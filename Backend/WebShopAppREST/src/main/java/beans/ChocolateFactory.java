@@ -19,7 +19,7 @@ public class ChocolateFactory {
 	}
 	
 	
-	public ChocolateFactory(int id, String name, List<Chocolate> availableChocolates, String worktime, boolean status,
+	public ChocolateFactory(int id, String name, ArrayList<Chocolate> availableChocolates, String worktime, boolean status,
 			Location location, String image, double grade) {
 		super();
 		this.id = id;
@@ -45,10 +45,10 @@ public class ChocolateFactory {
 	public void setName(String name) {
 		this.name = name;
 	}
-	public List<Chocolate> getAvailableChocolates() {
+	public ArrayList<Chocolate> getAvailableChocolates() {
 		return availableChocolates;
 	}
-	public void setAvailableChocolates(List<Chocolate> availableChocolates) {
+	public void setAvailableChocolates(ArrayList<Chocolate> availableChocolates) {
 		this.availableChocolates = availableChocolates;
 	}
 	public String getWorktime() {
