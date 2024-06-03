@@ -2,7 +2,7 @@ package beans;
 
 import java.util.ArrayList;
 
-public class ChocolateFactory {
+public class Factory {
 	private int id;
 	private String name;
 	private ArrayList<Chocolate> availableChocolates; //cokolade u ponudi
@@ -13,13 +13,13 @@ public class ChocolateFactory {
 	private double grade;
 	
 	
-	public ChocolateFactory() {
+	public Factory() {
 		super();
 		this.availableChocolates = new ArrayList<>();
 	}
 	
 	
-	public ChocolateFactory(int id, String name, ArrayList<Chocolate> availableChocolates, String worktime, boolean status,
+	public Factory(int id, String name, ArrayList<Chocolate> availableChocolates, String worktime, boolean status,
 			Location location, String image, double grade) {
 		super();
 		this.id = id;
@@ -29,6 +29,13 @@ public class ChocolateFactory {
 		this.status = status;
 		this.location = location;
 		this.image = image;
+		this.grade = grade;
+	}
+	public Factory(int id, String name, double grade) {
+		super();
+		this.id = id;
+		this.name = name;
+		
 		this.grade = grade;
 	}
 
