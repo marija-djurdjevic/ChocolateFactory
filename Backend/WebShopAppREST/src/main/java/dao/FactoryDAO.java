@@ -13,14 +13,8 @@ public class FactoryDAO {
 	
 	private ArrayList<Factory> factories = new ArrayList<>();
 	
-	public FactoryDAO() {
-		
-		factories.add(new Factory(1, "test", 5));
-	}
-	
 	public FactoryDAO(String contextPath) {
 		loadFactories(contextPath);
-		factories.add(new Factory(1, "test", 5));
 		}
 
 	public ArrayList<Factory> findAll() {
@@ -114,13 +108,11 @@ public class FactoryDAO {
 				String name = st.nextToken().trim();
 				String worktime = st.nextToken().trim();
 				boolean status = Boolean.parseBoolean(st.nextToken().trim());
-				String latitude = st.nextToken().trim();
-				String longitude = st.nextToken().trim();
-				String address = st.nextToken().trim();
-				Location location = new Location(latitude, longitude, address);
+				int locationId = Integer.parseInt(st.nextToken().trim());
 				String image = st.nextToken().trim();
 				double grade = Double.parseDouble(st.nextToken().trim());
-				factories.add(new Factory(id, name, new ArrayList<>(), worktime, status, location, image, grade));
+				factories.add(new Factory(id, name, new ArrayList<>(), worktime, status, locationId, image, grade));
+				
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

@@ -8,10 +8,16 @@ public class Factory {
 	private ArrayList<Chocolate> availableChocolates; //cokolade u ponudi
 	private String worktime; //radno vrijeme
 	private boolean status; //radi ili ne radi
-	private Location location;
+	public int locationId;
 	private String image;
 	private double grade;
 	
+	@Override
+	public String toString() {
+		return "Factory [id=" + id + ", name=" + name + ", availableChocolates=" + availableChocolates + ", worktime="
+				+ worktime + ", status=" + status + ", locationId=" + locationId + ", image=" + image + ", grade="
+				+ grade + "]";
+	}
 	
 	public Factory() {
 		super();
@@ -20,25 +26,17 @@ public class Factory {
 	
 	
 	public Factory(int id, String name, ArrayList<Chocolate> availableChocolates, String worktime, boolean status,
-			Location location, String image, double grade) {
+			int location, String image, double grade) {
 		super();
 		this.id = id;
 		this.name = name;
 		this.availableChocolates = availableChocolates;
 		this.worktime = worktime;
 		this.status = status;
-		this.location = location;
+		this.locationId = location;
 		this.image = image;
 		this.grade = grade;
 	}
-	public Factory(int id, String name, double grade) {
-		super();
-		this.id = id;
-		this.name = name;
-		
-		this.grade = grade;
-	}
-
 
 	public int getId() {
 		return id;
@@ -70,11 +68,11 @@ public class Factory {
 	public void setStatus(boolean status) {
 		this.status = status;
 	}
-	public Location getLocation() {
-		return location;
+	public int getLocation() {
+		return locationId;
 	}
-	public void setLocation(Location location) {
-		this.location = location;
+	public void setLocation(int location) {
+		this.locationId = location;
 	}
 	public String getImage() {
 		return image;
