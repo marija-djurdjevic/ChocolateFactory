@@ -1,0 +1,10 @@
+1;40.7128;-74.0060;123 Main St, New York, NY
+2;34.0522;-118.2437;456 Elm St, Los Angeles, CA
+3;51.5074;-0.1278;789 Oak St, London
+4;48.8566;2.3522;101 Rue de Paris, Paris
+5;35.6895;139.6917;202 Tokyo Ave, Tokyo
+6;55.7558;37.6173;303 Moscow St, Moscow
+7;39.9042;116.4074;404 Beijing Rd, Beijing
+8;41.9028;12.4964;505 Rome St, Rome
+9;52.5200;13.4050;606 Berlin St, Berlin
+10;-33.8688;151.2093;707 Sydney Rd, Sydney

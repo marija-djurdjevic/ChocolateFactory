@@ -1,10 +1,10 @@
-1;ChocoFactory1;8:00-17:00;true;40.7128;-74.0060;123 Main St, New York, NY;choco1.jpg;4.5
-2;ChocoFactory2;9:00-18:00;true;34.0522;-118.2437;456 Elm St, Los Angeles, CA;choco2.jpg;4.2
-3;ChocoFactory3;7:00-16:00;false;51.5074;-0.1278;789 Oak St, London;choco3.jpg;4.0
-4;ChocoFactory4;10:00-19:00;true;48.8566;2.3522;101 Rue de Paris, Paris;choco4.jpg;4.7
-5;ChocoFactory5;6:00-15:00;true;35.6895;139.6917;202 Tokyo Ave, Tokyo;choco5.jpg;4.6
-6;ChocoFactory6;8:00-17:00;false;55.7558;37.6173;303 Moscow St, Moscow;choco6.jpg;3.9
-7;ChocoFactory7;9:00-18:00;true;39.9042;116.4074;404 Beijing Rd, Beijing;choco7.jpg;4.3
-8;ChocoFactory8;7:00-16:00;false;41.9028;12.4964;505 Rome St, Rome;choco8.jpg;4.1
-9;ChocoFactory9;8:00-17:00;true;52.5200;13.4050;606 Berlin St, Berlin;choco9.jpg;4.4
-10;ChocoFactory10;10:00-19:00;true;-33.8688;151.2093;707 Sydney Rd, Sydney;choco10.jpg;4.8
+1;ChocoFactory1;8:00-17:00;true;1;../assets/logo1.jpg;4.5
+2;ChocoFactory2;9:00-18:00;true;2;../assets/logo2.jpg;4.2
+3;ChocoFactory3;7:00-16:00;false;3;../assets/logo3.png;4.0
+4;ChocoFactory4;10:00-19:00;true;4;../assets/logo4.png;4.7
+5;ChocoFactory5;6:00-15:00;true;5;../assets/logo5.png;4.6
+6;ChocoFactory6;8:00-17:00;false;6;../assets/logo6.jpg;3.9
+7;ChocoFactory7;9:00-18:00;true;7;../assets/logo8.jpg;4.3
+8;ChocoFactory8;7:00-16:00;false;8;../assets/logo9.jpg;4.1
+9;ChocoFactory9;8:00-17:00;true;9;../assets/logo10.png;4.4
+10;ChocoFactory10;10:00-19:00;true;10;../assets/logo10.jpg;4.8
