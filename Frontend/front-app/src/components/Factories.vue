@@ -12,9 +12,8 @@
           <div class="factory-details">
             <h2>{{ factory.name }}</h2>
             <div class="location-info" v-if="factory.locationInfo">
-              <p><strong>Address:</strong> {{ factory.locationInfo.address }}</p>
-              <p><strong>Longitude:</strong> {{ factory.locationInfo.longitude }}</p>
-              <p><strong>Latitude:</strong> {{ factory.locationInfo.latitude }}</p>
+              <p>{{ factory.locationInfo.address }}</p>
+              <p>{{ factory.locationInfo.longitude }}, {{ factory.locationInfo.latitude }}</p>
             </div>
             <p><strong>Status:</strong> {{ factory.status ? 'Open' : 'Closed' }}</p>
             <p><strong>Average Grade:</strong> {{ factory.grade }}</p>
