@@ -11,12 +11,12 @@ import beans.Factory;
 import beans.Location;
 
 public class FactoryDAO {
-	
+
 	private ArrayList<Factory> factories = new ArrayList<>();
-	
+
 	public FactoryDAO(String contextPath) {
 		loadFactories(contextPath);
-		}
+	}
 
 	public ArrayList<Factory> findAll() {
 		return factories;
@@ -30,13 +30,13 @@ public class FactoryDAO {
 		}
 		return null;
 	}
-	
+
 	public Chocolate addChocolateToFactory(int id, Chocolate chocolate) {
 		Factory f = findFactory(id);
 		f.addChocolateToFactory(chocolate);
 		return chocolate;
 	}
-	
+
 	public Factory updateFactory(int id, Factory factory) {
 		Factory f = findFactory(id);
 		if (f == null) {
@@ -51,7 +51,7 @@ public class FactoryDAO {
 			return f;
 		}
 	}
-	
+
 	public Factory save(Factory factory) {
 		int maxId = -1;
 		for (Factory f : factories) {
@@ -64,39 +64,39 @@ public class FactoryDAO {
 		factories.add(factory);
 		return factory;
 	}
-	
+
 	public Factory deleteFactoryById(int id) {
-        Factory factoryToRemove = null;
-        for (Factory factory : factories) {
-            if (factory.getId() == id) {
-                factoryToRemove = factory;
-                break;
-            }
-        }
-        if (factoryToRemove != null) {
-            factories.remove(factoryToRemove);
-        }
-        return factoryToRemove;
-    }
+		Factory factoryToRemove = null;
+		for (Factory factory : factories) {
+			if (factory.getId() == id) {
+				factoryToRemove = factory;
+				break;
+			}
+		}
+		if (factoryToRemove != null) {
+			factories.remove(factoryToRemove);
+		}
+		return factoryToRemove;
+	}
 
-    // Metoda za filtriranje tvornica prema statusu (radi ili ne radi)
-    public ArrayList<Factory> filterFactoriesByStatus(boolean status) {
-        ArrayList<Factory> filteredFactories = new ArrayList<>();
-        for (Factory factory : factories) {
-            if (factory.isStatus() == status) {
-                filteredFactories.add(factory);
-            }
-        }
-        return filteredFactories;
-    }
+	// Metoda za filtriranje tvornica prema statusu (radi ili ne radi)
+	public ArrayList<Factory> filterFactoriesByStatus(boolean status) {
+		ArrayList<Factory> filteredFactories = new ArrayList<>();
+		for (Factory factory : factories) {
+			if (factory.isStatus() == status) {
+				filteredFactories.add(factory);
+			}
+		}
+		return filteredFactories;
+	}
 
-    // Metoda za pronalaženje filtriranih tvornica
-    public ArrayList<Factory> findFilteredFactories() {
-        // Ovdje implementirati logiku za pronalaženje filtriranih tvornica
-        // Na primjer, možete filtrirati tvornice prema nekom kriteriju
-        // Ovdje ćemo samo vratiti sve tvornice za demonstraciju
-        return factories;
-    }
+	// Metoda za pronalaženje filtriranih tvornica
+	public ArrayList<Factory> findFilteredFactories() {
+		// Ovdje implementirati logiku za pronalaženje filtriranih tvornica
+		// Na primjer, možete filtrirati tvornice prema nekom kriteriju
+		// Ovdje ćemo samo vratiti sve tvornice za demonstraciju
+		return factories;
+	}
 
 	private void loadFactories(String contextPath) {
 		BufferedReader in = null;
@@ -119,7 +119,7 @@ public class FactoryDAO {
 				String image = st.nextToken().trim();
 				double grade = Double.parseDouble(st.nextToken().trim());
 				factories.add(new Factory(id, name, new ArrayList<>(), worktime, status, locationId, image, grade));
-				
+
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

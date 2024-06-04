@@ -7,6 +7,10 @@
           <input type="text" id="name" v-model="chocolate.name" required />
         </div>
         <div class="form-group">
+          <label for="price">Price:</label>
+          <input type="number" id="price" v-model="chocolate.price" required />
+        </div>
+        <div class="form-group">
           <label for="chocolateSort">Chocolate Sort:</label>
           <select id="chocolateSort" v-model="chocolate.chocolateSort" required>
             <option value="regular">Regular</option>
@@ -29,16 +33,8 @@
           <textarea id="chocolateDescription" v-model="chocolate.chocolateDescription" required></textarea>
         </div>
         <div class="form-group">
-          <label for="imagePath">Image Path:</label>
-          <input type="text" id="imagePath" v-model="chocolate.imagePath" required />
-        </div>
-        <div class="form-group">
-          <label for="isAvailable">Is Available:</label>
-          <input type="checkbox" id="isAvailable" v-model="chocolate.isAvailable" />
-        </div>
-        <div class="form-group">
-          <label for="amountOfChocolate">Amount of Chocolate:</label>
-          <input type="number" id="amountOfChocolate" v-model="chocolate.amountOfChocolate" required />
+          <label for="image">Image:</label>
+          <input type="file" @change="onFileSelected" />
         </div>
         <button type="submit">Add Chocolate</button>
       </form>
@@ -66,7 +62,20 @@
     amountOfChocolate: 0,
   });
   
-  function submitForm() {
+  const selectedFile = ref(null);
+  
+  function onFileSelected(event) {
+    selectedFile.value = event.target.files[0];
+  }
+  
+  async function submitForm() {
+    if (selectedFile.value) {
+      chocolate.value.imagePath = selectedFile.value.name; // Sačuvamo samo naziv fajla
+    }
+    saveChocolate();
+  }
+  
+  function saveChocolate() {
     axios.post('http://localhost:8080/WebShopAppREST/rest/chocolates/save', chocolate.value)
       .then(response => {
         alert('Chocolate added successfully!');
@@ -124,5 +133,4 @@
     background-color: #bf5640;
   }
   </style>
-  
   

@@ -5,6 +5,7 @@ import java.util.Objects;
 public class Chocolate {
 	private int id;
 	private String name;
+	private double price;
 	private String chocolateSort; //obična, za kuvanje
 	private int factoryId;
 	private String chocolateType; //crna, bijela
@@ -19,12 +20,13 @@ public class Chocolate {
 		// TODO Auto-generated constructor stub
 	}
 
-	public Chocolate(int id, String name, String chocolateSort, int factoryId, String chocolateType,
+	public Chocolate(int id, String name, double price, String chocolateSort, int factoryId, String chocolateType,
 			int gramsOfChocolate, String chocolateDescription, String imagePath, boolean isAvailable,
 			int amountOfChocolate) {
 		super();
 		this.id = id;
 		this.name = name;
+		this.price = price;
 		this.chocolateSort = chocolateSort;
 		this.factoryId = factoryId;
 		this.chocolateType = chocolateType;
@@ -49,6 +51,14 @@ public class Chocolate {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+	
+	public double getPrice() {
+		return price;
+	}
+
+	public void setPrice(double price) {
+		this.price = price;
 	}
 
 	public String getChocolateSort() {
@@ -117,16 +127,10 @@ public class Chocolate {
 
 	@Override
 	public String toString() {
-		return "Chocolate [id=" + id + ", name=" + name + ", chocolateSort=" + chocolateSort + ", factoryId="
+		return "Chocolate [id=" + id + ", name=" + name + ", price=" + price + ", chocolateSort=" + chocolateSort + ", factoryId="
 				+ factoryId + ", chocolateType=" + chocolateType + ", gramsOfChocolate=" + gramsOfChocolate
 				+ ", chocolateDescription=" + chocolateDescription + ", imagePath=" + imagePath + ", isAvailable="
 				+ isAvailable + ", amountOfChocolate=" + amountOfChocolate + "]";
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(amountOfChocolate, chocolateDescription, chocolateSort, chocolateType, factoryId,
-				gramsOfChocolate, id, imagePath, isAvailable, name);
 	}
 
 	@Override
@@ -140,6 +144,7 @@ public class Chocolate {
 		Chocolate other = (Chocolate) obj;
 		return amountOfChocolate == other.amountOfChocolate
 				&& Objects.equals(chocolateDescription, other.chocolateDescription)
+				&& Objects.equals(price, other.price)
 				&& Objects.equals(chocolateSort, other.chocolateSort)
 				&& Objects.equals(chocolateType, other.chocolateType) && factoryId == other.factoryId
 				&& gramsOfChocolate == other.gramsOfChocolate && id == other.id

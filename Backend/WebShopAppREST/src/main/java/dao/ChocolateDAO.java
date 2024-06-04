@@ -60,12 +60,15 @@ public class ChocolateDAO {
         }
         maxId++;
         chocolate.setId(maxId);
+        chocolate.setAvailable(false);
+        chocolate.setAmountOfChocolate(0);
         try {
             String filePath = contextPath + "chocolates.txt"; // Use the provided path
             FileWriter writer = new FileWriter(filePath, true); // Open in append mode
             BufferedWriter bufferedWriter = new BufferedWriter(writer);
             bufferedWriter.write(chocolate.getId() + ";" +
                     chocolate.getName() + ";" +
+            		chocolate.getPrice() + ";" +
                     chocolate.getChocolateSort() + ";" +
                     chocolate.getFactoryId() + ";" +
                     chocolate.getChocolateType() + ";" +
@@ -115,6 +118,7 @@ public class ChocolateDAO {
 				st = new StringTokenizer(line, ";");
 				int id = Integer.parseInt(st.nextToken().trim());
 				String name = st.nextToken().trim();
+				double price = Double.parseDouble(st.nextToken().trim());
 				String chocolateSort = st.nextToken().trim();
 				int factoryId = Integer.parseInt(st.nextToken().trim());
 				String chocolateType = st.nextToken().trim();
@@ -123,7 +127,7 @@ public class ChocolateDAO {
 				String imagePath = st.nextToken().trim();
 				boolean isAvailable = Boolean.parseBoolean(st.nextToken().trim());
 				int amountOfChocolate = Integer.parseInt(st.nextToken().trim());
-				chocolates.add(new Chocolate(id, name, chocolateSort, factoryId, chocolateType, gramsOfChocolate, chocolateDescription, imagePath, isAvailable, amountOfChocolate));
+				chocolates.add(new Chocolate(id, name, price, chocolateSort, factoryId, chocolateType, gramsOfChocolate, chocolateDescription, imagePath, isAvailable, amountOfChocolate));
 				
 			}
 		} catch (Exception e) {
