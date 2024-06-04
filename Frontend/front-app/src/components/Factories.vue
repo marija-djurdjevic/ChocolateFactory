@@ -17,6 +17,7 @@
             </div>
             <p><strong>Status:</strong> {{ factory.status ? 'Open' : 'Closed' }}</p>
             <p><strong>Average Grade:</strong> {{ factory.grade }}</p>
+            <p><input v-on:click="addChocolate(factory.id)" type="submit" value="Add chocolate"></p>
           </div>
         </div>
       </div>
@@ -27,8 +28,10 @@
 <script setup>
 import axios from 'axios';
 import { onMounted, ref, computed } from 'vue';
+import { useRouter } from 'vue-router';
 
 const factories = ref([]);
+const router = useRouter();
 
 onMounted(() => {
   loadFactories();
@@ -59,6 +62,10 @@ function loadFactories() {
     .catch(error => {
       console.error('Error loading factories:', error);
     });
+}
+
+function addChocolate(factoryId) {
+  router.push({ path: '/addChocolate', query: { factoryId } });
 }
 
 const filteredFactories = computed(() => {
