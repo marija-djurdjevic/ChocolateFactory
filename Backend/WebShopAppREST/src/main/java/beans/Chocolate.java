@@ -1,6 +1,6 @@
 package beans;
 
-import java.util.Objects;
+import java.util.Objects; 
 
 public class Chocolate {
 	private int id;

@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 
+import beans.Chocolate;
 import beans.Factory;
 import beans.Location;
 
@@ -28,6 +29,12 @@ public class FactoryDAO {
 			}
 		}
 		return null;
+	}
+	
+	public Chocolate addChocolateToFactory(int id, Chocolate chocolate) {
+		Factory f = findFactory(id);
+		f.addChocolateToFactory(chocolate);
+		return chocolate;
 	}
 	
 	public Factory updateFactory(int id, Factory factory) {

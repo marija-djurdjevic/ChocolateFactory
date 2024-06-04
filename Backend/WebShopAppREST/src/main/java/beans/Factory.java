@@ -24,7 +24,6 @@ public class Factory {
 		this.availableChocolates = new ArrayList<>();
 	}
 	
-	
 	public Factory(int id, String name, ArrayList<Chocolate> availableChocolates, String worktime, boolean status,
 			int location, String image, double grade) {
 		super();
@@ -85,6 +84,11 @@ public class Factory {
 	}
 	public void setGrade(double grade) {
 		this.grade = grade;
+	}
+
+	public void addChocolateToFactory(Chocolate chocolate) {
+		this.availableChocolates.add(chocolate);
+		
 	}
 	
 	
