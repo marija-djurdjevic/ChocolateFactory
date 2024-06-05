@@ -3,10 +3,13 @@ package dao;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.StringTokenizer;
 
 import beans.Chocolate;
@@ -16,29 +19,39 @@ public class ChocolateDAO {
 
 	private ArrayList<Chocolate> chocolates = new ArrayList<>();
 	
+	private final String contextPath;
+	
 	public ChocolateDAO(String contextPath) {
+		this.contextPath = contextPath;
 		loadChocolates(contextPath);
 	}
 
 	public ArrayList<Chocolate> findAll() {
+		loadChocolates(contextPath);
+		for(Chocolate c: chocolates) {
+			c.loadImageString();
+		}
 		return chocolates;
 	}
 
 	public Chocolate findChocolate(int id) {
+		loadChocolates(contextPath);
 		for (Chocolate chocolate : chocolates) {
 			if (chocolate.getId() == id) {
+				chocolate.loadImageString();
 				return chocolate;
 			}
 		}
 		return null;
 	}
 	
-	public Chocolate updateChocolate(int id, Chocolate chocolate, String contextPath) {
-		Chocolate c = findChocolate(id);
-		if (c == null) {
-			return save(chocolate, contextPath);
-		} else {
+	public Chocolate updateChocolate(Chocolate chocolate) {
+		loadChocolates(contextPath);
+		Chocolate c = findChocolate(chocolate.getId());
+		if(c != null) {
 			c.setName(chocolate.getName());
+			System.out.println(c.getName());
+			c.setPrice(chocolate.getPrice());
 			c.setChocolateSort(chocolate.getChocolateSort());
 			c.setFactoryId(chocolate.getFactoryId());
 			c.setChocolateType(chocolate.getChocolateType());
@@ -47,11 +60,53 @@ public class ChocolateDAO {
 			c.setImagePath(chocolate.getImagePath());
 			c.setAvailable(chocolate.isAvailable());
 			c.setAmountOfChocolate(chocolate.getAmountOfChocolate());
+			saveAllChocolates();
 			return c;
+		}
+		else {
+			return null;
 		}
 	}
 	
+	private void saveAllChocolates() {
+	    try {
+	        String filePath = contextPath + "chocolates.txt";
+	        FileWriter writer = new FileWriter(filePath, false); 
+	        BufferedWriter bufferedWriter = new BufferedWriter(writer);
+	        for (Chocolate chocolate : chocolates) {
+	            bufferedWriter.write(chocolate.getId() + ";" +
+	                    chocolate.getName() + ";" +
+	                    chocolate.getPrice() + ";" +
+	                    chocolate.getChocolateSort() + ";" +
+	                    chocolate.getFactoryId() + ";" +
+	                    chocolate.getChocolateType() + ";" +
+	                    chocolate.getGramsOfChocolate() + ";" +
+	                    chocolate.getChocolateDescription() + ";" +
+	                    chocolate.getImagePath() + ";" +
+	                    chocolate.isAvailable() + ";" +
+	                    chocolate.getAmountOfChocolate() + "\n");
+	        }
+	        bufferedWriter.flush();
+	        bufferedWriter.close();
+	    } catch (IOException e) {
+	        e.printStackTrace();
+	    }
+	}
+	 public ArrayList<Chocolate> findChocolatesByFactoryId(int factoryId) {
+		 loadChocolates(contextPath);
+	     ArrayList<Chocolate> result = new ArrayList<>();
+	     	for (Chocolate chocolate : chocolates) {
+	            if (chocolate.getFactoryId() == factoryId) {
+	            	chocolate.loadImageString();
+	                result.add(chocolate);
+	            }
+	        }
+	     return result;
+	    }
+
+	
 	public Chocolate save(Chocolate chocolate, String contextPath) {
+		loadChocolates(contextPath);
         int maxId = -1;
         for (Chocolate c : chocolates) {
             if (c.getId() > maxId) {
@@ -60,6 +115,10 @@ public class ChocolateDAO {
         }
         maxId++;
         chocolate.setId(maxId);
+        
+        String path = this.contextPath + "images\\chocolate" + maxId + ".jpg"; 
+        saveImage(path, chocolate.getImageString());
+        chocolate.setImagePath(path);
         chocolate.setAvailable(false);
         chocolate.setAmountOfChocolate(0);
         try {
@@ -85,11 +144,24 @@ public class ChocolateDAO {
         
         FactoryChocolateDAO dao = new FactoryChocolateDAO();
         dao.save(chocolate.getFactoryId(), chocolate.getId(), contextPath);
-        return chocolate; // Return the saved Chocolate object
         
+        return chocolate; // Return the saved Chocolate object
     }
 	
+	private void saveImage(String path, String imageString) {
+		byte[] imageBytes = Base64.getDecoder().decode(imageString);
+		try (FileOutputStream fos = new FileOutputStream(path)){
+			fos.write(imageBytes);
+			System.out.println("Uspjesno sacuvanaaa");
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
 	public Chocolate deleteChocolateById(int id) {
+		loadChocolates(contextPath);
         Chocolate chocolateToRemove = null;
         for (Chocolate chocolate : chocolates) {
             if (chocolate.getId() == id) {
@@ -104,10 +176,10 @@ public class ChocolateDAO {
     }
 
 	private void loadChocolates(String contextPath) {
+		this.chocolates = new ArrayList<Chocolate>();
 		BufferedReader in = null;
 		try {
 			File file = new File(contextPath + "/chocolates.txt");
-			System.out.println(file.getCanonicalPath());
 			in = new BufferedReader(new FileReader(file));
 			String line;
 			StringTokenizer st;
@@ -125,10 +197,10 @@ public class ChocolateDAO {
 				int gramsOfChocolate = Integer.parseInt(st.nextToken().trim());
 				String chocolateDescription = st.nextToken().trim();
 				String imagePath = st.nextToken().trim();
-				boolean isAvailable = Boolean.parseBoolean(st.nextToken().trim());
+				boolean available = Boolean.parseBoolean(st.nextToken().trim());
 				int amountOfChocolate = Integer.parseInt(st.nextToken().trim());
-				chocolates.add(new Chocolate(id, name, price, chocolateSort, factoryId, chocolateType, gramsOfChocolate, chocolateDescription, imagePath, isAvailable, amountOfChocolate));
-				
+				chocolates.add(new Chocolate(id, name, price, chocolateSort, factoryId, chocolateType, gramsOfChocolate, chocolateDescription, imagePath, "", available, amountOfChocolate));
+
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

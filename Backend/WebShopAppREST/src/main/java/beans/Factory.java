@@ -50,6 +50,9 @@ public class Factory {
 		this.name = name;
 	}
 	public ArrayList<Chocolate> getAvailableChocolates() {
+		for(Chocolate c: availableChocolates) {
+			c.loadImageString();
+		}
 		return availableChocolates;
 	}
 	public void setAvailableChocolates(ArrayList<Chocolate> availableChocolates) {

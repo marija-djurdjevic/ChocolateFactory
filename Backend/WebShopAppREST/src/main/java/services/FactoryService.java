@@ -16,6 +16,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
+import beans.Chocolate;
 import beans.Factory;
 import dao.FactoryDAO;
 
@@ -40,7 +41,23 @@ public class FactoryService {
         FactoryDAO dao = (FactoryDAO) ctx.getAttribute("factoryDAO");
         return dao.findAll();
     }
-
+    
+    @GET
+    @Path("/{factoryId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Factory getFactoryById(@PathParam("factoryId") int factoryId) {
+        FactoryDAO dao = (FactoryDAO) ctx.getAttribute("factoryDAO");
+        return dao.findFactory(factoryId);
+    }
+    
+    @GET
+    @Path("/{factoryId}/chocolates")
+    @Produces(MediaType.APPLICATION_JSON)
+    public ArrayList<Chocolate> getChocolatesByFactoryId(@PathParam("factoryId") int factoryId) {
+        FactoryDAO dao = (FactoryDAO) ctx.getAttribute("factoryDAO");
+        return dao.findFactory(factoryId).getAvailableChocolates();
+    }
+    
     @OPTIONS
     @Path("/save")
     @Produces(MediaType.APPLICATION_JSON)

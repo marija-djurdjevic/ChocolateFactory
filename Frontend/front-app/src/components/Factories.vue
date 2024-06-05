@@ -17,7 +17,10 @@
             </div>
             <p><strong>Status:</strong> {{ factory.status ? 'Open' : 'Closed' }}</p>
             <p><strong>Average Grade:</strong> {{ factory.grade }}</p>
-            <p><input v-on:click="addChocolate(factory.id)" type="submit" value="Add chocolate"></p>
+            <div class="button-group">
+              <input v-on:click="addChocolate(factory.id)" type="submit" value="Add chocolate">
+              <input v-on:click="showChocolates(factory.id)" type="button" value="Show Chocolates">
+            </div>
           </div>
         </div>
       </div>
@@ -29,6 +32,7 @@
 import axios from 'axios';
 import { onMounted, ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
+import EventBus from '../event-bus';
 
 const factories = ref([]);
 const router = useRouter();
@@ -68,17 +72,20 @@ function addChocolate(factoryId) {
   router.push({ path: '/addChocolate', query: { factoryId } });
 }
 
+function showChocolates(factoryId) {
+  router.push({ path: `/factory/${factoryId}/chocolates` });
+}
+
 const filteredFactories = computed(() => {
   // Sortiramo fabrike tako da su one sa statusom Open prve
   const openFactories = factories.value.filter(factory => factory.status);
   const closedFactories = factories.value.filter(factory => !factory.status);
   return [...openFactories, ...closedFactories];
 });
-
 </script>
 
 <style>
-body{
+body {
   background-color: #dd6755;
 }
 .factory-display {
@@ -120,6 +127,9 @@ body{
 
 .factory-info {
   padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .factory-logo img {
@@ -130,9 +140,15 @@ body{
   margin-bottom: 20px;
 }
 
+.factory-details {
+  text-align: left;
+  width: 100%;
+}
+
 .factory-details h2 {
   font-size: 1.5rem;
   margin-bottom: 10px;
+  text-align: center; 
 }
 
 .location-info p {
@@ -141,5 +157,29 @@ body{
 
 .factory-details p {
   margin: 5px 0;
+  text-align: center; 
+}
+
+.button-group {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  align-items: center;
+}
+
+.button-group input {
+  width: 80%;
+  margin: 10px 0;
+  padding: 10px;
+  background-color: #ff6347; /* Tomato */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.button-group input:hover {
+  background-color: #ff4500; /* OrangeRed */
 }
 </style>

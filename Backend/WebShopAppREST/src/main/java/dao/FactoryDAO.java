@@ -11,18 +11,33 @@ import beans.Factory;
 import beans.Location;
 
 public class FactoryDAO {
-
+	
 	private ArrayList<Factory> factories = new ArrayList<>();
+	private ChocolateDAO chocolateDAO;
+	private String contextPath;
 
+	
 	public FactoryDAO(String contextPath) {
+		this.contextPath = contextPath;
+		chocolateDAO = new ChocolateDAO(contextPath);
 		loadFactories(contextPath);
+		loadChocolatesForFactories();
 	}
-
+	private void loadChocolatesForFactories() {
+		for (Factory factory : factories) {
+			ArrayList<Chocolate> chocolates = chocolateDAO.findChocolatesByFactoryId(factory.getId());
+			factory.setAvailableChocolates(chocolates);
+		}
+	}
 	public ArrayList<Factory> findAll() {
+		loadFactories(contextPath);
+		loadChocolatesForFactories();
 		return factories;
 	}
 
 	public Factory findFactory(int id) {
+		loadFactories(contextPath);
+		loadChocolatesForFactories();
 		for (Factory factory : factories) {
 			if (factory.getId() == id) {
 				return factory;
@@ -30,14 +45,18 @@ public class FactoryDAO {
 		}
 		return null;
 	}
-
+	
 	public Chocolate addChocolateToFactory(int id, Chocolate chocolate) {
+		loadFactories(contextPath);
+		loadChocolatesForFactories();
 		Factory f = findFactory(id);
 		f.addChocolateToFactory(chocolate);
 		return chocolate;
 	}
-
+	
 	public Factory updateFactory(int id, Factory factory) {
+		loadFactories(contextPath);
+		loadChocolatesForFactories();
 		Factory f = findFactory(id);
 		if (f == null) {
 			return save(factory);
@@ -51,8 +70,10 @@ public class FactoryDAO {
 			return f;
 		}
 	}
-
+	
 	public Factory save(Factory factory) {
+		loadFactories(contextPath);
+		loadChocolatesForFactories();
 		int maxId = -1;
 		for (Factory f : factories) {
 			if (f.getId() > maxId) {
@@ -64,45 +85,51 @@ public class FactoryDAO {
 		factories.add(factory);
 		return factory;
 	}
-
+	
 	public Factory deleteFactoryById(int id) {
-		Factory factoryToRemove = null;
-		for (Factory factory : factories) {
-			if (factory.getId() == id) {
-				factoryToRemove = factory;
-				break;
-			}
-		}
-		if (factoryToRemove != null) {
-			factories.remove(factoryToRemove);
-		}
-		return factoryToRemove;
-	}
+		loadFactories(contextPath);
+		loadChocolatesForFactories();
+        Factory factoryToRemove = null;
+        for (Factory factory : factories) {
+            if (factory.getId() == id) {
+                factoryToRemove = factory;
+                break;
+            }
+        }
+        if (factoryToRemove != null) {
+            factories.remove(factoryToRemove);
+        }
+        return factoryToRemove;
+    }
 
-	// Metoda za filtriranje tvornica prema statusu (radi ili ne radi)
-	public ArrayList<Factory> filterFactoriesByStatus(boolean status) {
-		ArrayList<Factory> filteredFactories = new ArrayList<>();
-		for (Factory factory : factories) {
-			if (factory.isStatus() == status) {
-				filteredFactories.add(factory);
-			}
-		}
-		return filteredFactories;
-	}
+    // Metoda za filtriranje tvornica prema statusu (radi ili ne radi)
+    public ArrayList<Factory> filterFactoriesByStatus(boolean status) {
+    	loadFactories(contextPath);
+		loadChocolatesForFactories();
+        ArrayList<Factory> filteredFactories = new ArrayList<>();
+        for (Factory factory : factories) {
+            if (factory.isStatus() == status) {
+                filteredFactories.add(factory);
+            }
+        }
+        return filteredFactories;
+    }
 
-	// Metoda za pronalaženje filtriranih tvornica
-	public ArrayList<Factory> findFilteredFactories() {
-		// Ovdje implementirati logiku za pronalaženje filtriranih tvornica
-		// Na primjer, možete filtrirati tvornice prema nekom kriteriju
-		// Ovdje ćemo samo vratiti sve tvornice za demonstraciju
-		return factories;
-	}
+    // Metoda za pronalaženje filtriranih tvornica
+    public ArrayList<Factory> findFilteredFactories() {
+    	loadFactories(contextPath);
+		loadChocolatesForFactories();
+        // Ovdje implementirati logiku za pronalaženje filtriranih tvornica
+        // Na primjer, možete filtrirati tvornice prema nekom kriteriju
+        // Ovdje ćemo samo vratiti sve tvornice za demonstraciju
+        return factories;
+    }
 
 	private void loadFactories(String contextPath) {
+		this.factories = new ArrayList<Factory>();
 		BufferedReader in = null;
 		try {
 			File file = new File(contextPath + "/factories.txt");
-			System.out.println(file.getCanonicalPath());
 			in = new BufferedReader(new FileReader(file));
 			String line;
 			StringTokenizer st;
@@ -119,7 +146,7 @@ public class FactoryDAO {
 				String image = st.nextToken().trim();
 				double grade = Double.parseDouble(st.nextToken().trim());
 				factories.add(new Factory(id, name, new ArrayList<>(), worktime, status, locationId, image, grade));
-
+				
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

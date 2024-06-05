@@ -1,5 +1,11 @@
 package beans;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.Base64;
 import java.util.Objects; 
 
 public class Chocolate {
@@ -12,7 +18,8 @@ public class Chocolate {
 	private int gramsOfChocolate;
 	private String chocolateDescription;
 	private String imagePath;
-	private boolean isAvailable;
+	private String imageString;
+	private boolean available;
 	private int amountOfChocolate;
 	
 	public Chocolate() {
@@ -21,7 +28,7 @@ public class Chocolate {
 	}
 
 	public Chocolate(int id, String name, double price, String chocolateSort, int factoryId, String chocolateType,
-			int gramsOfChocolate, String chocolateDescription, String imagePath, boolean isAvailable,
+			int gramsOfChocolate, String chocolateDescription, String imagePath, String imageString, boolean available,
 			int amountOfChocolate) {
 		super();
 		this.id = id;
@@ -33,7 +40,8 @@ public class Chocolate {
 		this.gramsOfChocolate = gramsOfChocolate;
 		this.chocolateDescription = chocolateDescription;
 		this.imagePath = imagePath;
-		this.isAvailable = isAvailable;
+		this.imageString = imageString;
+		this.available = available;
 		this.amountOfChocolate = amountOfChocolate;
 	}
 
@@ -51,10 +59,6 @@ public class Chocolate {
 
 	public void setName(String name) {
 		this.name = name;
-	}
-	
-	public double getPrice() {
-		return price;
 	}
 
 	public void setPrice(double price) {
@@ -110,11 +114,11 @@ public class Chocolate {
 	}
 
 	public boolean isAvailable() {
-		return isAvailable;
+		return available;
 	}
 
 	public void setAvailable(boolean isAvailable) {
-		this.isAvailable = isAvailable;
+		this.available = isAvailable;
 	}
 
 	public int getAmountOfChocolate() {
@@ -125,12 +129,20 @@ public class Chocolate {
 		this.amountOfChocolate = amountOfChocolate;
 	}
 
+	public String getImageString() {
+		return imageString;
+	}
+
+	public void setImageString(String imageString) {
+		this.imageString = imageString;
+	}
+
 	@Override
 	public String toString() {
 		return "Chocolate [id=" + id + ", name=" + name + ", price=" + price + ", chocolateSort=" + chocolateSort + ", factoryId="
 				+ factoryId + ", chocolateType=" + chocolateType + ", gramsOfChocolate=" + gramsOfChocolate
 				+ ", chocolateDescription=" + chocolateDescription + ", imagePath=" + imagePath + ", isAvailable="
-				+ isAvailable + ", amountOfChocolate=" + amountOfChocolate + "]";
+				+ available + ", amountOfChocolate=" + amountOfChocolate + "]";
 	}
 
 	@Override
@@ -148,8 +160,39 @@ public class Chocolate {
 				&& Objects.equals(chocolateSort, other.chocolateSort)
 				&& Objects.equals(chocolateType, other.chocolateType) && factoryId == other.factoryId
 				&& gramsOfChocolate == other.gramsOfChocolate && id == other.id
-				&& Objects.equals(imagePath, other.imagePath) && isAvailable == other.isAvailable
+				&& Objects.equals(imagePath, other.imagePath) && available == other.available
 				&& Objects.equals(name, other.name);
+	}
+
+	public double getPrice() {
+		return price;
+	}
+
+	public void loadImageString() {
+		File file = new File(this.imagePath);
+		FileInputStream fis;
+		try {
+			fis = new FileInputStream(file);
+		
+			ByteArrayOutputStream bos = new ByteArrayOutputStream();
+			byte[] buffer = new byte[1024];
+			int bytesRead;
+			while((bytesRead = fis.read(buffer)) != -1) {
+				bos.write(buffer, 0, bytesRead);
+			}
+			
+			byte[] imageBytes = bos.toByteArray();
+			String base64String = Base64.getEncoder().encodeToString(imageBytes);
+			fis.close();
+			bos.close();
+			this.imageString = base64String;
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		
 	}
 	
 	

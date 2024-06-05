@@ -43,6 +43,14 @@ public class ChocolateService {
         return dao.findAll();
     }
     
+    @GET
+    @Path("/{factoryId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public ArrayList<Chocolate> getChocolatesByFactoryId(@PathParam("factoryId") int factoryId) {
+        ChocolateDAO dao = (ChocolateDAO) ctx.getAttribute("chocolateDAO");
+        return dao.findChocolatesByFactoryId(factoryId);
+    }
+    
     @OPTIONS
     @Path("/save")
     @Produces(MediaType.APPLICATION_JSON)
@@ -58,5 +66,14 @@ public class ChocolateService {
         ChocolateDAO dao = (ChocolateDAO) ctx.getAttribute("chocolateDAO");
         String contextPath = ctx.getRealPath("");
         return dao.save(chocolate, contextPath);
+    }
+    
+    @POST
+    @Path("/edit")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Chocolate editChocolate(Chocolate chocolate) {
+        ChocolateDAO dao = (ChocolateDAO) ctx.getAttribute("chocolateDAO");
+        return dao.updateChocolate(chocolate);
     }
 }
