@@ -43,6 +43,14 @@ public class ChocolateService {
         return dao.findAll();
     }
     
+    @GET
+    @Path("/{factoryId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public ArrayList<Chocolate> getChocolatesByFactoryId(@PathParam("factoryId") int factoryId) {
+        ChocolateDAO dao = (ChocolateDAO) ctx.getAttribute("chocolateDAO");
+        return dao.findChocolatesByFactoryId(factoryId);
+    }
+    
     @OPTIONS
     @Path("/save")
     @Produces(MediaType.APPLICATION_JSON)
