@@ -13,11 +13,20 @@ import beans.Location;
 public class FactoryDAO {
 	
 	private ArrayList<Factory> factories = new ArrayList<>();
+	private ChocolateDAO chocolateDAO;
+
 	
 	public FactoryDAO(String contextPath) {
+		chocolateDAO = new ChocolateDAO(contextPath);
 		loadFactories(contextPath);
+		loadChocolatesForFactories();
+	}
+	private void loadChocolatesForFactories() {
+		for (Factory factory : factories) {
+			ArrayList<Chocolate> chocolates = chocolateDAO.findChocolatesByFactoryId(factory.getId());
+			factory.setAvailableChocolates(chocolates);
 		}
-
+	}
 	public ArrayList<Factory> findAll() {
 		return factories;
 	}

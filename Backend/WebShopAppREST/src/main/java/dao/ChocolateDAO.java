@@ -50,6 +50,16 @@ public class ChocolateDAO {
 			return c;
 		}
 	}
+	 public ArrayList<Chocolate> findChocolatesByFactoryId(int factoryId) {
+	        ArrayList<Chocolate> result = new ArrayList<>();
+	        for (Chocolate chocolate : chocolates) {
+	            if (chocolate.getFactoryId() == factoryId) {
+	                result.add(chocolate);
+	            }
+	        }
+	        return result;
+	    }
+
 	
 	public Chocolate save(Chocolate chocolate, String contextPath) {
         int maxId = -1;
