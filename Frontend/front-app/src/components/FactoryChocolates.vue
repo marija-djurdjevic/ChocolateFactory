@@ -5,7 +5,7 @@
       </header>
       <div class="factory-info">
         <div class="factory-logo">
-          <img :src="factory.image" alt="Factory Logo" />
+            <img :src="'../' + factory.image" alt="Factory Logo" />
         </div>
         <div class="factory-details">
           <div class="location-info" v-if="factory.locationInfo">
@@ -27,11 +27,14 @@
               <p><strong>Type:</strong> {{ chocolate.chocolateType }}</p>
               <p><strong>Weight:</strong> {{ chocolate.gramsOfChocolate }} grams</p>
               <p><strong>Description:</strong> {{ chocolate.chocolateDescription }}</p>
-              <p><strong>Status:</strong> {{ chocolate.isAvailable ? 'Available' : 'Not Available' }}</p>
+              <p><strong>Status:</strong> {{ chocolate.available ? 'Available' : 'Not Available' }}</p>
               <p><strong>Amount:</strong> {{ chocolate.amountOfChocolate }}</p>
             </div>
             <div class="chocolate-image">
-              <img :src="chocolate.imagePath" alt="Chocolate Image" />
+              <img :src="'data:image/jpeg;base64,' + chocolate.imageString" alt="Chocolate Image" />
+            </div>
+            <div class="button-group">
+              <input v-on:click="editChocolate(chocolate)" type="submit" value="Edit">
             </div>
           </div>
         </div>
@@ -42,9 +45,10 @@
   <script setup>
   import axios from 'axios';
   import { onMounted, ref } from 'vue';
-  import { useRoute } from 'vue-router';
+  import { useRoute, useRouter } from 'vue-router';
   
   const route = useRoute();
+  const router = useRouter();
   const factoryId = route.params.factoryId;
   const factory = ref({});
   const chocolates = ref([]);
@@ -58,6 +62,7 @@
     try {
       const response = await axios.get(`http://localhost:8080/WebShopAppREST/rest/factories/${factoryId}`);
       factory.value = response.data;
+      console.log(factory.value);
       const locationResponse = await axios.get(`http://localhost:8080/WebShopAppREST/rest/locations/findLocation?id=${factory.value.locationId}`);
       factory.value.locationInfo = locationResponse.data;
     } catch (error) {
@@ -72,6 +77,11 @@
     } catch (error) {
       console.error('Error loading chocolates:', error);
     }
+  }
+
+  function editChocolate(chocolate) {
+    console.log(chocolate);
+    router.push({ path: '/editChocolate', query: { chocolate: JSON.stringify(chocolate), factoryId: factoryId } });
   }
   </script>
   
@@ -159,5 +169,28 @@
     border-radius: 10px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
+
+  .button-group {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  align-items: center;
+}
+
+.button-group input {
+  width: 80%;
+  margin: 10px 0;
+  padding: 10px;
+  background-color: #ff6347; /* Tomato */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.button-group input:hover {
+  background-color: #ff4500; /* OrangeRed */
+}
   </style>
   

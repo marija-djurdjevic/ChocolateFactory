@@ -14,9 +14,11 @@ public class FactoryDAO {
 	
 	private ArrayList<Factory> factories = new ArrayList<>();
 	private ChocolateDAO chocolateDAO;
+	private String contextPath;
 
 	
 	public FactoryDAO(String contextPath) {
+		this.contextPath = contextPath;
 		chocolateDAO = new ChocolateDAO(contextPath);
 		loadFactories(contextPath);
 		loadChocolatesForFactories();
@@ -28,10 +30,14 @@ public class FactoryDAO {
 		}
 	}
 	public ArrayList<Factory> findAll() {
+		loadFactories(contextPath);
+		loadChocolatesForFactories();
 		return factories;
 	}
 
 	public Factory findFactory(int id) {
+		loadFactories(contextPath);
+		loadChocolatesForFactories();
 		for (Factory factory : factories) {
 			if (factory.getId() == id) {
 				return factory;
@@ -41,12 +47,16 @@ public class FactoryDAO {
 	}
 	
 	public Chocolate addChocolateToFactory(int id, Chocolate chocolate) {
+		loadFactories(contextPath);
+		loadChocolatesForFactories();
 		Factory f = findFactory(id);
 		f.addChocolateToFactory(chocolate);
 		return chocolate;
 	}
 	
 	public Factory updateFactory(int id, Factory factory) {
+		loadFactories(contextPath);
+		loadChocolatesForFactories();
 		Factory f = findFactory(id);
 		if (f == null) {
 			return save(factory);
@@ -62,6 +72,8 @@ public class FactoryDAO {
 	}
 	
 	public Factory save(Factory factory) {
+		loadFactories(contextPath);
+		loadChocolatesForFactories();
 		int maxId = -1;
 		for (Factory f : factories) {
 			if (f.getId() > maxId) {
@@ -75,6 +87,8 @@ public class FactoryDAO {
 	}
 	
 	public Factory deleteFactoryById(int id) {
+		loadFactories(contextPath);
+		loadChocolatesForFactories();
         Factory factoryToRemove = null;
         for (Factory factory : factories) {
             if (factory.getId() == id) {
@@ -90,6 +104,8 @@ public class FactoryDAO {
 
     // Metoda za filtriranje tvornica prema statusu (radi ili ne radi)
     public ArrayList<Factory> filterFactoriesByStatus(boolean status) {
+    	loadFactories(contextPath);
+		loadChocolatesForFactories();
         ArrayList<Factory> filteredFactories = new ArrayList<>();
         for (Factory factory : factories) {
             if (factory.isStatus() == status) {
@@ -101,6 +117,8 @@ public class FactoryDAO {
 
     // Metoda za pronalaženje filtriranih tvornica
     public ArrayList<Factory> findFilteredFactories() {
+    	loadFactories(contextPath);
+		loadChocolatesForFactories();
         // Ovdje implementirati logiku za pronalaženje filtriranih tvornica
         // Na primjer, možete filtrirati tvornice prema nekom kriteriju
         // Ovdje ćemo samo vratiti sve tvornice za demonstraciju
@@ -108,10 +126,10 @@ public class FactoryDAO {
     }
 
 	private void loadFactories(String contextPath) {
+		this.factories = new ArrayList<Factory>();
 		BufferedReader in = null;
 		try {
 			File file = new File(contextPath + "/factories.txt");
-			System.out.println(file.getCanonicalPath());
 			in = new BufferedReader(new FileReader(file));
 			String line;
 			StringTokenizer st;

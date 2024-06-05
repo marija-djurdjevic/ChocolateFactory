@@ -1,62 +1,57 @@
 <template>
-    <div class="add-chocolate">
-      <h1>Add Chocolate</h1>
+    <div class="edit-chocolate">
+      <h1>Edit Chocolate</h1>
       <form @submit.prevent="submitForm">
         <div class="form-group">
           <label for="name">Name:</label>
-          <input type="text" id="name" v-model="chocolate.name" required />
+          <input type="text" id="name" v-model="chocolate.name" />
         </div>
         <div class="form-group">
-        <label for="price">Price:</label>
-        <input type="number" step="0.01" v-model.number="chocolate.price" required />
-      </div>
-      <div class="form-group">
+          <label for="price">Price:</label>
+          <input type="number" step="0.01" v-model.number="chocolate.price" />
+        </div>
+        <div class="form-group">
           <label for="chocolateSort">Chocolate Sort:</label>
-          <input type="text" id="chocolateSort" v-model="chocolate.chocolateSort" required />
+          <input type="text" id="chocolateSort" v-model="chocolate.chocolateSort" />
         </div>
         <div class="form-group">
-        <label for="chocolateType">Chocolate Type:</label>
-        <input type="text" id="chocolateType" v-model="chocolate.chocolateType" required />            
-      </div>
+          <label for="chocolateType">Chocolate Type:</label>
+          <input type="text" id="chocolateType" v-model="chocolate.chocolateType" />            
+        </div>
+        <div class="form-group">
+          <label for="amountOfChocolate">Amount of Chocolate:</label>
+          <input type="number" id="amountOfChocolate" v-model="chocolate.amountOfChocolate" />
+        </div>
+        <div class="form-group checkbox-group">
+          <label for="isAvailable">Available:</label>
+          <input type="checkbox" id="isAvailable" v-model="chocolate.available" />
+        </div>
         <div class="form-group">
           <label for="gramsOfChocolate">Grams of Chocolate:</label>
-          <input type="number" id="gramsOfChocolate" v-model="chocolate.gramsOfChocolate" required />
+          <input type="number" id="gramsOfChocolate" v-model="chocolate.gramsOfChocolate"  />
         </div>
         <div class="form-group">
           <label for="chocolateDescription">Description:</label>
-          <textarea id="chocolateDescription" v-model="chocolate.chocolateDescription" required></textarea>
+          <textarea id="chocolateDescription" v-model="chocolate.chocolateDescription"></textarea>
         </div>
         <div class="form-group">
           <label for="image">Image:</label>
           <input type="file" @change="onFileSelected" />
         </div>
-        <button type="submit">Add Chocolate</button>
+        <button type="submit">Save Changes</button>
       </form>
     </div>
   </template>
   
   <script setup>
-  import { ref } from 'vue';
-  import { useRouter, useRoute } from 'vue-router';
+  import { ref, onMounted } from 'vue';
+  import { useRoute, useRouter } from 'vue-router';
   import axios from 'axios';
-  import EventBus from '../event-bus';
   
   const route = useRoute();
   const router = useRouter();
   const factoryId = route.query.factoryId;
-  
-  const chocolate = ref({
-    name: '',
-    chocolateSort: 'regular',
-    chocolateType: 'dark',
-    factoryId: factoryId,
-    gramsOfChocolate: 0,
-    chocolateDescription: '',
-    imagePath: '',
-    imageString: '',
-    isAvailable: false,
-    amountOfChocolate: 0,
-  });
+  const chocolate = ref(JSON.parse(route.query.chocolate));
   
   const selectedFile = ref(null);
   
@@ -65,33 +60,33 @@
   }
   
   function submitForm() {
+    console.log("Before sending: ", chocolate.value); // Dodano za debug
     if (selectedFile.value) {
-      //chocolate.value.imagePath = selectedFile.value.name; // Sačuvamo samo naziv fajla
       const reader = new FileReader();
       reader.onload = (e) => {
         chocolate.value.imageString = e.target.result.split(",")[1];
         saveChocolate();
       }
       reader.readAsDataURL(selectedFile.value);
+    } else {
+      saveChocolate();
     }
-    
   }
   
   function saveChocolate() {
-    console.log("Sada je string " + chocolate.value.imageString);
-    axios.post('http://localhost:8080/WebShopAppREST/rest/chocolates/save', chocolate.value)
+    axios.post(`http://localhost:8080/WebShopAppREST/rest/chocolates/edit`, chocolate.value)
       .then(response => {
-        alert('Chocolate added successfully!');
-        router.push('/');
+        alert('Chocolate updated successfully!');
+        router.push(`/factory/${factoryId}/chocolates`);
       })
       .catch(error => {
-        console.error('Error adding chocolate:', error);
+        console.error('Error updating chocolate:', error);
       });
   }
   </script>
   
   <style>
-  .add-chocolate {
+  .edit-chocolate {
     max-width: 600px;
     margin: 50px auto;
     padding: 20px;
@@ -100,9 +95,18 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   }
   
-  .add-chocolate h1 {
+  .edit-chocolate h1 {
     text-align: center;
     margin-bottom: 20px;
+  }
+  
+  .checkbox-group {
+    display: flex;
+    align-items: center;
+  }
+  
+  .checkbox-group label {
+    margin-right: 10px;
   }
   
   .form-group {
@@ -136,4 +140,3 @@
     background-color: #bf5640;
   }
   </style>
-  

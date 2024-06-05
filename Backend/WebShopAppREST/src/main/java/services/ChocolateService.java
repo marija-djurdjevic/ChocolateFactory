@@ -67,4 +67,13 @@ public class ChocolateService {
         String contextPath = ctx.getRealPath("");
         return dao.save(chocolate, contextPath);
     }
+    
+    @POST
+    @Path("/edit")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Chocolate editChocolate(Chocolate chocolate) {
+        ChocolateDAO dao = (ChocolateDAO) ctx.getAttribute("chocolateDAO");
+        return dao.updateChocolate(chocolate);
+    }
 }
