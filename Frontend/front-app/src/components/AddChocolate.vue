@@ -66,7 +66,6 @@
   
   function submitForm() {
     if (selectedFile.value) {
-      //chocolate.value.imagePath = selectedFile.value.name; // Sačuvamo samo naziv fajla
       const reader = new FileReader();
       reader.onload = (e) => {
         chocolate.value.imageString = e.target.result.split(",")[1];
