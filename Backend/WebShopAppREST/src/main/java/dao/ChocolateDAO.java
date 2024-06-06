@@ -47,6 +47,7 @@ public class ChocolateDAO {
 	
 	public Chocolate updateChocolate(Chocolate chocolate) {
 		loadChocolates(contextPath);
+		int izmjena = 0;
 		Chocolate c = findChocolate(chocolate.getId());
 		if(c != null) {
 			c.setName(chocolate.getName());
@@ -57,10 +58,14 @@ public class ChocolateDAO {
 			c.setChocolateType(chocolate.getChocolateType());
 			c.setGramsOfChocolate(chocolate.getGramsOfChocolate());
 			c.setChocolateDescription(chocolate.getChocolateDescription());
-			c.setImagePath(chocolate.getImagePath());
+			String path = this.contextPath + "images\\chocolate" + chocolate.getId() + izmjena + ".jpg"; 
+            saveImage(path, chocolate.getImageString());
+            c.setImagePath(path);
+            System.out.println(path);
 			c.setAvailable(chocolate.isAvailable());
 			c.setAmountOfChocolate(chocolate.getAmountOfChocolate());
 			saveAllChocolates();
+			izmjena++;
 			return c;
 		}
 		else {
@@ -152,7 +157,6 @@ public class ChocolateDAO {
 		byte[] imageBytes = Base64.getDecoder().decode(imageString);
 		try (FileOutputStream fos = new FileOutputStream(path)){
 			fos.write(imageBytes);
-			System.out.println("Uspjesno sacuvanaaa");
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -160,20 +164,6 @@ public class ChocolateDAO {
 		}
 	}
 
-	/*public Chocolate deleteChocolateById(int id) {
-		loadChocolates(contextPath);
-        Chocolate chocolateToRemove = null;
-        for (Chocolate chocolate : chocolates) {
-            if (chocolate.getId() == id) {
-                chocolateToRemove = chocolate;
-                break;
-            }
-        }
-        if (chocolateToRemove != null) {
-            chocolates.remove(chocolateToRemove);
-        }
-        return chocolateToRemove;
-    }*/
 	 public Chocolate deleteChocolateById(int id) {
 	        loadChocolates(contextPath);
 	        Chocolate chocolateToRemove = null;
