@@ -164,20 +164,21 @@ public class ChocolateDAO {
 		}
 	}
 
-	public Chocolate deleteChocolateById(int id) {
-		loadChocolates(contextPath);
-        Chocolate chocolateToRemove = null;
-        for (Chocolate chocolate : chocolates) {
-            if (chocolate.getId() == id) {
-                chocolateToRemove = chocolate;
-                break;
-            }
-        }
-        if (chocolateToRemove != null) {
-            chocolates.remove(chocolateToRemove);
-        }
-        return chocolateToRemove;
-    }
+	 public Chocolate deleteChocolateById(int id) {
+	        loadChocolates(contextPath);
+	        Chocolate chocolateToRemove = null;
+	        for (Chocolate chocolate : chocolates) {
+	            if (chocolate.getId() == id) {
+	                chocolateToRemove = chocolate;
+	                break;
+	            }
+	        }
+	        if (chocolateToRemove != null) {
+	            chocolates.remove(chocolateToRemove);
+	            saveAllChocolates(); 
+	        }
+	        return chocolateToRemove;
+	    }
 
 	private void loadChocolates(String contextPath) {
 		this.chocolates = new ArrayList<Chocolate>();
