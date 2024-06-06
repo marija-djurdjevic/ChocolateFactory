@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import javax.annotation.PostConstruct;
 import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.OPTIONS;
 import javax.ws.rs.POST;
@@ -75,5 +76,12 @@ public class ChocolateService {
     public Chocolate editChocolate(Chocolate chocolate) {
         ChocolateDAO dao = (ChocolateDAO) ctx.getAttribute("chocolateDAO");
         return dao.updateChocolate(chocolate);
+    }
+    @DELETE
+    @Path("/{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Chocolate deleteChocolate(@PathParam("id") int id) {
+        ChocolateDAO dao = (ChocolateDAO) ctx.getAttribute("chocolateDAO");
+        return dao.deleteChocolateById(id);
     }
 }
