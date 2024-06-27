@@ -147,9 +147,6 @@ public class ChocolateDAO {
             e.printStackTrace();
         } 
         
-        FactoryChocolateDAO dao = new FactoryChocolateDAO();
-        dao.save(chocolate.getFactoryId(), chocolate.getId(), contextPath);
-        
         return chocolate; // Return the saved Chocolate object
     }
 	

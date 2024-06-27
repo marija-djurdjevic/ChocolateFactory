@@ -34,21 +34,25 @@
   
   async function login() {
     try {
-      const response = await axios.post('http://localhost:8080/WebShopAppREST/rest/auth/login', {
-        username: username.value,
-        password: password.value
-      });
-      if (response.data.success) {
-        alert('Login successful!');
-        router.push('/dashboard'); // Adjust the route as needed
-      } else {
-        alert('Login failed, please check your credentials');
-      }
-    } catch (error) {
-      console.error('Login failed:', error);
-      alert('Login failed, please check your credentials');
+    const response = await axios.post('http://localhost:8080/WebShopAppREST/rest/users/login', {
+      username: username.value,
+      password: password.value
+    });
+
+
+    if (response.data) {
+      alert('Login successful!');
+      router.go(-1);  // Vrati se na prethodnu stranicu
+    } else {
+      throw new Error('Invalid credentials');
     }
+  } catch (error) {
+    console.error('Login failed:', error);
+    alert('Login failed, please check your credentials');
   }
+}
+
+
   
   function goToRegister() {
     router.push('/register');
