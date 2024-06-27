@@ -32,7 +32,6 @@
 import axios from 'axios';
 import { onMounted, ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
-import EventBus from '../event-bus';
 
 const factories = ref([]);
 const router = useRouter();

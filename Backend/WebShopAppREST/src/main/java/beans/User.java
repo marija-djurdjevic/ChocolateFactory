@@ -3,6 +3,8 @@ package beans;
 import java.time.LocalDate;
 import java.util.Objects;
 
+import beans.enums.Role;
+
 public class User {
 	private int id;
 	private String username;
@@ -11,12 +13,14 @@ public class User {
 	private String surname;
 	private String gender;
 	private LocalDate birthDate;
+	private Role role;
+	
 	public User() {
 		super();
 		// TODO Auto-generated constructor stub
 	}
 	public User(int id, String username, String password, String name, String surname, String gender,
-			LocalDate birthDate) {
+			LocalDate birthDate, Role role) {
 		super();
 		this.id = id;
 		this.username = username;
@@ -25,12 +29,20 @@ public class User {
 		this.surname = surname;
 		this.gender = gender;
 		this.birthDate = birthDate;
+		this.role = role;
 	}
 	public int getId() {
 		return id;
 	}
 	public void setId(int id) {
 		this.id = id;
+	}
+	
+	public Role getRole() {
+		return role;
+	}
+	public void setRole(Role role) {
+		this.role = role;
 	}
 	public String getUsername() {
 		return username;
