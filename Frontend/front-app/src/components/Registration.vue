@@ -8,35 +8,35 @@
         <form @submit.prevent="register">
           <div class="form-group">
             <label for="username">Username</label>
-            <input type="text" id="username" v-model="form.username" required>
+            <input type="text" id="username" v-model="user.username" required>
           </div>
           <div class="form-group">
             <label for="password">Password</label>
-            <input type="password" id="password" v-model="form.password" required>
+            <input type="password" id="password" v-model="user.password" required>
           </div>
           <div class="form-group">
             <label for="confirmPassword">Confirm Password</label>
-            <input type="password" id="confirmPassword" v-model="form.confirmPassword" required>
+            <input type="password" id="confirmPassword" v-model="confirmPassword" required>
           </div>
           <div class="form-group">
-            <label for="firstName">First Name</label>
-            <input type="text" id="firstName" v-model="form.firstName" required>
+            <label for="name">First Name</label>
+            <input type="text" id="name" v-model="user.name" required>
           </div>
           <div class="form-group">
-            <label for="lastName">Last Name</label>
-            <input type="text" id="lastName" v-model="form.lastName" required>
+            <label for="surname">Last Name</label>
+            <input type="text" id="surname" v-model="user.surname" required>
           </div>
           <div class="form-group">
             <label for="gender">Gender</label>
-            <select id="gender" v-model="form.gender" required>
+            <select id="gender" v-model="user.gender" required>
               <option value="male">Male</option>
               <option value="female">Female</option>
               <option value="other">Other</option>
             </select>
           </div>
           <div class="form-group">
-            <label for="dob">Date of Birth</label>
-            <input type="date" id="dob" v-model="form.dob" required>
+            <label for="birthDate">Date of Birth</label>
+            <input type="date" id="birthDate" v-model="user.birthDate" required>
           </div>
           <div class="form-group">
             <button type="submit">Register</button>
@@ -50,36 +50,40 @@
   import { ref } from 'vue';
   import { useRouter } from 'vue-router';
   import axios from 'axios';
-  
-  const form = ref({
+
+  const confirmPassword = ref('');
+
+  const user = ref({
     username: '',
     password: '',
-    confirmPassword: '',
-    firstName: '',
-    lastName: '',
+    name: '',
+    surname: '',
     gender: '',
-    dob: ''
+    birthDate: ''
   });
   
   const router = useRouter();
   
-  async function register() {
-    if (form.value.password !== form.value.confirmPassword) {
+  function register() {
+    if (user.value.password !== confirmPassword.value) {
       alert('Passwords do not match!');
       return;
     }
-    try {
-      const response = await axios.post('http://localhost:8080/WebShopAppREST/rest/auth/register', form.value);
-      if (response.data.success) {
-        alert('Registration successful!');
-        router.push('/login'); // Adjust the route as needed
-      } else {
+
+    axios.post('http://localhost:8080/WebShopAppREST/rest/users/save', user.value)
+      .then(response => {
+        console.log(response.data);
+        if (response.data.success) {
+          alert('Registration successful!');
+          router.push('/login');
+        } else {
+          alert('Registration failed, please try again');
+        }
+      })
+      .catch(error => {
+        console.error('Registration failed:', error);
         alert('Registration failed, please try again');
-      }
-    } catch (error) {
-      console.error('Registration failed:', error);
-      alert('Registration failed, please try again');
-    }
+      });
   }
   </script>
   
