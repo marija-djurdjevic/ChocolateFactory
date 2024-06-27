@@ -99,7 +99,7 @@ public class FactoryService {
         return dao.filterFactoriesByStatus(status);
     }
 
-    @GET
+    @GET 
     @Path("/findFiltered")
     @Produces(MediaType.APPLICATION_JSON)
     public ArrayList<Factory> findFilteredFactories() {

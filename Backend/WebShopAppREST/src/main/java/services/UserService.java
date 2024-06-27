@@ -2,6 +2,8 @@ package services;
 
 import java.util.ArrayList;
 
+import javax.ws.rs.core.NewCookie;
+import javax.ws.rs.core.Response;
 import javax.annotation.PostConstruct;
 import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
@@ -58,12 +60,31 @@ public class UserService {
         UserDAO dao = (UserDAO) ctx.getAttribute("userDAO");
         return dao.save(user);
     }
+    
     @POST
-    @Path("/login")
+    @Path("/logging")
     @Produces(MediaType.APPLICATION_JSON)
-    public User login(@QueryParam("username") String username, @QueryParam("password") String password) {
+    public Response login(@QueryParam("username") String username, @QueryParam("password") String password) {
+        System.out.println(username);
+        System.out.println(password);
         UserDAO dao = (UserDAO) ctx.getAttribute("userDAO");
         User authenticatedUser = dao.authenticateUser(username, password);
-        return authenticatedUser;
+        
+        if (authenticatedUser != null) {
+            // Generiši token (na primer JWT)
+            String token = generateToken(authenticatedUser);
+            
+            // Kreiraj kolačić sa tokenom
+            NewCookie cookie = new NewCookie("token", token, "/", null, null, 7 * 24 * 60 * 60, false);
+            
+            return Response.ok(authenticatedUser).cookie(cookie).build();
+        } else {
+            return Response.status(Response.Status.UNAUTHORIZED).entity("Invalid credentials").build();
+        }
+    }
+
+    private String generateToken(User user) {
+        // Generiši JWT ili neki drugi token
+        return "mockToken"; // Ovo je samo primer
     }
 }

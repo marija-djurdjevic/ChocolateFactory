@@ -74,6 +74,7 @@ public class UserDAO {
 		BufferedReader in = null;
 		try {
 			File file = new File(contextPath + "/users.txt");
+			System.out.println("Loading users from: " + file.getAbsolutePath());
 			in = new BufferedReader(new FileReader(file));
 			String line;
 			StringTokenizer st;
@@ -89,13 +90,10 @@ public class UserDAO {
 				String surname = st.nextToken().trim();
 				String gender = st.nextToken().trim();
 				LocalDate birthDate = LocalDate.parse(st.nextToken().trim(), formatter); 
-				Role role = Role.valueOf(st.nextToken().trim().toUpperCase());				
+				Role role = Role.valueOf(st.nextToken().trim());				
 				User user = new User(id, username, password, name, surname, gender, birthDate, role);
 				users.add(user);
-
 				
-				System.out.println("Loaded user: " + user);
-
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
