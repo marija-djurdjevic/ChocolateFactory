@@ -72,7 +72,7 @@
       const response = await axios.post('http://localhost:8080/WebShopAppREST/rest/auth/register', form.value);
       if (response.data.success) {
         alert('Registration successful!');
-        router.push('/login'); // Adjust the route as needed
+        router.push('/login');
       } else {
         alert('Registration failed, please try again');
       }
