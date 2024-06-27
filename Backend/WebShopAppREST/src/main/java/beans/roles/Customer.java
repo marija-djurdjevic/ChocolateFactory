@@ -21,13 +21,17 @@ public class Customer  extends User {
 	}
 	
 	public Customer(int id, String username, String password, String name, String surname, String gender,
-			LocalDate birthDate, Role role, ArrayList<Purchase> purchases, CustomerType type, ShoppingCart shoppingCart, int points) {
+			LocalDate birthDate, Role role, CustomerType type, ShoppingCart shoppingCart, int points) {
 		super(id, username, password, name, surname, gender, birthDate, role);
-		this.purchases = purchases;
 		this.type = type;
 		this.shoppingCart = shoppingCart;
 		this.points = points;
 		
+	}
+	
+	public Customer(int id, String username, String password, String name, String surname, String gender,
+			LocalDate birthDate, Role role) {
+		super(id, username, password, name, surname, gender, birthDate, role);		
 	}
 	public ArrayList<Purchase> getPurchases() {
 		return purchases;
