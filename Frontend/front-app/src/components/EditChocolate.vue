@@ -60,7 +60,6 @@
   }
   
   function submitForm() {
-    console.log("Before sending: ", chocolate.value); // Dodano za debug
     if (selectedFile.value) {
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -68,9 +67,7 @@
         saveChocolate();
       }
       reader.readAsDataURL(selectedFile.value);
-    } else {
-      saveChocolate();
-    }
+    }    
   }
   
   function saveChocolate() {
