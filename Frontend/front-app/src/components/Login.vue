@@ -27,29 +27,38 @@
   import { ref } from 'vue';
   import { useRouter } from 'vue-router';
   import axios from 'axios';
+  import Cookies from 'js-cookie';
   
   const username = ref('');
   const password = ref('');
   const router = useRouter();
   
-  async function login() {
-    try {
-    const response = await axios.post('http://localhost:8080/WebShopAppREST/rest/users/login', {
-      username: username.value,
-      password: password.value
-    });
 
+  const axiosInstance = axios.create({
+  baseURL: 'http://localhost:8080/WebShopAppREST/rest',
+  withCredentials: true, // Omogućava slanje kolačića
+});
+  
+  function login() {
+    axiosInstance.post('http://localhost:8080/WebShopAppREST/rest/users/logging?username='+username.value +'&password='+ password.value, 
+    )
+    .then(response => {
+      if (response.data) {
+      // Sačuvaj token u kolačić (ako koristiš JWT)
+      const token = response.data.token;
+      Cookies.set('token', token, { expires: 7, path: '' }); // Sačuvaj kolačić na 7 dana
 
-    if (response.data) {
       alert('Login successful!');
-      router.go(-1);  // Vrati se na prethodnu stranicu
+      console.log('Token:', Cookies.get('token')); // Prikaži token u konzoli
+      router.go(-1); 
     } else {
       throw new Error('Invalid credentials');
     }
-  } catch (error) {
-    console.error('Login failed:', error);
-    alert('Login failed, please check your credentials');
-  }
+    })
+    .catch(error => {
+      console.error('Login failed:', error);
+      alert('Login failed, please check your credentials');
+    });
 }
 
 

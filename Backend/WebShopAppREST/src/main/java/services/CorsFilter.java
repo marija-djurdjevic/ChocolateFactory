@@ -31,20 +31,18 @@ public class CorsFilter implements ContainerRequestFilter, ContainerResponseFilt
     public void filter(ContainerRequestContext request, ContainerResponseContext response)
             throws IOException {
 
-        if (request.getHeaderString("Origin") == null) {
+        String origin = request.getHeaderString("Origin");
+        if (origin == null) {
             return;
         }
 
-        if (isPreflightRequest(request)) {
-        	//response.getHeaders().add("Access-Control-Allow-Origin", "*");
-            response.getHeaders().add("Access-Control-Allow-Credentials", "true");
-            response.getHeaders().add("Access-Control-Allow-Methods",
-                "GET, POST, PUT, DELETE, OPTIONS, HEAD");
-            response.getHeaders().add("Access-Control-Allow-Headers",
-                "X-Requested-With, Authorization, " +
-                "Accept-Version, Content-MD5, CSRF-Token, Content-Type");
-        }
+        response.getHeaders().add("Access-Control-Allow-Origin", origin);
+        response.getHeaders().add("Access-Control-Allow-Credentials", "true");
+        response.getHeaders().add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, HEAD");
+        response.getHeaders().add("Access-Control-Allow-Headers", "X-Requested-With, Authorization, Accept-Version, Content-MD5, CSRF-Token, Content-Type");
 
-        response.getHeaders().add("Access-Control-Allow-Origin", "*");
+        if (isPreflightRequest(request)) {
+            response.getHeaders().add("Access-Control-Max-Age", "1728000");
+        }
     }
 }
