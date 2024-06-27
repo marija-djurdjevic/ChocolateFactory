@@ -4,6 +4,13 @@
       <h1>Factory Display</h1>
       <button class="login-button" @click="goToLogin">Login</button>
     </header>
+    <div class="search-bar">
+      <input v-model="searchFactoryName" placeholder="Factory Name">
+      <input v-model="searchChocolateName" placeholder="Chocolate Name">
+      <input v-model="searchLocation" placeholder="Location">
+      <input v-model="searchAverageGrade" placeholder="Average Grade" type="number" min="1" max="5">
+      <button @click="searchFactories">Search</button>
+    </div>
     <div class="factory-cards">
       <div v-for="(factory, index) in filteredFactories" :key="factory.id" class="factory-card" :style="{ backgroundColor: index % 2 === 0 ? '#ffe4b5' : '#FFC9AD' }">
         <div class="factory-info">
@@ -65,6 +72,10 @@ function loadFactories() {
     });
 }
 
+function searchFactories() {
+  loadFactories(); 
+}
+
 function addChocolate(factoryId) {
   router.push({ path: '/addChocolate', query: { factoryId } });
 }
@@ -111,6 +122,35 @@ body {
   text-align: center
 }
 
+.search-bar {
+  display: flex;
+  justify-content: center; /* Center the search bar */
+  gap: 10px; /* Add some space between elements */
+  margin-bottom: 20px;
+}
+
+.search-bar input {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  width: 150px; /* Reduce width */
+}
+
+.search-bar button {
+  padding: 10px;
+  background-color: #ff6347; /* Tomato */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  width: 80px; /* Match width of login button */
+  height: 40px; /* Match height of login button */
+}
+
+.search-bar button:hover {
+  background-color: #ff4500; /* OrangeRed */
+}
 
 .login-button {
   background-color: #ff6347; /* Tomato */
