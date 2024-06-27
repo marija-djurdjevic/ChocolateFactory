@@ -72,18 +72,13 @@
 
     axios.post('http://localhost:8080/WebShopAppREST/rest/users/save', user.value)
       .then(response => {
-        console.log(response.data);
-        if (response.data.success) {
-          alert('Registration successful!');
-          router.push('/login');
-        } else {
-          alert('Registration failed, please try again');
-        }
+        alert('User added successfully!');
+        router.push('/');
       })
       .catch(error => {
-        console.error('Registration failed:', error);
-        alert('Registration failed, please try again');
+        console.error('Error adding user:', error);
       });
+
   }
   </script>
   

@@ -89,8 +89,12 @@ public class UserDAO {
 				String surname = st.nextToken().trim();
 				String gender = st.nextToken().trim();
 				LocalDate birthDate = LocalDate.parse(st.nextToken().trim(), formatter); 
-				Role role = Role.valueOf(st.nextToken().trim().toUpperCase())
-;				users.add(new User(id, username, password, name, surname, gender, birthDate, role));
+				Role role = Role.valueOf(st.nextToken().trim().toUpperCase());				
+				User user = new User(id, username, password, name, surname, gender, birthDate, role);
+				users.add(user);
+
+				
+				System.out.println("Loaded user: " + user);
 
 			}
 		} catch (Exception e) {
@@ -107,6 +111,14 @@ public class UserDAO {
 	}
 	
 	
-	
+	 public User authenticateUser(String username, String password) {
+	        loadUsers(contextPath); // Ensure users are loaded
+	        for (User user : users) {
+	            if (user.getUsername().equals(username) && user.getPassword().equals(password)) {
+	                return user;
+	            }
+	        }
+	        return null;
+	}
 	
 }

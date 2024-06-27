@@ -58,4 +58,12 @@ public class UserService {
         UserDAO dao = (UserDAO) ctx.getAttribute("userDAO");
         return dao.save(user);
     }
+    @POST
+    @Path("/login")
+    @Produces(MediaType.APPLICATION_JSON)
+    public User login(@QueryParam("username") String username, @QueryParam("password") String password) {
+        UserDAO dao = (UserDAO) ctx.getAttribute("userDAO");
+        User authenticatedUser = dao.authenticateUser(username, password);
+        return authenticatedUser;
+    }
 }
