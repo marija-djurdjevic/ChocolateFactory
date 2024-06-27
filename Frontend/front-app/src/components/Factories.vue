@@ -2,6 +2,7 @@
   <div class="factory-display">
     <header class="status-bar">
       <h1>Factory Display</h1>
+      <button class="login-button" @click="goToLogin">Login</button>
     </header>
     <div class="factory-cards">
       <div v-for="(factory, index) in filteredFactories" :key="factory.id" class="factory-card" :style="{ backgroundColor: index % 2 === 0 ? '#ffe4b5' : '#FFC9AD' }">
@@ -32,31 +33,27 @@
 import axios from 'axios';
 import { onMounted, ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
-import EventBus from '../event-bus';
 
 const factories = ref([]);
 const router = useRouter();
 
 onMounted(() => {
   loadFactories();
-})
+});
 
 function loadFactories() {
   axios.get('http://localhost:8080/WebShopAppREST/rest/factories/')
     .then(response => {
       factories.value = response.data;
-      // Pronalazimo informacije o lokaciji za svaku fabriku
       factories.value.forEach(async factory => {
         try {
           const locationResponse = await axios.get(`http://localhost:8080/WebShopAppREST/rest/locations/findLocation?id=${factory.locationId}`);
           const location = locationResponse.data;
-          // Kreiramo objekat sa informacijama o lokaciji
           let factoryLocation = {
             longitude: location.longitude,
             latitude: location.latitude,
             address: location.address
           };
-          // Dodajemo informacije o lokaciji u objekat fabrike
           factory.locationInfo = factoryLocation;
         } catch (error) {
           console.error('Error loading location:', error);
@@ -76,8 +73,11 @@ function showChocolates(factoryId) {
   router.push({ path: `/factory/${factoryId}/chocolates` });
 }
 
+function goToLogin() {
+  router.push('/login');
+}
+
 const filteredFactories = computed(() => {
-  // Sortiramo fabrike tako da su one sa statusom Open prve
   const openFactories = factories.value.filter(factory => factory.status);
   const closedFactories = factories.value.filter(factory => !factory.status);
   return [...openFactories, ...closedFactories];
@@ -88,6 +88,7 @@ const filteredFactories = computed(() => {
 body {
   background-color: #dd6755;
 }
+
 .factory-display {
   text-align: center;
   padding: 20px;
@@ -99,10 +100,34 @@ body {
   color: #333;
   padding: 10px;
   margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .status-bar h1 {
   font-size: 2rem;
+  flex-grow: 1;
+  text-align: center
+}
+
+
+.login-button {
+  background-color: #ff6347; /* Tomato */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  font-size: 1rem; /* Adjust font size to match other buttons */
+  width: 80px; /* Match width of other buttons */
+  height: 40px; /* Match height of other buttons */
+  margin-left: auto; /* Align to the right */
+}
+
+.login-button:hover {
+  background-color: #ff4500; /* OrangeRed */
 }
 
 .factory-cards {
@@ -182,4 +207,5 @@ body {
 .button-group input:hover {
   background-color: #ff4500; /* OrangeRed */
 }
+
 </style>
