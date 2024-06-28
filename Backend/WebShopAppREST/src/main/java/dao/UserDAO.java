@@ -109,14 +109,32 @@ public class UserDAO {
 	}
 	
 	
-	 public User authenticateUser(String username, String password) {
-	        loadUsers(contextPath); // Ensure users are loaded
-	        for (User user : users) {
-	            if (user.getUsername().equals(username) && user.getPassword().equals(password)) {
+	public User authenticateUser(String username, String password) {
+	    loadUsers(contextPath); // Ensure users are loaded
+	    for (User user : users) {
+	        System.out.println("Checking user: " + user.getUsername());
+	        if (user.getUsername().equals(username)) {
+	            System.out.println("Username matches for: " + username);
+	            if (user.getPassword().equals(password)) {
+	                System.out.println("Password matches for: " + username);
 	                return user;
+	            } else {
+	                System.out.println("Password does not match for: " + username);
 	            }
 	        }
-	        return null;
+	    }
+	    System.out.println("User not found: " + username);
+	    return null;
 	}
+
+	public User findUserByToken(String token) {
+        loadUsers(contextPath); // Ensure users are loaded
+        for (User user : users) {
+            if (user.getToken() != null && user.getToken().equals(token)) {
+                return user;
+            }
+        }
+        return null;
+    }
 	
 }

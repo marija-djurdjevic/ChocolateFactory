@@ -85,7 +85,7 @@ public class CustomerDAO {
 				String surname = st.nextToken().trim();
 				String gender = st.nextToken().trim();
 				LocalDate birthDate = LocalDate.parse(st.nextToken().trim(), formatter); 
-				Role role = Role.valueOf(st.nextToken().trim().toUpperCase());
+				Role role = Role.valueOf(st.nextToken().trim());
 				int points = Integer.parseInt(st.nextToken().trim());
 				ShoppingCart shoppingCart = new ShoppingCart();
 				CustomerType customerType = new CustomerType();

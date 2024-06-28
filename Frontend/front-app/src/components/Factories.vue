@@ -2,7 +2,9 @@
   <div class="factory-display">
     <header class="status-bar">
       <h1>Factory Display</h1>
-      <button class="login-button" @click="goToLogin">Login</button>
+      <button v-if="!isLoggedIn" class="login-button" @click="goToLogin">Login</button>
+      <button v-if="isLoggedIn && isAdmin" class="admin-button" @click="goToAddFactory">Add Factory</button>
+      <button v-if="isLoggedIn && isAdmin" class="login-button" @click="logout">Logout</button>
     </header>
     <div class="search-bar">
       <input v-model="searchFactoryName" placeholder="Factory Name">
@@ -26,8 +28,8 @@
             <p><strong>Status:</strong> {{ factory.status ? 'Open' : 'Closed' }}</p>
             <p><strong>Average Grade:</strong> {{ factory.grade }}</p>
             <div class="button-group">
-              <input v-on:click="addChocolate(factory.id)" type="submit" value="Add chocolate">
-              <input v-on:click="showChocolates(factory.id)" type="button" value="Show Chocolates">
+              <button @click="addChocolate(factory.id)">Add Chocolate</button>
+              <button @click="showChocolates(factory.id)">Show Chocolates</button>
             </div>
           </div>
         </div>
@@ -44,9 +46,29 @@ import { useRouter } from 'vue-router';
 const factories = ref([]);
 const router = useRouter();
 
+const isLoggedIn = ref(false);
+const isAdmin = ref(false);
+
 onMounted(() => {
+  isLoggedIn.value = checkLoggedIn();
+  isAdmin.value = checkAdmin();
   loadFactories();
 });
+
+function checkLoggedIn() {
+  const token = localStorage.getItem('token');
+  return !!token;
+}
+
+async function checkAdmin() {
+  try {
+    const response = await axios.get('http://localhost:8080/WebShopAppREST/rest/users/admin');
+    return response.data === true;
+  } catch (error) {
+    console.error('Error checking admin status:', error);
+    return false;
+  }
+}
 
 function loadFactories() {
   axios.get('http://localhost:8080/WebShopAppREST/rest/factories/')
@@ -72,20 +94,19 @@ function loadFactories() {
     });
 }
 
-function searchFactories() {
-  loadFactories(); 
-}
-
-function addChocolate(factoryId) {
-  router.push({ path: '/addChocolate', query: { factoryId } });
-}
-
-function showChocolates(factoryId) {
-  router.push({ path: `/factory/${factoryId}/chocolates` });
-}
-
 function goToLogin() {
   router.push('/login');
+}
+
+function logout() {
+  localStorage.removeItem('token');
+  isLoggedIn.value = false;
+  isAdmin.value = false;
+  router.push('/login');
+}
+
+function goToAddFactory() {
+  router.push('/addFactory');
 }
 
 const filteredFactories = computed(() => {
