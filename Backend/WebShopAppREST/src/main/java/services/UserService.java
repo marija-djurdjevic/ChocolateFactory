@@ -21,6 +21,7 @@ import beans.User;
 import beans.enums.Role;
 import dao.UserDAO;
 import dto.LoginResponseDTO;
+import io.jsonwebtoken.Claims;
 import utils.TokenUtils;
 
 @Path("/users")
@@ -82,44 +83,6 @@ public class UserService {
         } else {
             return Response.status(Response.Status.UNAUTHORIZED).entity("Invalid credentials").build();
         }
-    }
-    
-    @GET
-    @Path("/admin")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response checkAdminStatus(@Context HttpServletRequest request) {
-        String token = getTokenFromCookies(request);
-        System.out.println("Token iz kolačića: " + token);
-
-        if (token == null) {
-            System.out.println("Token nije pronađen");
-            return Response.status(Response.Status.UNAUTHORIZED).entity("Token nije pronađen").build();
-        }
-
-        UserDAO dao = (UserDAO) ctx.getAttribute("userDAO");
-        User user = dao.findUserByToken(token);
-        System.out.println("Korisnik pronađen: " + user);
-
-        if (user == null) {
-            System.out.println("Korisnik nije pronađen");
-            return Response.status(Response.Status.UNAUTHORIZED).entity("Korisnik nije pronađen").build();
-        }
-
-        boolean isAdmin = user.getRole() == Role.Administrator;
-        System.out.println("Da li je korisnik administrator: " + isAdmin);
-        return Response.ok(isAdmin).build();
-    }
-
-    private String getTokenFromCookies(HttpServletRequest request) {
-        javax.servlet.http.Cookie[] cookies = request.getCookies();
-        if (cookies != null) {
-            for (javax.servlet.http.Cookie cookie : cookies) {
-                if (cookie.getName().equals("token")) {
-                    return cookie.getValue();
-                }
-            }
-        }
-        return null;
     }
        
 }

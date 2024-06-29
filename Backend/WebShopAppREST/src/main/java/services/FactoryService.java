@@ -1,9 +1,11 @@
 package services;
 
+import java.net.http.HttpHeaders;
 import java.util.ArrayList;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.OPTIONS;
@@ -15,21 +17,26 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import beans.Chocolate;
 import beans.Factory;
 import dao.FactoryDAO;
+import io.jsonwebtoken.Claims;
+import utils.TokenUtils;
 
 @Path("/factories")
 public class FactoryService {
 
+    private TokenUtils tokenUtils = new TokenUtils();
+
     @Context
     ServletContext ctx;
-
+    
     @PostConstruct
     public void init() {
         if (ctx.getAttribute("factoryDAO") == null) {
-        	String contextPath = ctx.getRealPath("");
+            String contextPath = ctx.getRealPath("");
             ctx.setAttribute("factoryDAO", new FactoryDAO(contextPath));
         }
     }
@@ -69,19 +76,38 @@ public class FactoryService {
     @Path("/save")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Factory newFactory(Factory factory) {
-        FactoryDAO dao = (FactoryDAO) ctx.getAttribute("factoryDAO");
-        return dao.save(factory);
-    }
+    public Response newFactory(Factory factory, @Context HttpServletRequest request) {
+        // Izvucite token iz zaglavlja zahteva
+        String token = tokenUtils.getToken(request);
+        System.out.println("Token: " + token);
+        if (token == null || token.isEmpty()) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity("Token is missing").build();
+        }
 
-    /*@POST
-    @Path("/update")
-    @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_JSON)
-    public ArrayList<Factory> updateFactory(Factory factory) {
+        // Verifikujte token
+        Claims claims;
+        try {
+            claims = tokenUtils.parseToken(token);
+            if (claims == null) {
+                return Response.status(Response.Status.UNAUTHORIZED).entity("Invalid token").build();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Response.status(Response.Status.UNAUTHORIZED).entity("Token parsing error").build();
+        }
+
+        // Proverite ulogu korisnika
+        String role = claims.get("role", String.class);
+        if (role == null || !"Administrator".equals(role)) {
+            return Response.status(Response.Status.FORBIDDEN).entity("You do not have permission to perform this action").build();
+        }
+
+        // Ako je sve u redu, sačuvajte fabriku
         FactoryDAO dao = (FactoryDAO) ctx.getAttribute("factoryDAO");
-        return dao.updateFactory(factory.getId(), factory);
-    }*/
+        Factory savedFactory = dao.save(factory);
+
+        return Response.ok(savedFactory).build();
+    }
 
     @GET
     @Path("/delete")

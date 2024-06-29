@@ -12,6 +12,8 @@ import java.util.StringTokenizer;
 import beans.Chocolate;
 import beans.Factory;
 import beans.Location;
+import io.jsonwebtoken.Claims;
+import utils.TokenUtils;
 
 public class FactoryDAO {
 	
@@ -77,6 +79,7 @@ public class FactoryDAO {
 	}
 	
 	public Factory save(Factory factory) {
+		
 		loadFactories(contextPath);
         int maxId = -1;
         for (Factory f : factories) {

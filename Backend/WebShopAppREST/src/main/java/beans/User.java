@@ -14,7 +14,6 @@ public class User {
 	private String gender;
 	private LocalDate birthDate;
 	private Role role;
-	private String token; // New field to store user token
 	
 	public User() {
 		super();
@@ -81,14 +80,6 @@ public class User {
 	public void setBirthDate(LocalDate birthDate) {
 		this.birthDate = birthDate;
 	}
-	
-	public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
-    }
     
 	@Override
 	public String toString() {
@@ -116,7 +107,7 @@ public class User {
         return Objects.equals(birthDate, other.birthDate) && Objects.equals(gender, other.gender) && id == other.id
                 && Objects.equals(name, other.name) && Objects.equals(password, other.password)
                 && Objects.equals(surname, other.surname) && Objects.equals(username, other.username)
-                && role == other.role && Objects.equals(token, other.token);
+                && role == other.role;
     }
 	
 	
