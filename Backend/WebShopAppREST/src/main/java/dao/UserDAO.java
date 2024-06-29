@@ -126,15 +126,5 @@ public class UserDAO {
 	    System.out.println("User not found: " + username);
 	    return null;
 	}
-
-	public User findUserByToken(String token) {
-        loadUsers(contextPath); // Ensure users are loaded
-        for (User user : users) {
-            if (user.getToken() != null && user.getToken().equals(token)) {
-                return user;
-            }
-        }
-        return null;
-    }
 	
 }

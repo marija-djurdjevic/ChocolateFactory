@@ -1,47 +1,39 @@
 <template>
-  <div class="add-factory">
-    <h1>Add Factory</h1>
-    <form @submit.prevent="submitForm">
-      <div class="form-group">
-        <label for="name">Name:</label>
-        <input type="text" id="name" v-model="factory.name" required />
-      </div>
-      <label>Location:</label>
-      <div class="location-fields">
-        <div class="field-group">
-          <label for="gs">GS:</label>
-          <input type="text" id="gs" v-model="location.gs" required />
+    <div class="add-chocolate">
+      <h1>Add Chocolate</h1>
+      <form @submit.prevent="submitForm">
+        <div class="form-group">
+          <label for="name">Name:</label>
+          <input type="text" id="name" v-model="chocolate.name" required />
         </div>
-        <div class="field-group">
-          <label for="gd">GD:</label>
-          <input type="text" id="gd" v-model="location.gd" required />
-        </div>
-        <div class="field-group">
-          <label for="address">Address:</label>
-          <input type="text" id="address" v-model="location.address" required />
-        </div>
-        <div class="field-group">
-          <label for="city">City:</label>
-          <input type="text" id="city" v-model="location.city" required />
-        </div>
+        <div class="form-group">
+        <label for="price">Price:</label>
+        <input type="number" step="0.01" v-model.number="chocolate.price" required />
       </div>
       <div class="form-group">
-        <label for="worktime">Work time:</label>
-        <input type="text" id="worktime" v-model="factory.worktime" required />
+          <label for="chocolateSort">Chocolate Sort:</label>
+          <input type="text" id="chocolateSort" v-model="chocolate.chocolateSort" required />
+        </div>
+        <div class="form-group">
+        <label for="chocolateType">Chocolate Type:</label>
+        <input type="text" id="chocolateType" v-model="chocolate.chocolateType" required />            
       </div>
-      <div class="form-group">
-        <label for="image">Logo:</label>
-        <input type="file" @change="onFileSelected" />
-      </div>
-      <div class="form-group">
-        <label for="manager">Manager:</label>
-        <input type="text" id="manager" v-model="factory.manager" required />            
-      </div>
-      <button type="submit">Add Factory</button>
-    </form>
-  </div>
-</template>
-
+        <div class="form-group">
+          <label for="gramsOfChocolate">Grams of Chocolate:</label>
+          <input type="number" id="gramsOfChocolate" v-model="chocolate.gramsOfChocolate" required />
+        </div>
+        <div class="form-group">
+          <label for="chocolateDescription">Description:</label>
+          <textarea id="chocolateDescription" v-model="chocolate.chocolateDescription" required></textarea>
+        </div>
+        <div class="form-group">
+          <label for="image">Image:</label>
+          <input type="file" @change="onFileSelected" />
+        </div>
+        <button type="submit">Add Chocolate</button>
+      </form>
+    </div>
+  </template>
   
   <script setup>
   import { ref } from 'vue';

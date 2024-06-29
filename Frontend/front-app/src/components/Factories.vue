@@ -4,7 +4,7 @@
       <h1>Factory Display</h1>
       <button v-if="!isLoggedIn" class="login-button" @click="goToLogin">Login</button>
       <button v-if="isLoggedIn && isAdmin" class="admin-button" @click="goToAddFactory">Add Factory</button>
-      <button v-if="isLoggedIn && isAdmin" class="login-button" @click="logout">Logout</button>
+      <button v-if="isLoggedIn" class="login-button" @click="logout">Logout</button>
     </header>
     <div class="search-bar">
       <input v-model="searchFactoryName" placeholder="Factory Name">
@@ -88,6 +88,7 @@ onMounted(() => {
   console.log(localStorage.getItem("role"));
   isLoggedIn.value = checkLoggedIn();
   isAdmin.value = checkAdmin();
+  console.log(isAdmin.value);
   loadFactories();
 });
 
@@ -96,7 +97,8 @@ function checkLoggedIn() {
   return !!token;
 }
 
-async function checkAdmin() {
+function checkAdmin() {
+  console.log(role);
   return role === 'Administrator';
 }
 
