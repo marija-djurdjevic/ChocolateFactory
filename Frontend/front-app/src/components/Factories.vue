@@ -51,7 +51,7 @@
             <p><strong>Status:</strong> {{ factory.status ? 'Open' : 'Closed' }}</p>
             <p><strong>Average Grade:</strong> {{ factory.grade }}</p>
             <div class="button-group">
-              <button @click="addChocolate(factory.id)">Add Chocolate</button>
+              <button v-if="isManager" @click="addChocolate(factory.id)">Add Chocolate</button>
               <button @click="showChocolates(factory.id)">Show Chocolates</button>
             </div>
           </div>
@@ -81,6 +81,7 @@ const showOpenFactories = ref('');
 
 const isLoggedIn = ref(false);
 const isAdmin = ref(false);
+const isManager = ref(false); // Add this line
 const role = localStorage.getItem("role");
 
 onMounted(() => {
@@ -88,6 +89,7 @@ onMounted(() => {
   console.log(localStorage.getItem("role"));
   isLoggedIn.value = checkLoggedIn();
   isAdmin.value = checkAdmin();
+  isManager.value = checkManager(); // Add this line
   console.log(isAdmin.value);
   loadFactories();
 });
@@ -100,6 +102,10 @@ function checkLoggedIn() {
 function checkAdmin() {
   console.log(role);
   return role === 'Administrator';
+}
+
+function checkManager() { // Add this function
+  return role === 'Manager';
 }
 
 async function loadChocolatesForFactory(factory) {
@@ -274,6 +280,7 @@ function logout() {
   localStorage.removeItem('role'); // Uklanjanje tokena iz localStorage
   isLoggedIn.value = false; // Postavljanje stanja prijavljenosti na false
   isAdmin.value = false; // Resetovanje admin statusa
+  isManager.value = false;
   router.push('/'); // Navigacija na početnu stranicu (fabrike)
 }
 
@@ -285,7 +292,6 @@ const filteredFactories = computed(() => {
   return factories.value;
 });
 </script>
-
 <style>
 body {
   background-color: #dd6755;
