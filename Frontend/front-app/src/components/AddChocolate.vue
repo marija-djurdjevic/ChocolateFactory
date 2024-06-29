@@ -77,7 +77,6 @@
   }
   
   function saveChocolate() {
-    console.log("Sada je string " + chocolate.value.imageString);
     axios.post('http://localhost:8080/WebShopAppREST/rest/chocolates/save', chocolate.value)
       .then(response => {
         alert('Chocolate added successfully!');

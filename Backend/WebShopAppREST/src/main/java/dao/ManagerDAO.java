@@ -12,10 +12,12 @@ import java.util.ArrayList;
 import java.util.StringTokenizer;
 
 import beans.roles.Manager;
+import beans.Chocolate;
 import beans.enums.Role;
 
 public class ManagerDAO {
     private ArrayList<Manager> managers = new ArrayList<>();
+    private ArrayList<Manager> availableManagers = new ArrayList<>();
     private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private String contextPath;
 
@@ -27,6 +29,18 @@ public class ManagerDAO {
     public ArrayList<Manager> findAll() {
         loadManagers(contextPath);
         return managers;
+    }
+    
+    public ArrayList<Manager> findAvailableManagers(){
+    	loadManagers(contextPath);
+    	availableManagers = new ArrayList<>();
+    	for(Manager manager : managers) {
+    		if(manager.getFactoryId() == -1) {
+    			availableManagers.add(manager);
+    		}
+    	}
+    	
+    	return availableManagers;
     }
 
     public Manager save(Manager manager, String contextPath) {
@@ -53,6 +67,59 @@ public class ManagerDAO {
 
         return manager; // Return the saved Manager object
     }
+    
+    public Manager updateManager(Manager manager) {
+		loadManagers(contextPath);
+		Manager m = findManager(manager.getId());
+		if(m != null) {
+			m.setUsername(manager.getUsername());
+			m.setPassword(manager.getPassword());
+			m.setName(manager.getName());
+			m.setSurname(manager.getSurname());
+			m.setGender(manager.getGender());
+			m.setBirthDate(manager.getBirthDate());
+			m.setRole(manager.getRole());
+			m.setFactoryId(manager.getFactoryId());
+			saveAllManagers();
+			return m;
+		}
+		else {
+			return null;
+		}
+	}
+    
+    private void saveAllManagers() {
+	    try {
+	        String filePath = contextPath + "managers.txt";
+	        FileWriter writer = new FileWriter(filePath, false); 
+	        BufferedWriter bufferedWriter = new BufferedWriter(writer);
+	        for (Manager manager : managers) {
+	            bufferedWriter.write(manager.getId() + ";" +
+	            		manager.getUsername() + ";" +
+	                    manager.getPassword() + ";" +
+	                    manager.getName() + ";" +
+	                    manager.getSurname() + ";" +
+	                    manager.getGender() + ";" +
+	                    manager.getBirthDate().format(formatter) + ";" +
+	                    manager.getRole() + ";" +
+	                    manager.getFactoryId() + "\n");
+	        }
+	        bufferedWriter.flush();
+	        bufferedWriter.close();
+	    } catch (IOException e) {
+	        e.printStackTrace();
+	    }
+	}
+    
+    public Manager findManager(int id) {
+		loadManagers(contextPath);
+		for (Manager manager : managers) {
+			if (manager.getId() == id) {
+				return manager;
+			}
+		}
+		return null;
+	}
 
     private void loadManagers(String contextPath) {
         this.managers = new ArrayList<Manager>();
