@@ -12,6 +12,8 @@ import java.util.StringTokenizer;
 import beans.Chocolate;
 import beans.Factory;
 import beans.Location;
+import beans.roles.Manager;
+import beans.roles.Worker;
 import io.jsonwebtoken.Claims;
 import utils.TokenUtils;
 
@@ -20,6 +22,9 @@ public class FactoryDAO {
 	private ArrayList<Factory> factories = new ArrayList<>();
 	private ChocolateDAO chocolateDAO;
 	private LocationDAO locationDAO;
+    private WorkerDAO workerDAO;
+    private ManagerDAO managerDAO;
+
 	private String contextPath;
 
 	
@@ -27,6 +32,8 @@ public class FactoryDAO {
 		this.contextPath = contextPath;
 		chocolateDAO = new ChocolateDAO(contextPath);
 		locationDAO = new LocationDAO(contextPath);
+		workerDAO = new WorkerDAO(contextPath);
+		managerDAO = new ManagerDAO(contextPath);
 		loadFactories(contextPath);
 		loadChocolatesForFactories();
 	}
@@ -143,7 +150,37 @@ public class FactoryDAO {
         // Ovdje ćemo samo vratiti sve tvornice za demonstraciju
         return factories;
     }
-
+    public Worker addWorkerToFactory(int factoryId, Worker worker) {
+        loadFactories(contextPath);
+        loadChocolatesForFactories();
+        
+        Factory factory = findFactory(factoryId);
+        if (factory != null) {
+            worker.setFactoryId(factoryId);
+            workerDAO.save(worker, contextPath); // Save the worker with updated factory ID
+            return worker;
+        }
+        return null;
+    }
+    public boolean isManagerOfFactory(String username, int factoryId) {
+        loadFactories(contextPath);
+        
+        // Pronaći managera sa datim username-om
+        Manager manager = null;
+        for (Manager m : managerDAO.findAll()) {
+            if (m.getUsername().equals(username)) {
+                manager = m;
+                break;
+            }
+        }
+        
+        // Provjeriti da li je pronađeni manager zadužen za traženu fabriku
+        if (manager != null && manager.getFactoryId() == factoryId) {
+            return true;
+        }
+        
+        return false;
+    }
 	private void loadFactories(String contextPath) {
 		this.factories = new ArrayList<Factory>();
 		BufferedReader in = null;

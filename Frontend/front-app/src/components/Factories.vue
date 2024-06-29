@@ -51,6 +51,7 @@
             <p><strong>Status:</strong> {{ factory.status ? 'Open' : 'Closed' }}</p>
             <p><strong>Average Grade:</strong> {{ factory.grade }}</p>
             <div class="button-group">
+              <button v-if="isManager" @click="addWorker(factory.id)">Add Worker</button>
               <button v-if="isManager" @click="addChocolate(factory.id)">Add Chocolate</button>
               <button @click="showChocolates(factory.id)">Show Chocolates</button>
             </div>
@@ -60,6 +61,7 @@
     </div>
   </div>
 </template>
+
 
 <script setup>
 import axios from 'axios';
@@ -93,6 +95,10 @@ onMounted(() => {
   console.log(isAdmin.value);
   loadFactories();
 });
+
+function addWorker(factoryId) {
+  router.push({ path: '/addWorker', query: { factoryId } });
+} 
 
 function checkLoggedIn() {
   const token = localStorage.getItem('token');
