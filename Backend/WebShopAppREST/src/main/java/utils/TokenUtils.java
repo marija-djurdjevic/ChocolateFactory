@@ -20,7 +20,7 @@ public class TokenUtils {
 		String jwtToken = Jwts.builder()
 		        .claim("role", role)
 		        .claim("email", username)
-		        .setSubject("jane")
+		        .setSubject(username)
 		        .setId(UUID.randomUUID().toString())
 		        .setIssuedAt(Date.from(Instant.now()))
 		        .setExpiration(Date.from(Instant.now().plus(5l, ChronoUnit.MINUTES)))

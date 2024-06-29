@@ -6,6 +6,7 @@ import EditChocolateView from '@/views/EditChocolateView.vue';
 import Login from '@/views/LoginView.vue';
 import Registration from '@/views/RegistrationView.vue';
 import AddFactoryView from '@/views/AddFactoryView.vue';
+import AddWorkerView from '@/views/AddWorkerView.vue';
 const routes = [
   {
     path: '/',
@@ -41,6 +42,11 @@ const routes = [
     path: '/addFactory',
     name: 'addFactory',
     component: AddFactoryView
+  },
+  {
+    path: '/addWorker', // Define the route for AddWorker
+    name: 'AddWorker',
+    component: AddWorkerView
   }
 ]
 

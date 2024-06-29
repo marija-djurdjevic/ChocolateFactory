@@ -21,6 +21,7 @@ import javax.ws.rs.core.Response;
 
 import beans.Chocolate;
 import beans.Factory;
+import beans.roles.Worker;
 import dao.FactoryDAO;
 import io.jsonwebtoken.Claims;
 import utils.TokenUtils;
@@ -131,5 +132,48 @@ public class FactoryService {
     public ArrayList<Factory> findFilteredFactories() {
         FactoryDAO dao = (FactoryDAO) ctx.getAttribute("factoryDAO");
         return dao.findFilteredFactories();
+    }
+
+    @POST
+    @Path("/{factoryId}/addWorker")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response addWorkerToFactory(@PathParam("factoryId") int factoryId, Worker worker, @Context HttpServletRequest request) {
+        // Izvucite token iz zaglavlja zahteva
+        String token = tokenUtils.getToken(request);
+        System.out.println("Token: " + token);
+        if (token == null || token.isEmpty()) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity("Token is missing").build();
+        }
+
+        // Verifikujte token
+        Claims claims;
+        try {
+            claims = tokenUtils.parseToken(token);
+            if (claims == null) {
+                return Response.status(Response.Status.UNAUTHORIZED).entity("Invalid token").build();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Response.status(Response.Status.UNAUTHORIZED).entity("Token parsing error").build();
+        }
+
+        // Proverite ulogu korisnika
+        String role = claims.get("role", String.class);
+        if (role == null || !"Manager".equals(role)) {
+            return Response.status(Response.Status.FORBIDDEN).entity("You do not have permission to perform this action").build();
+        }
+        String username = claims.getSubject();
+        FactoryDAO dao = (FactoryDAO) ctx.getAttribute("factoryDAO");
+        if (!dao.isManagerOfFactory(username, factoryId)) {
+            return Response.status(Response.Status.FORBIDDEN).entity("You are not the manager of this factory").build();
+        }
+       
+        Worker addedWorker = dao.addWorkerToFactory(factoryId, worker);
+        if (addedWorker != null) {
+            return Response.ok(addedWorker).build();
+        } else {
+            return Response.status(Response.Status.BAD_REQUEST).entity("Factory not found").build();
+        }
     }
 }
