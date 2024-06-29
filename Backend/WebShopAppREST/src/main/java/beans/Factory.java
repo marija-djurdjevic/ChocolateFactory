@@ -1,6 +1,12 @@
 package beans;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Base64;
 
 public class Factory {
 	private int id;
@@ -9,15 +15,9 @@ public class Factory {
 	private String worktime; //radno vrijeme
 	private boolean status; //radi ili ne radi
 	public int locationId;
-	private String image;
+	private String imagePath;
+	private String imageString;
 	private double grade;
-	
-	@Override
-	public String toString() {
-		return "Factory [id=" + id + ", name=" + name + ", availableChocolates=" + availableChocolates + ", worktime="
-				+ worktime + ", status=" + status + ", locationId=" + locationId + ", image=" + image + ", grade="
-				+ grade + "]";
-	}
 	
 	public Factory() {
 		super();
@@ -25,7 +25,7 @@ public class Factory {
 	}
 	
 	public Factory(int id, String name, ArrayList<Chocolate> availableChocolates, String worktime, boolean status,
-			int location, String image, double grade) {
+			int location, String imagePath, String imageString, double grade) {
 		super();
 		this.id = id;
 		this.name = name;
@@ -33,7 +33,8 @@ public class Factory {
 		this.worktime = worktime;
 		this.status = status;
 		this.locationId = location;
-		this.image = image;
+		this.imagePath = imagePath;
+		this.imageString = imageString;
 		this.grade = grade;
 	}
 
@@ -76,12 +77,30 @@ public class Factory {
 	public void setLocation(int location) {
 		this.locationId = location;
 	}
-	public String getImage() {
-		return image;
+	public String getImagePath() {
+		return imagePath;
 	}
-	public void setImage(String image) {
-		this.image = image;
+	public void setImagePath(String imagePath) {
+		this.imagePath = imagePath;
 	}
+	
+	
+	public int getLocationId() {
+		return locationId;
+	}
+
+	public void setLocationId(int locationId) {
+		this.locationId = locationId;
+	}
+
+	public String getImageString() {
+		return imageString;
+	}
+
+	public void setImageString(String imageString) {
+		this.imageString = imageString;
+	}
+
 	public double getGrade() {
 		return grade;
 	}
@@ -94,7 +113,29 @@ public class Factory {
 		
 	}
 	
-	
-	
+	public void loadImageString() {
+		File file = new File(this.imagePath);
+		FileInputStream fis;
+		try {
+			fis = new FileInputStream(file);
+		
+			ByteArrayOutputStream bos = new ByteArrayOutputStream();
+			byte[] buffer = new byte[1024];
+			int bytesRead;
+			while((bytesRead = fis.read(buffer)) != -1) {
+				bos.write(buffer, 0, bytesRead);
+			}
+			
+			byte[] imageBytes = bos.toByteArray();
+			String base64String = Base64.getEncoder().encodeToString(imageBytes);
+			fis.close();
+			bos.close();
+			this.imageString = base64String;
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}	
+	}
 	
 }

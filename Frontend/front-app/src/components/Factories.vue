@@ -40,8 +40,8 @@
       <div v-for="(factory, index) in filteredFactories" :key="factory.id" class="factory-card" :style="{ backgroundColor: index % 2 === 0 ? '#FFE4B5' : '#FFC9AD' }">
         <div class="factory-info">
           <div class="factory-logo">
-            <img :src="factory.image" alt="Factory Logo" />
-          </div>
+              <img :src="'data:image/jpeg;base64,' + factory.imageString" alt="Factory Image" />
+            </div>
           <div class="factory-details">
             <h2>{{ factory.name }}</h2>
             <div class="location-info" v-if="factory.locationInfo">

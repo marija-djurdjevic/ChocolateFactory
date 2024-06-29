@@ -7,19 +7,11 @@
           <input type="text" id="name" v-model="factory.name" required />
         </div>
         <label>Location:</label>
-        <div class="location-fields">
-          <div class="field-group">
-            <label for="longitude">Longitude:</label>
-            <input type="text" id="longitude" v-model="location.longitude" required />
-          </div>
-          <div class="field-group">
-            <label for="latitude">Latitude:</label>
-            <input type="text" id="latitude" v-model="location.latitude" required />
-          </div>
-          <div class="field-group">
-            <label for="address">Address:</label>
-            <input type="text" id="address" v-model="location.address" required />
-          </div>
+        <MapComponent @location-selected="updateLocation" />
+        <div class="form-group">
+          <label>Selected Location:</label>
+          <div class="locationparams">{{ selectedLocation.address }}</div>
+          <div class="locationparams">{{ selectedLocation.longitude }}, {{ selectedLocation.latitude }}</div>
         </div>
         <div class="form-group">
           <label>Work time:</label>
@@ -39,42 +31,42 @@
           <input type="file" @change="onFileSelected" />
         </div>
         <div class="form-group">
-          <label for="manager">Manager:</label>
-          <select id="manager" v-model="selectedManager" required>
-            <option v-for="manager in managers" :key="manager.id" :value="manager.id">
-              {{ manager.name }} {{ manager.surname }}
-            </option>
-          </select>
+            <label for="manager">Manager:</label>
+        <select id="manager" v-model="selectedManager" required>
+          <option v-for="manager in managers" :key="manager.id" :value="manager">
+            {{ manager.name }} {{ manager.surname }}
+          </option>
+        </select>
         </div>
-        <button type="submit">Add Factory</button>
+        <button type="submit" class="button">Add Factory</button>
       </form>
     </div>
   </template>
   
   <script setup>
-  import { ref } from 'vue';
+  import { ref, onMounted } from 'vue';
   import { useRouter } from 'vue-router';
   import axios from 'axios';
-  import { onMounted } from 'vue';
+  import MapComponent from './MapComponent.vue';
   
   const router = useRouter();
   
   const factory = ref({
     name: '',
     status: false,
-    locationId: -1,
-    workTime: '',
+    location: -1,
+    worktime: '',
     image: '',
-    grade: 0,
-    managerId: -1
+    grade: 0
   });
   
-  const location = ref({
+  const selectedLocation = ref({
     longitude: '',
     latitude: '',
     address: ''
   });
-  
+
+
   const workTimeFrom = ref('');
   const workTimeTo = ref('');
   const managers = ref([]);
@@ -82,118 +74,162 @@
   const selectedManager = ref(null);
   
   onMounted(() => {
-    fetchManagers();
-  });
-  
-  function fetchManagers() {
-    axios.get('http://localhost:8080/WebShopAppREST/rest/managers/')
-      .then(response => {
-        managers.value = response.data;
-      })
-      .catch(error => {
-        console.error('Error fetching managers:', error);
-      });
-  }
-  
-  function onFileSelected(event) {
-    selectedFile.value = event.target.files[0];
-  }
-  
-  function submitForm() {
-    if (selectedFile.value) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        saveFactory();
-      }
-      reader.readAsDataURL(selectedFile.value);
-    } else {
-      saveFactory();
-    }
-  }
-  
-  function saveFactory() {
-    const token = localStorage.getItem('token'); // Pretpostavljamo da token čuvate u localStorage
-    axios.post('http://localhost:8080/WebShopAppREST/rest/factories/save', factory.value, {
-        headers: {
-        'Authorization': `Bearer ${token}`
-        }
-    })
+  fetchManagers();
+});
+
+function fetchManagers() {
+  axios.get('http://localhost:8080/WebShopAppREST/rest/managers/available')
     .then(response => {
-        alert('Factory added successfully!');
-        router.push('/');
+      managers.value = response.data;
     })
     .catch(error => {
-        console.error('Error adding factory:', error);
+      console.error('Error fetching managers:', error);
     });
-   }
-  
+}
+
+function updateLocation(location) {
+  selectedLocation.value = location;
+  console.log(selectedLocation.address);
+}
+
+function onFileSelected(event) {
+  selectedFile.value = event.target.files[0];
+}
+
+function submitForm() {
+  if (selectedFile.value) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      factory.value.imageString = e.target.result.split(",")[1];
+      factory.value.worktime = workTimeFrom.value + "-" + workTimeTo.value;
+      console.log("Factory data being sent: ", factory.value);
+      saveLocation();
+    };
+    reader.readAsDataURL(selectedFile.value);
+  } else {
+    factory.value.worktime = workTimeFrom.value + "-" + workTimeTo.value;
+    console.log("Factory data being sent: ", factory.value);
+    saveLocation();
+  }
+}
+
+function saveLocation() {
+  console.log("Location data being sent: ", selectedLocation.value);
+  axios.post('http://localhost:8080/WebShopAppREST/rest/locations/save', selectedLocation.value)
+    .then(response => {
+      console.log(response.data.id);
+      factory.value.location = response.data.id;
+      saveFactory();
+    })
+    .catch(error => {
+      console.error('Error saving location:', error);
+    });
+}
+
+function saveFactory() {
+  const token = localStorage.getItem('token');
+  console.log("Factory data with location being sent: ", factory.value);
+  axios.post('http://localhost:8080/WebShopAppREST/rest/factories/save', factory.value, {
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
+  })
+  .then(response => {
+    if (response.status === 200) {
+      alert('Factory added successfully!');
+      updateManager(response.data.id);  // Use the new factory ID
+      router.push('/');
+    } else {
+      console.error('Error adding factory:', response.data);
+    }
+  })
+  .catch(error => {
+    console.error('Error adding factory:', error);
+  });
+}
+
+function updateManager(factoryId) {
+  const managerToUpdate = selectedManager.value;
+  if (managerToUpdate) {
+    managerToUpdate.factoryId = factoryId;
+    console.log("Updating manager with ID: ", managerToUpdate.id, " to factory ID: ", factoryId);
+    axios.post(`http://localhost:8080/WebShopAppREST/rest/managers/edit`, managerToUpdate)
+      .then(response => {
+        console.log('Manager updated successfully');
+      })
+      .catch(error => {
+        console.error('Error updating manager:', error);
+      });
+  }
+}
 </script>
-  
-  <style>
-  .add-factory {
-    max-width: 600px;
-    margin: 50px auto;
-    padding: 20px;
-    background-color: #ffe4b5;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  }
-  
-  .add-factory h1 {
-    text-align: center;
-    margin-bottom: 20px;
-  }
-  
-  .form-group {
-    margin-bottom: 15px;
-  }
-  
-  .form-group label {
-    display: block;
-    margin-bottom: 5px;
-  }
-  
-  .form-group input, .form-group select, .form-group textarea {
-    width: 100%;
-    padding: 8px;
-    box-sizing: border-box;
-  }
-  
-  .location-fields {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 15px;
-  }
-  
-  .field-group {
-    flex: 1;
-    margin-right: 10px;
-  }
-  
-  .field-group:last-child {
-    margin-right: 0;
-  }
-  
-  .work-time-fields {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 15px;
-  }
-  
-  button {
-    display: block;
-    width: 100%;
-    padding: 10px;
-    background-color: #dd6755;
-    color: #fff;
-    border: none;
-    border-radius: 5px;
-    font-size: 16px;
-    cursor: pointer;
-  }
-  
-  button:hover {
-    background-color: #bf5640;
-  }
-  </style>
-  
+
+<style scoped>
+.add-factory {
+  max-width: 700px; 
+  margin: 20px auto;
+  padding: 20px;
+  background-color: #ffe4b5;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.add-factory h1 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 10px; 
+  box-sizing: border-box;
+}
+
+.locationparams {
+  width: 100%;
+  font-size: medium; 
+  margin-bottom: 10px; 
+}
+
+.work-time-fields {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15px;
+}
+
+.field-group {
+  flex: 1;
+  margin-right: 10px; 
+}
+
+.field-group:last-child {
+  margin-right: 0; 
+}
+
+.button {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  background-color: #dd6755;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.button:hover {
+  background-color: #bf5640;
+}
+</style>

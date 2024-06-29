@@ -3,10 +3,13 @@ package dao;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.StringTokenizer;
 
 import beans.Chocolate;
@@ -46,6 +49,9 @@ public class FactoryDAO {
 	public ArrayList<Factory> findAll() {
 		loadFactories(contextPath);
 		loadChocolatesForFactories();
+		for(Factory f: factories) {
+			f.loadImageString();
+		}
 		return factories;
 	}
 
@@ -68,25 +74,24 @@ public class FactoryDAO {
 		return chocolate;
 	}
 	
-	public Factory updateFactory(int id, Factory factory) {
-		loadFactories(contextPath);
-		loadChocolatesForFactories();
-		Factory f = findFactory(id);
-		if (f == null) {
-			return save(factory);
-		} else {
-			f.setName(factory.getName());
-			f.setWorktime(factory.getWorktime());
-			f.setStatus(factory.isStatus());
-			f.setLocation(factory.getLocation());
-			f.setImage(factory.getImage());
-			f.setGrade(factory.getGrade());
-			return f;
-		}
-	}
+	//public Factory updateFactory(int id, Factory factory) {
+		//loadFactories(contextPath);
+		//loadChocolatesForFactories();
+		//Factory f = findFactory(id);
+		//if (f == null) {
+			//return save(factory);
+		//} else {
+			//f.setName(factory.getName());
+			//f.setWorktime(factory.getWorktime());
+			//f.setStatus(factory.isStatus());
+			//f.setLocation(factory.getLocation());
+			//f.setImage(factory.getImage());
+			//f.setGrade(factory.getGrade());
+			//return f;
+		//}
+	//}
 	
 	public Factory save(Factory factory) {
-		
 		loadFactories(contextPath);
         int maxId = -1;
         for (Factory f : factories) {
@@ -97,21 +102,39 @@ public class FactoryDAO {
         maxId++;
         factory.setId(maxId);
         
-        int maks = -1;
-        for(Location l : locationDAO.findAll()) {
-        	if (l.getId() > maxId) {
-                maxId = l.getId();
-            }
-        }
-        maxId++;
-        
-        factory.setLocation(maxId);
-     
         String path = this.contextPath + "images\\factory" + maxId + ".jpg"; 
-
-        return null; // Return the saved Chocolate object
+        saveImage(path, factory.getImageString());
+        factory.setImagePath(path);
+        try {
+            String filePath = contextPath + "factories.txt"; // Use the provided path
+            FileWriter writer = new FileWriter(filePath, true); // Open in append mode
+            BufferedWriter bufferedWriter = new BufferedWriter(writer);
+            bufferedWriter.write(factory.getId() + ";" +
+                    factory.getName() + ";" +
+            		factory.getWorktime() + ";" +
+                    factory.isStatus() + ";" +
+                    factory.getLocation() + ";" +
+                    factory.getImagePath() + ";" +
+                    factory.getGrade() + "\n");
+            bufferedWriter.flush(); // Ensure all data is written to the file
+            bufferedWriter.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } 
+        
+        return factory; // Return the saved Chocolate object
 	}
 	
+	private void saveImage(String path, String imageString) {
+		byte[] imageBytes = Base64.getDecoder().decode(imageString);
+		try (FileOutputStream fos = new FileOutputStream(path)){
+			fos.write(imageBytes);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 	public Factory deleteFactoryById(int id) {
 		loadFactories(contextPath);
 		loadChocolatesForFactories();
@@ -199,9 +222,9 @@ public class FactoryDAO {
 				String worktime = st.nextToken().trim();
 				boolean status = Boolean.parseBoolean(st.nextToken().trim());
 				int locationId = Integer.parseInt(st.nextToken().trim());
-				String image = st.nextToken().trim();
+				String imagePath = st.nextToken().trim();
 				double grade = Double.parseDouble(st.nextToken().trim());
-				factories.add(new Factory(id, name, new ArrayList<>(), worktime, status, locationId, image, grade));
+				factories.add(new Factory(id, name, new ArrayList<>(), worktime, status, locationId, imagePath, "", grade));
 				
 			}
 		} catch (Exception e) {
