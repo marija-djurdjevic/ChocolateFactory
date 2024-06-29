@@ -77,6 +77,7 @@ public class ChocolateService {
         ChocolateDAO dao = (ChocolateDAO) ctx.getAttribute("chocolateDAO");
         return dao.updateChocolate(chocolate);
     }
+    
     @DELETE
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
