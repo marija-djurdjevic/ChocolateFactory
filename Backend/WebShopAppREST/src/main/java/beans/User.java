@@ -14,6 +14,7 @@ public class User {
 	private String gender;
 	private LocalDate birthDate;
 	private Role role;
+	private String token; // New field to store user token
 	
 	public User() {
 		super();
@@ -80,6 +81,15 @@ public class User {
 	public void setBirthDate(LocalDate birthDate) {
 		this.birthDate = birthDate;
 	}
+	
+	public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+    
 	@Override
 	public String toString() {
 		return "User [id=" + id + ", username=" + username + ", password=" + password + ", name=" + name + ", surname="
@@ -93,19 +103,21 @@ public class User {
 	public int hashCode() {
 		return Objects.hash(birthDate, gender, id, name, password, surname, username);
 	}
+	
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		User other = (User) obj;
-		return Objects.equals(birthDate, other.birthDate) && Objects.equals(gender, other.gender) && id == other.id
-				&& Objects.equals(name, other.name) && Objects.equals(password, other.password)
-				&& Objects.equals(surname, other.surname) && Objects.equals(username, other.username);
-	}
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        User other = (User) obj;
+        return Objects.equals(birthDate, other.birthDate) && Objects.equals(gender, other.gender) && id == other.id
+                && Objects.equals(name, other.name) && Objects.equals(password, other.password)
+                && Objects.equals(surname, other.surname) && Objects.equals(username, other.username)
+                && role == other.role && Objects.equals(token, other.token);
+    }
 	
 	
 }

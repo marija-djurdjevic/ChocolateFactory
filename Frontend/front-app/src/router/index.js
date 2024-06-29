@@ -5,6 +5,7 @@ import FactoryChocolatesView from '@/views/FactoryChocolatesView.vue';
 import EditChocolateView from '@/views/EditChocolateView.vue';
 import Login from '@/views/LoginView.vue';
 import Registration from '@/views/RegistrationView.vue';
+import AddFactoryView from '@/views/AddFactoryView.vue';
 const routes = [
   {
     path: '/',
@@ -35,6 +36,11 @@ const routes = [
     path: '/editChocolate',
     name: 'editChocolate',
     component: EditChocolateView
+  },
+  {
+    path: '/addFactory',
+    name: 'addFactory',
+    component: AddFactoryView
   }
 ]
 

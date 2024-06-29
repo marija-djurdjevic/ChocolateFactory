@@ -1,48 +1,34 @@
 package services;
 
 import java.io.IOException;
+import javax.servlet.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.container.ContainerRequestFilter;
-import javax.ws.rs.container.ContainerResponseContext;
-import javax.ws.rs.container.ContainerResponseFilter;
-import javax.ws.rs.container.PreMatching;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.ext.Provider;
-
-@Provider
-@PreMatching
-public class CorsFilter implements ContainerRequestFilter, ContainerResponseFilter {
+public class CorsFilter implements Filter {
 
     @Override
-    public void filter(ContainerRequestContext request) throws IOException {
-        if (isPreflightRequest(request)) {
-            request.abortWith(Response.ok().build());
-            return;
-        }
-    }
+    public void init(FilterConfig filterConfig) throws ServletException {}
 
-    private static boolean isPreflightRequest(ContainerRequestContext request) {
-        return request.getHeaderString("Origin") != null
-                && request.getMethod().equalsIgnoreCase("OPTIONS");
-    }
-    
     @Override
-    public void filter(ContainerRequestContext request, ContainerResponseContext response)
-            throws IOException {
+    public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
+        HttpServletResponse response = (HttpServletResponse) res;
+        HttpServletRequest request = (HttpServletRequest) req;
 
-        String origin = request.getHeaderString("Origin");
-        if (origin == null) {
+        String origin = request.getHeader("Origin");
+        response.setHeader("Access-Control-Allow-Origin", origin);
+        response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+        response.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Token");
+        response.setHeader("Access-Control-Allow-Credentials", "true");
+        
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            response.setStatus(HttpServletResponse.SC_OK);
             return;
         }
 
-        response.getHeaders().add("Access-Control-Allow-Origin", origin);
-        response.getHeaders().add("Access-Control-Allow-Credentials", "true");
-        response.getHeaders().add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, HEAD");
-        response.getHeaders().add("Access-Control-Allow-Headers", "X-Requested-With, Authorization, Accept-Version, Content-MD5, CSRF-Token, Content-Type");
-
-        if (isPreflightRequest(request)) {
-            response.getHeaders().add("Access-Control-Max-Age", "1728000");
-        }
+        chain.doFilter(req, res);
     }
+
+    @Override
+    public void destroy() {}
 }

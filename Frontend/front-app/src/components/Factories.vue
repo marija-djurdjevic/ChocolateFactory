@@ -2,7 +2,9 @@
   <div class="factory-display">
     <header class="status-bar">
       <h1>Factory Display</h1>
-      <button class="login-button" @click="goToLogin">Login</button>
+      <button v-if="!isLoggedIn" class="login-button" @click="goToLogin">Login</button>
+      <button v-if="isLoggedIn && isAdmin" class="admin-button" @click="goToAddFactory">Add Factory</button>
+      <button v-if="isLoggedIn && isAdmin" class="login-button" @click="logout">Logout</button>
     </header>
     <div class="search-bar">
       <input v-model="searchFactoryName" placeholder="Factory Name">
@@ -49,8 +51,8 @@
             <p><strong>Status:</strong> {{ factory.status ? 'Open' : 'Closed' }}</p>
             <p><strong>Average Grade:</strong> {{ factory.grade }}</p>
             <div class="button-group">
-              <input v-on:click="addChocolate(factory.id)" type="submit" value="Add chocolate">
-              <input v-on:click="showChocolates(factory.id)" type="button" value="Show Chocolates">
+              <button @click="addChocolate(factory.id)">Add Chocolate</button>
+              <button @click="showChocolates(factory.id)">Show Chocolates</button>
             </div>
           </div>
         </div>
@@ -77,9 +79,26 @@ const sortCriteria = ref('name'); // Default sort criteria
 const sortOrder = ref('asc'); // Default sort order
 const showOpenFactories = ref('');
 
+const isLoggedIn = ref(false);
+const isAdmin = ref(false);
+const role = localStorage.getItem("role");
+
 onMounted(() => {
+  console.log(localStorage.getItem("token"));
+  console.log(localStorage.getItem("role"));
+  isLoggedIn.value = checkLoggedIn();
+  isAdmin.value = checkAdmin();
   loadFactories();
 });
+
+function checkLoggedIn() {
+  const token = localStorage.getItem('token');
+  return !!token;
+}
+
+async function checkAdmin() {
+  return role === 'Administrator';
+}
 
 async function loadChocolatesForFactory(factory) {
   try {
@@ -247,6 +266,19 @@ function goToLogin() {
   router.push('/login');
 }
 
+function logout() {
+  localStorage.removeItem('token'); // Uklanjanje tokena iz localStorage
+  localStorage.removeItem('username'); // Uklanjanje tokena iz localStorage
+  localStorage.removeItem('role'); // Uklanjanje tokena iz localStorage
+  isLoggedIn.value = false; // Postavljanje stanja prijavljenosti na false
+  isAdmin.value = false; // Resetovanje admin statusa
+  router.push('/'); // Navigacija na početnu stranicu (fabrike)
+}
+
+function goToAddFactory() {
+  router.push('/addFactory');
+}
+
 const filteredFactories = computed(() => {
   return factories.value;
 });
@@ -324,6 +356,25 @@ body {
 }
 
 .login-button:hover {
+  background-color: #ff4500; /* OrangeRed */
+}
+
+/* Novo dodati CSS za admin button */
+.admin-button {
+  background-color: #ff6347; /* Tomato */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  font-size: 1rem;
+  width: 120px; /* Malo šire od login dugmeta */
+  height: 40px; /* Ista visina kao login dugme */
+  margin-right: 10px; /* Dodaj razmak između dugmadi */
+}
+
+.admin-button:hover {
   background-color: #ff4500; /* OrangeRed */
 }
 
