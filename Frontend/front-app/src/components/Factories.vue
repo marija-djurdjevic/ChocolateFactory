@@ -13,8 +13,31 @@
       <input v-model="searchAverageGrade" placeholder="Average Grade" type="number" min="1" max="5">
       <button @click="searchFactories">Search</button>
     </div>
+    <div class="filter-bar">
+      <input v-model="filterChocolateType" placeholder="Chocolate Type">
+      <input v-model="filterChocolateCategory" placeholder="Chocolate Category">
+      <select v-model="showOpenFactories" id="showOpenFactories">
+      <option value="">All Factories</option>
+      <option value="true">Open Factories</option>
+      <option value="false">Closed Factories</option>
+      </select>
+      <button @click="applyFilters">Filter</button>
+      <div class="sort-controls">
+        <label for="sortCriteria">Sort by:</label>
+        <select v-model="sortCriteria" id="sortCriteria">
+          <option value="name">Factory Name</option>
+          <option value="location">Location</option>
+          <option value="grade">Average Grade</option>
+        </select>
+        <select v-model="sortOrder" id="sortOrder">
+          <option value="asc">Ascending</option>
+          <option value="desc">Descending</option>
+        </select>
+        <button @click="applySort">Sort</button>
+      </div>
+    </div>
     <div class="factory-cards">
-      <div v-for="(factory, index) in filteredFactories" :key="factory.id" class="factory-card" :style="{ backgroundColor: index % 2 === 0 ? '#ffe4b5' : '#FFC9AD' }">
+      <div v-for="(factory, index) in filteredFactories" :key="factory.id" class="factory-card" :style="{ backgroundColor: index % 2 === 0 ? '#FFE4B5' : '#FFC9AD' }">
         <div class="factory-info">
           <div class="factory-logo">
             <img :src="factory.image" alt="Factory Logo" />
@@ -45,11 +68,24 @@ import { useRouter } from 'vue-router';
 
 const factories = ref([]);
 const router = useRouter();
+const searchFactoryName = ref('');
+const searchLocation = ref('');
+const searchAverageGrade = ref(null);
+const searchChocolateName = ref('');
+const filterChocolateType = ref('');
+const filterChocolateCategory = ref('');
+const showOnlyOption = ref('all'); // Default value for combo box
+const sortCriteria = ref('name'); // Default sort criteria
+const sortOrder = ref('asc'); // Default sort order
+const showOpenFactories = ref('');
 
 const isLoggedIn = ref(false);
 const isAdmin = ref(false);
+const role = localStorage.getItem("role");
 
 onMounted(() => {
+  console.log(localStorage.getItem("token"));
+  console.log(localStorage.getItem("role"));
   isLoggedIn.value = checkLoggedIn();
   isAdmin.value = checkAdmin();
   loadFactories();
@@ -61,37 +97,169 @@ function checkLoggedIn() {
 }
 
 async function checkAdmin() {
+  return role === 'Administrator';
+}
+
+async function loadChocolatesForFactory(factory) {
   try {
-    const response = await axios.get('http://localhost:8080/WebShopAppREST/rest/users/admin');
-    return response.data === true;
+    const response = await axios.get(`http://localhost:8080/WebShopAppREST/rest/chocolates/${factory.id}`);
+    factory.chocolates = response.data;
   } catch (error) {
-    console.error('Error checking admin status:', error);
-    return false;
+    console.error('Error loading chocolates for factory:', error);
   }
 }
 
 function loadFactories() {
   axios.get('http://localhost:8080/WebShopAppREST/rest/factories/')
-    .then(response => {
+    .then(async response => {
       factories.value = response.data;
-      factories.value.forEach(async factory => {
+      for (const factory of factories.value) {
         try {
           const locationResponse = await axios.get(`http://localhost:8080/WebShopAppREST/rest/locations/findLocation?id=${factory.locationId}`);
           const location = locationResponse.data;
-          let factoryLocation = {
+          factory.locationInfo = {
             longitude: location.longitude,
             latitude: location.latitude,
             address: location.address
           };
-          factory.locationInfo = factoryLocation;
+          await loadChocolatesForFactory(factory);
         } catch (error) {
           console.error('Error loading location:', error);
         }
-      });
+      }
     })
     .catch(error => {
       console.error('Error loading factories:', error);
     });
+}
+
+function searchFactories() {
+  axios.get('http://localhost:8080/WebShopAppREST/rest/factories/')
+    .then(async response => {
+      factories.value = response.data;
+      for (const factory of factories.value) {
+        try {
+          const locationResponse = await axios.get(`http://localhost:8080/WebShopAppREST/rest/locations/findLocation?id=${factory.locationId}`);
+          const location = locationResponse.data;
+          factory.locationInfo = {
+            longitude: location.longitude,
+            latitude: location.latitude,
+            address: location.address
+          };
+          await loadChocolatesForFactory(factory);
+        } catch (error) {
+          console.error('Error loading location:', error);
+        }
+      }
+      applyFilters();
+    })
+    .catch(error => {
+      console.error('Error loading factories:', error);
+    });
+}
+
+function applyFilters() {
+  let filtered = factories.value;
+
+  if (searchFactoryName.value) {
+    filtered = filtered.filter(factory => factory.name && factory.name.toLowerCase().includes(searchFactoryName.value.toLowerCase()));
+  }
+
+  if (searchLocation.value) {
+    filtered = filtered.filter(factory => factory.locationInfo && factory.locationInfo.address && factory.locationInfo.address.toLowerCase().includes(searchLocation.value.toLowerCase()));
+  }
+
+  if (searchAverageGrade.value !== null) {
+    filtered = filtered.filter(factory => factory.grade == searchAverageGrade.value);
+  }
+
+  if (searchChocolateName.value) {
+    filtered = filtered.filter(factory => {
+      if (factory.chocolates && factory.chocolates.length > 0) {
+        return factory.chocolates.some(chocolate => chocolate.name && chocolate.name.toLowerCase().includes(searchChocolateName.value.toLowerCase()));
+      }
+      return false;
+    });
+  }
+
+  if (filterChocolateType.value) {
+    filtered = filtered.filter(factory => {
+      if (factory.chocolates && factory.chocolates.length > 0) {
+        return factory.chocolates.some(chocolate => chocolate.chocolateType && chocolate.chocolateType.toLowerCase().includes(filterChocolateType.value.toLowerCase()));
+      }
+      return false;
+    });
+  }
+
+  if (filterChocolateCategory.value) {
+    filtered = filtered.filter(factory => {
+      if (factory.chocolates && factory.chocolates.length > 0) {
+        return factory.chocolates.some(chocolate => chocolate.chocolateSort && chocolate.chocolateSort.toLowerCase().includes(filterChocolateCategory.value.toLowerCase()));
+      }
+      return false;
+    });
+  }
+
+  if (showOpenFactories.value === 'true') {
+    filtered = filtered.filter(factory => factory.status);
+  } else if (showOpenFactories.value === 'false') {
+    filtered = filtered.filter(factory => !factory.status);
+  }
+
+  factories.value = filtered;
+
+  
+}
+
+
+function applySort() {
+  let sorted = factories.value;
+
+  switch (sortCriteria.value) {
+    case 'name':
+      sorted.sort((a, b) => {
+        const nameA = a.name.toUpperCase();
+        const nameB = b.name.toUpperCase();
+        if (sortOrder.value === 'asc') {
+          return nameA < nameB ? -1 : nameA > nameB ? 1 : 0;
+        } else {
+          return nameA > nameB ? -1 : nameA < nameB ? 1 : 0;
+        }
+      });
+      break;
+    case 'location':
+      sorted.sort((a, b) => {
+        const locationA = a.locationInfo ? a.locationInfo.address.toUpperCase() : '';
+        const locationB = b.locationInfo ? b.locationInfo.address.toUpperCase() : '';
+        if (sortOrder.value === 'asc') {
+          return locationA < locationB ? -1 : locationA > locationB ? 1 : 0;
+        } else {
+          return locationA > locationB ? -1 : locationA < locationB ? 1 : 0;
+        }
+      });
+      break;
+    case 'grade':
+      sorted.sort((a, b) => {
+        if (sortOrder.value === 'asc') {
+          return a.grade - b.grade;
+        } else {
+          return b.grade - a.grade;
+        }
+      });
+      break;
+    default:
+      break;
+  }
+
+  factories.value = sorted;
+}
+
+function addChocolate(factoryId) {
+  router.push({ path: '/addChocolate', query: { factoryId } });
+}
+
+function showChocolates(factoryId) {
+  router.push({ path: `/factory/${factoryId}/chocolates` });
 }
 
 function goToLogin() {
@@ -99,10 +267,12 @@ function goToLogin() {
 }
 
 function logout() {
-  localStorage.removeItem('token');
-  isLoggedIn.value = false;
-  isAdmin.value = false;
-  router.push('/login');
+  localStorage.removeItem('token'); // Uklanjanje tokena iz localStorage
+  localStorage.removeItem('username'); // Uklanjanje tokena iz localStorage
+  localStorage.removeItem('role'); // Uklanjanje tokena iz localStorage
+  isLoggedIn.value = false; // Postavljanje stanja prijavljenosti na false
+  isAdmin.value = false; // Resetovanje admin statusa
+  router.push('/'); // Navigacija na početnu stranicu (fabrike)
 }
 
 function goToAddFactory() {
@@ -110,9 +280,7 @@ function goToAddFactory() {
 }
 
 const filteredFactories = computed(() => {
-  const openFactories = factories.value.filter(factory => factory.status);
-  const closedFactories = factories.value.filter(factory => !factory.status);
-  return [...openFactories, ...closedFactories];
+  return factories.value;
 });
 </script>
 
@@ -188,6 +356,89 @@ body {
 }
 
 .login-button:hover {
+  background-color: #ff4500; /* OrangeRed */
+}
+
+/* Novo dodati CSS za admin button */
+.admin-button {
+  background-color: #ff6347; /* Tomato */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  font-size: 1rem;
+  width: 120px; /* Malo šire od login dugmeta */
+  height: 40px; /* Ista visina kao login dugme */
+  margin-right: 10px; /* Dodaj razmak između dugmadi */
+}
+
+.admin-button:hover {
+  background-color: #ff4500; /* OrangeRed */
+}
+
+.filter-bar {
+  display: flex;
+  justify-content: center; /* Center the filter bar */
+  gap: 10px; /* Add some space between elements */
+  margin-bottom: 20px;
+}
+
+.filter-bar input {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  width: 150px; /* Reduce width */
+  height:20px;
+}
+
+.filter-bar label {
+  margin: 0 10px;
+}
+
+.filter-bar button {
+  padding: 10px;
+  background-color: #ff6347; /* Tomato */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  height:40px;
+  width:80px;
+  transition: background-color 0.3s;
+}
+
+.filter-bar button:hover {
+  background-color: #ff4500; /* OrangeRed */
+}
+
+.sort-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sort-controls label {
+  margin-right: 10px;
+}
+
+.sort-controls select {
+  padding: 8px;
+  border-radius: 5px;
+}
+
+.sort-controls button {
+  padding: 10px;
+  background-color: #ff6347; /* Tomato */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.sort-controls button:hover {
   background-color: #ff4500; /* OrangeRed */
 }
 

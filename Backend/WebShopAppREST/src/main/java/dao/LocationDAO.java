@@ -1,20 +1,26 @@
 package dao;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 
+import beans.Chocolate;
 import beans.Factory;
 import beans.Location;
 
 public class LocationDAO {
-private ArrayList<Location> locations = new ArrayList<>();
+	private ArrayList<Location> locations = new ArrayList<>();
+	private String contextPath;
 	
 	public LocationDAO(String contextPath) {
 		loadLocations(contextPath);
-		}
+		this.contextPath = contextPath;
+	}
 
 	public ArrayList<Location> findAll() {
 		return locations;
@@ -42,16 +48,31 @@ private ArrayList<Location> locations = new ArrayList<>();
 	}
 	
 	public Location save(Location location) {
-		int maxId = -1;
-		for (Location l : locations) {
-			if (l.getId() > maxId) {
-				maxId = l.getId();
-			}
-		}
-		maxId++;
-		location.setId(maxId);
-		locations.add(location);
-		return location;
+		loadLocations(contextPath);
+        int maxId = -1;
+        for (Location l : locations) {
+            if (l.getId() > maxId) {
+                maxId = l.getId();
+            }
+        }
+        maxId++;
+        location.setId(maxId);
+        
+        try {
+            String filePath = contextPath + "locations.txt"; // Use the provided path
+            FileWriter writer = new FileWriter(filePath, true); // Open in append mode
+            BufferedWriter bufferedWriter = new BufferedWriter(writer);
+            bufferedWriter.write(location.getId() + ";" +
+                    location.getLatitude() + ";" +
+            		location.getLongitude() + ";" +
+                    location.getAddress() + "\n");
+            bufferedWriter.flush(); // Ensure all data is written to the file
+            bufferedWriter.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } 
+        
+        return location; // Return the saved Chocolate object
 	}
 	
 	public Location deleteLocationById(int id) {

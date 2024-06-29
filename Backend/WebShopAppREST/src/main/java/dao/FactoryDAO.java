@@ -1,8 +1,11 @@
 package dao;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 
@@ -14,12 +17,14 @@ public class FactoryDAO {
 	
 	private ArrayList<Factory> factories = new ArrayList<>();
 	private ChocolateDAO chocolateDAO;
+	private LocationDAO locationDAO;
 	private String contextPath;
 
 	
 	public FactoryDAO(String contextPath) {
 		this.contextPath = contextPath;
 		chocolateDAO = new ChocolateDAO(contextPath);
+		locationDAO = new LocationDAO(contextPath);
 		loadFactories(contextPath);
 		loadChocolatesForFactories();
 	}
@@ -73,17 +78,28 @@ public class FactoryDAO {
 	
 	public Factory save(Factory factory) {
 		loadFactories(contextPath);
-		loadChocolatesForFactories();
-		int maxId = -1;
-		for (Factory f : factories) {
-			if (f.getId() > maxId) {
-				maxId = f.getId();
-			}
-		}
-		maxId++;
-		factory.setId(maxId);
-		factories.add(factory);
-		return factory;
+        int maxId = -1;
+        for (Factory f : factories) {
+            if (f.getId() > maxId) {
+                maxId = f.getId();
+            }
+        }
+        maxId++;
+        factory.setId(maxId);
+        
+        int maks = -1;
+        for(Location l : locationDAO.findAll()) {
+        	if (l.getId() > maxId) {
+                maxId = l.getId();
+            }
+        }
+        maxId++;
+        
+        factory.setLocation(maxId);
+     
+        String path = this.contextPath + "images\\factory" + maxId + ".jpg"; 
+
+        return null; // Return the saved Chocolate object
 	}
 	
 	public Factory deleteFactoryById(int id) {

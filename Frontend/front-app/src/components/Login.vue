@@ -27,29 +27,37 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
-import Cookies from 'js-cookie';
 
 const username = ref('');
 const password = ref('');
 const router = useRouter();
 
 const axiosInstance = axios.create({
-    baseURL: 'http://localhost:8080/WebShopAppREST/rest',
-    withCredentials: true, // Omogućava slanje kolačića
+  baseURL: 'http://localhost:8080/WebShopAppREST/rest',
+  withCredentials: true, // Omogućava slanje kolačića
 });
 
 function login() {
-  axiosInstance.post(`/users/logging?username=${username.value}&password=${password.value}`)
-  .then(response => {
-    const token = response.data.token; // Pretpostavka: server vraća token kao dio response.data
-    localStorage.setItem('token', token); // Čuvanje tokena u localStorage
-    axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token}`; // Postavljanje globalnog zaglavlja za autorizaciju
-    router.push('/'); // Navigacija unazad
+  axiosInstance.post(`http://localhost:8080/WebShopAppREST/rest/users/logging?username=${username.value}&password=${password.value}`)
+    .then(response => {
+      const token = response.data.token; // Proverite ovde da li je response.data definisan
+      console.log(token);
+    if (token) {
+      localStorage.setItem('token', token);
+      localStorage.setItem('username', response.data.username);
+      localStorage.setItem('role', response.data.role);
+      axiosInstance.defaults.headers.common['Authorization'] = `${token}`;
+      router.push('/');
+    } else {
+      console.error('Token not found in response:', response);
+      alert('Token not found in response');
+      router.push('/');
+    }
   })
   .catch(error => {
     console.error('Login failed:', error);
     alert('Login failed, please check your credentials');
-  });
+    });
 }
 
 function goToRegister() {

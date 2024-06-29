@@ -1,11 +1,7 @@
 package services;
 
-import java.net.http.HttpHeaders;
 import java.util.ArrayList;
-import java.util.UUID;
 
-import javax.ws.rs.core.NewCookie;
-import javax.ws.rs.core.Response;
 import javax.annotation.PostConstruct;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -13,23 +9,24 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.OPTIONS;
 import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.NewCookie;
+import javax.ws.rs.core.Response;
 
 import beans.User;
 import beans.enums.Role;
 import dao.UserDAO;
+import dto.LoginResponseDTO;
+import utils.TokenUtils;
 
 @Path("/users")
 public class UserService {
-
-	private String generateToken() {
-        return UUID.randomUUID().toString();
-    }
+	
+	private TokenUtils tokenUtils = new TokenUtils();
 	
     @Context
     ServletContext ctx;
@@ -75,15 +72,12 @@ public class UserService {
         User authenticatedUser = dao.authenticateUser(username, password);
 
         if (authenticatedUser != null) {
-            String token = generateToken();
+        	String role = authenticatedUser.getRole().toString();
+            String token = tokenUtils.generateToken(username, role);
+            
+            LoginResponseDTO response = new LoginResponseDTO(username, role, token);
 
-            // Kreiranje kolačića sa tokenom
-            NewCookie cookie = new NewCookie("token", token, "/", null, null, 7 * 24 * 60 * 60, false);
-
-            // Dodavanje tokena u zaglavlje odgovora
-            return Response.ok(authenticatedUser)
-                    .cookie(cookie)
-                    .header("X-Token", token)
+            return Response.ok(response)
                     .build();
         } else {
             return Response.status(Response.Status.UNAUTHORIZED).entity("Invalid credentials").build();
@@ -104,7 +98,7 @@ public class UserService {
 
         UserDAO dao = (UserDAO) ctx.getAttribute("userDAO");
         User user = dao.findUserByToken(token);
-        System.out.println("Korisnik iz tokena: " + user);
+        System.out.println("Korisnik pronađen: " + user);
 
         if (user == null) {
             System.out.println("Korisnik nije pronađen");
