@@ -34,13 +34,14 @@ const router = useRouter();
 
 const axiosInstance = axios.create({
   baseURL: 'http://localhost:8080/WebShopAppREST/rest',
-  withCredentials: true, // Omogućava slanje kolačića
+  withCredentials: true, 
 });
+
 
 function login() {
   axiosInstance.post(`http://localhost:8080/WebShopAppREST/rest/users/logging?username=${username.value}&password=${password.value}`)
     .then(response => {
-      const token = response.data.token; // Proverite ovde da li je response.data definisan
+      const token = response.data.token; 
       console.log(token);
     if (token) {
       localStorage.setItem('token', token);

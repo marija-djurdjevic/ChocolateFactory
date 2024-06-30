@@ -76,14 +76,14 @@ const searchAverageGrade = ref(null);
 const searchChocolateName = ref('');
 const filterChocolateType = ref('');
 const filterChocolateCategory = ref('');
-const showOnlyOption = ref('all'); // Default value for combo box
-const sortCriteria = ref('name'); // Default sort criteria
-const sortOrder = ref('asc'); // Default sort order
+const showOnlyOption = ref('all'); 
+const sortCriteria = ref('name'); 
+const sortOrder = ref('asc'); 
 const showOpenFactories = ref('');
 
 const isLoggedIn = ref(false);
 const isAdmin = ref(false);
-const isManager = ref(false); // Add this line
+const isManager = ref(false);
 const role = localStorage.getItem("role");
 
 onMounted(() => {
@@ -91,7 +91,7 @@ onMounted(() => {
   console.log(localStorage.getItem("role"));
   isLoggedIn.value = checkLoggedIn();
   isAdmin.value = checkAdmin();
-  isManager.value = checkManager(); // Add this line
+  isManager.value = checkManager(); 
   console.log(isAdmin.value);
   loadFactories();
 });
@@ -110,7 +110,7 @@ function checkAdmin() {
   return role === 'Administrator';
 }
 
-function checkManager() { // Add this function
+function checkManager() { 
   return role === 'Manager';
 }
 
@@ -363,19 +363,18 @@ body {
   padding: 10px;
   cursor: pointer;
   transition: background-color 0.3s;
-  font-size: 1rem; /* Adjust font size to match other buttons */
-  width: 80px; /* Match width of other buttons */
-  height: 40px; /* Match height of other buttons */
-  margin-left: auto; /* Align to the right */
+  font-size: 1rem; 
+  width: 80px; 
+  height: 40px;
+  margin-left: auto; 
 }
 
 .login-button:hover {
-  background-color: #ff4500; /* OrangeRed */
+  background-color: #ff4500; 
 }
 
-/* Novo dodati CSS za admin button */
 .admin-button {
-  background-color: #ff6347; /* Tomato */
+  background-color: #ff6347; 
   color: white;
   border: none;
   border-radius: 5px;
@@ -383,19 +382,19 @@ body {
   cursor: pointer;
   transition: background-color 0.3s;
   font-size: 1rem;
-  width: 120px; /* Malo šire od login dugmeta */
-  height: 40px; /* Ista visina kao login dugme */
-  margin-right: 10px; /* Dodaj razmak između dugmadi */
+  width: 120px; 
+  height: 40px; 
+  margin-right: 10px; 
 }
 
 .admin-button:hover {
-  background-color: #ff4500; /* OrangeRed */
+  background-color: #ff4500; 
 }
 
 .filter-bar {
   display: flex;
-  justify-content: center; /* Center the filter bar */
-  gap: 10px; /* Add some space between elements */
+  justify-content: center; 
+  gap: 10px; 
   margin-bottom: 20px;
 }
 
@@ -403,7 +402,7 @@ body {
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 5px;
-  width: 150px; /* Reduce width */
+  width: 150px; 
   height:20px;
 }
 
@@ -413,7 +412,7 @@ body {
 
 .filter-bar button {
   padding: 10px;
-  background-color: #ff6347; /* Tomato */
+  background-color: #ff6347;
   color: white;
   border: none;
   border-radius: 5px;
@@ -424,7 +423,7 @@ body {
 }
 
 .filter-bar button:hover {
-  background-color: #ff4500; /* OrangeRed */
+  background-color: #ff4500; 
 }
 
 .sort-controls {
@@ -444,7 +443,7 @@ body {
 
 .sort-controls button {
   padding: 10px;
-  background-color: #ff6347; /* Tomato */
+  background-color: #ff6347;
   color: white;
   border: none;
   border-radius: 5px;
@@ -453,7 +452,7 @@ body {
 }
 
 .sort-controls button:hover {
-  background-color: #ff4500; /* OrangeRed */
+  background-color: #ff4500; 
 }
 
 .factory-cards {
@@ -522,7 +521,7 @@ body {
   width: 80%;
   margin: 10px 0;
   padding: 10px;
-  background-color: #ff6347; /* Tomato */
+  background-color: #ff6347; 
   color: white;
   border: none;
   border-radius: 5px;
@@ -531,7 +530,7 @@ body {
 }
 
 .button-group input:hover {
-  background-color: #ff4500; /* OrangeRed */
+  background-color: #ff4500; 
 }
 
 </style>

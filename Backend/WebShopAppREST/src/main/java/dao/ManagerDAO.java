@@ -11,8 +11,10 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 
+import beans.roles.Customer;
 import beans.roles.Manager;
 import beans.Chocolate;
+import beans.User;
 import beans.enums.Role;
 
 public class ManagerDAO {
@@ -43,9 +45,9 @@ public class ManagerDAO {
     	return availableManagers;
     }
 
-    public Manager save(Manager manager, String contextPath) {
+    public Manager save(User user, String contextPath) {
         loadManagers(contextPath);
-
+		Manager manager = new Manager(user.getId(), user.getUsername(), user.getPassword(), user.getName(), user.getSurname(), user.getGender(), user.getBirthDate(), user.getRole(), -1);
         try {
             String filePath = contextPath + "managers.txt"; // Use the provided path
             FileWriter writer = new FileWriter(filePath, true); // Open in append mode
@@ -64,7 +66,8 @@ public class ManagerDAO {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
+        
+        System.out.println(manager.getUsername());
         return manager; // Return the saved Manager object
     }
     

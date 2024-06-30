@@ -35,7 +35,7 @@ public class ManagerService {
     }
 
     @GET
-    @Path("/available")
+    @Path("/findAvailable")
     @Produces(MediaType.APPLICATION_JSON)
     public ArrayList<Manager> getAvailableManagers() {
         ManagerDAO dao = (ManagerDAO) ctx.getAttribute("managerDAO");
