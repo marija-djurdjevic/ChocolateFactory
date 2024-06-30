@@ -2,6 +2,7 @@
   <div class="factory-display">
     <header class="status-bar">
       <h1>Factory Display</h1>
+      <button v-if="isLoggedIn && isAdmin" class="admin-button" @click="goToRegisterManager">New manager</button>
       <button v-if="!isLoggedIn" class="login-button" @click="goToLogin">Login</button>
       <button v-if="isLoggedIn && isAdmin" class="admin-button" @click="goToAddFactory">Add Factory</button>
       <button v-if="isLoggedIn" class="login-button" @click="logout">Logout</button>
@@ -114,6 +115,10 @@ function checkManager() {
   return role === 'Manager';
 }
 
+function goToRegisterManager() {
+  router.push('/register');
+}
+
 async function loadChocolatesForFactory(factory) {
   try {
     const response = await axios.get(`http://localhost:8080/WebShopAppREST/rest/chocolates/${factory.id}`);
@@ -136,6 +141,7 @@ function loadFactories() {
             latitude: location.latitude,
             address: location.address
           };
+          console.log(location.address);
           await loadChocolatesForFactory(factory);
         } catch (error) {
           console.error('Error loading location:', error);
