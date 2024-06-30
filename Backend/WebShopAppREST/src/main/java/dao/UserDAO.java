@@ -15,6 +15,7 @@ import beans.Chocolate;
 import beans.Factory;
 import beans.User;
 import beans.enums.Role;
+import beans.roles.Manager;
 
 
 public class UserDAO {
@@ -47,7 +48,6 @@ public class UserDAO {
             String filePath = contextPath + "users.txt"; // Use the provided path
             FileWriter writer = new FileWriter(filePath, true); // Open in append mode
             BufferedWriter bufferedWriter = new BufferedWriter(writer);
-            user.setRole(Role.Customer);
             String roleString = user.getRole().toString();
             bufferedWriter.write(user.getId() + ";" +
                     user.getUsername() + ";" +
@@ -63,11 +63,26 @@ public class UserDAO {
             e.printStackTrace();
         } 
         
-        CustomerDAO dao = new CustomerDAO(contextPath);
-        dao.save(user, contextPath);
-        
         return user; // Return the saved Chocolate object
     }
+	
+	
+	public User saveCustomer(User user) {
+        user.setRole(Role.Customer);
+		User customerUser = save(user);
+		CustomerDAO dao = new CustomerDAO(contextPath);
+        dao.save(customerUser, contextPath);
+        
+        return customerUser;
+	}
+	public Manager saveManager(User user) {
+        user.setRole(Role.Manager);
+		User managerUser = save(user);
+		ManagerDAO dao = new ManagerDAO(contextPath);
+        Manager manager = dao.save(managerUser, contextPath);
+        
+        return manager;
+	}
 	
 	private void loadUsers(String contextPath) {
 		this.users = new ArrayList<User>();

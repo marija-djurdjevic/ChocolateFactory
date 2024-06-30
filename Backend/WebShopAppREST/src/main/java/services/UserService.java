@@ -19,6 +19,7 @@ import javax.ws.rs.core.Response;
 
 import beans.User;
 import beans.enums.Role;
+import beans.roles.Manager;
 import dao.UserDAO;
 import dto.LoginResponseDTO;
 import io.jsonwebtoken.Claims;
@@ -56,12 +57,21 @@ public class UserService {
     }
 
     @POST
-    @Path("/save")
+    @Path("/saveCustomer")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public User newUser(User user) {
         UserDAO dao = (UserDAO) ctx.getAttribute("userDAO");
-        return dao.save(user);
+        return dao.saveCustomer(user);
+    }
+    
+    @POST
+    @Path("/saveManager")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Manager newManager(User user) {
+        UserDAO dao = (UserDAO) ctx.getAttribute("userDAO");
+        return dao.saveManager(user);
     }
 
     @POST

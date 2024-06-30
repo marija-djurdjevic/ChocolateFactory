@@ -6,6 +6,8 @@ import EditChocolateView from '@/views/EditChocolateView.vue';
 import Login from '@/views/LoginView.vue';
 import Registration from '@/views/RegistrationView.vue';
 import AddFactoryView from '@/views/AddFactoryView.vue';
+import ManagerRegistration from '@/views/ManagerRegistrationView.vue';
+
 const routes = [
   {
     path: '/',
@@ -28,7 +30,7 @@ const routes = [
     component: Registration
   },
   {
-    path: '/factory/:factoryId/chocolates', // Definišite novu rutu
+    path: '/factory/:factoryId/chocolates', 
     name: 'factoryChocolates',
     component: FactoryChocolatesView
   },
@@ -41,6 +43,11 @@ const routes = [
     path: '/addFactory',
     name: 'addFactory',
     component: AddFactoryView
+  },
+  {
+    path: '/registerManager',
+    name: 'ManagerRegistration',
+    component: ManagerRegistration
   }
 ]
 

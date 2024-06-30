@@ -74,9 +74,9 @@ const searchAverageGrade = ref(null);
 const searchChocolateName = ref('');
 const filterChocolateType = ref('');
 const filterChocolateCategory = ref('');
-const showOnlyOption = ref('all'); // Default value for combo box
-const sortCriteria = ref('name'); // Default sort criteria
-const sortOrder = ref('asc'); // Default sort order
+const showOnlyOption = ref('all'); 
+const sortCriteria = ref('name'); 
+const sortOrder = ref('asc'); 
 const showOpenFactories = ref('');
 
 const isLoggedIn = ref(false);

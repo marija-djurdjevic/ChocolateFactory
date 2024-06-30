@@ -31,54 +31,74 @@
           <input type="file" @change="onFileSelected" />
         </div>
         <div class="form-group">
-            <label for="manager">Manager:</label>
-        <select id="manager" v-model="selectedManager" required>
-          <option v-for="manager in managers" :key="manager.id" :value="manager">
-            {{ manager.name }} {{ manager.surname }}
-          </option>
-        </select>
+          <label for="manager">Manager:</label>
+          <div v-if="managers.length > 0">
+            <select id="manager" v-model="selectedManager" required>
+              <option v-for="manager in managers" :key="manager.id" :value="manager">
+                {{ manager.name }} {{ manager.surname }}
+              </option>
+            </select>
+          </div>
+          <div v-else>
+            <p>No managers available. <br/>
+            <button @click.prevent="registerManager" class="regManButton">Register new manager</button></p>
+          </div>
         </div>
         <button type="submit" class="button">Add Factory</button>
       </form>
     </div>
-  </template>
-  
-  <script setup>
-  import { ref, onMounted } from 'vue';
-  import { useRouter } from 'vue-router';
-  import axios from 'axios';
-  import MapComponent from './MapComponent.vue';
-  
-  const router = useRouter();
-  
-  const factory = ref({
-    name: '',
-    status: false,
-    location: -1,
-    worktime: '',
-    image: '',
-    grade: 0
-  });
-  
-  const selectedLocation = ref({
-    longitude: '',
-    latitude: '',
-    address: ''
-  });
+  </template>  
 
+<script setup>
+import { ref, onMounted, watch } from 'vue';
+import { useRoute } from 'vue-router';
+import { useRouter } from 'vue-router';
+import axios from 'axios';
+import MapComponent from './MapComponent.vue';
 
-  const workTimeFrom = ref('');
-  const workTimeTo = ref('');
-  const managers = ref([]);
-  const selectedFile = ref(null);
-  const selectedManager = ref(null);
-  
-  onMounted(() => {
+const router = useRouter();
+const route = useRoute();
+
+const factory = ref({
+  name: '',
+  status: false,
+  location: -1,
+  worktime: '',
+  image: '',
+  grade: 0
+});
+
+const selectedLocation = ref({
+  longitude: '',
+  latitude: '',
+  address: ''
+});
+
+const workTimeFrom = ref('');
+const workTimeTo = ref('');
+const managers = ref([]);
+const selectedFile = ref(null);
+const selectedManager = ref(null);
+
+onMounted(() => {
   fetchManagers();
+  const newManager = route.query.manager ? JSON.parse(route.query.manager) : null;
+  if (newManager) {
+    selectedManager.value = newManager;
+    managers.value.push(newManager);
+  }
+});
+
+watch(route, (newRoute) => {
+  const newManager = newRoute.query.manager ? JSON.parse(newRoute.query.manager) : null;
+  if (newManager) {
+    selectedManager.value = newManager;
+    managers.value.push(newManager);
+  }
 });
 
 function fetchManagers() {
-  axios.get('http://localhost:8080/WebShopAppREST/rest/managers/available')
+  axios.get('http://localhost:8080/WebShopAppREST/rest/managers/findAvailable')
     .then(response => {
       managers.value = response.data;
     })
@@ -89,7 +109,6 @@ function fetchManagers() {
 
 function updateLocation(location) {
   selectedLocation.value = location;
-  console.log(selectedLocation.address);
 }
 
 function onFileSelected(event) {
@@ -102,22 +121,18 @@ function submitForm() {
     reader.onload = (e) => {
       factory.value.imageString = e.target.result.split(",")[1];
       factory.value.worktime = workTimeFrom.value + "-" + workTimeTo.value;
-      console.log("Factory data being sent: ", factory.value);
       saveLocation();
     };
     reader.readAsDataURL(selectedFile.value);
   } else {
     factory.value.worktime = workTimeFrom.value + "-" + workTimeTo.value;
-    console.log("Factory data being sent: ", factory.value);
     saveLocation();
   }
 }
 
 function saveLocation() {
-  console.log("Location data being sent: ", selectedLocation.value);
   axios.post('http://localhost:8080/WebShopAppREST/rest/locations/save', selectedLocation.value)
     .then(response => {
-      console.log(response.data.id);
       factory.value.location = response.data.id;
       saveFactory();
     })
@@ -128,7 +143,6 @@ function saveLocation() {
 
 function saveFactory() {
   const token = localStorage.getItem('token');
-  console.log("Factory data with location being sent: ", factory.value);
   axios.post('http://localhost:8080/WebShopAppREST/rest/factories/save', factory.value, {
     headers: {
       'Authorization': `Bearer ${token}`
@@ -137,7 +151,7 @@ function saveFactory() {
   .then(response => {
     if (response.status === 200) {
       alert('Factory added successfully!');
-      updateManager(response.data.id);  // Use the new factory ID
+      updateManager(response.data.id);
       router.push('/');
     } else {
       console.error('Error adding factory:', response.data);
@@ -152,7 +166,6 @@ function updateManager(factoryId) {
   const managerToUpdate = selectedManager.value;
   if (managerToUpdate) {
     managerToUpdate.factoryId = factoryId;
-    console.log("Updating manager with ID: ", managerToUpdate.id, " to factory ID: ", factoryId);
     axios.post(`http://localhost:8080/WebShopAppREST/rest/managers/edit`, managerToUpdate)
       .then(response => {
         console.log('Manager updated successfully');
@@ -161,6 +174,10 @@ function updateManager(factoryId) {
         console.error('Error updating manager:', error);
       });
   }
+}
+
+function registerManager() {
+  router.push('/registerManager');
 }
 </script>
 
@@ -230,6 +247,22 @@ function updateManager(factoryId) {
 }
 
 .button:hover {
+  background-color: #bf5640;
+}
+
+.regManButton {
+  display: block;
+  width: 50%;
+  padding: 10px;
+  background-color: #dd6755;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.regManButton:hover {
   background-color: #bf5640;
 }
 </style>

@@ -69,7 +69,7 @@
       return;
     }
 
-    axios.post('http://localhost:8080/WebShopAppREST/rest/users/save', user.value)
+    axios.post('http://localhost:8080/WebShopAppREST/rest/users/saveCustomer', user.value)
       .then(response => {
         alert('User added successfully!');
         router.push('/');
