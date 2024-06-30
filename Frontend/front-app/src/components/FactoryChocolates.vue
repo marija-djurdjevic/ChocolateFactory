@@ -37,6 +37,7 @@
           <div class="button-group">
             <input v-if="isManager" v-on:click="editChocolate(chocolate)" type="submit" value="Edit">
             <input v-if="isManager" v-on:click="deleteChocolate(chocolate.id)" type="submit" value="Delete">
+            <input v-if="isWorker" v-on:click="openEditAmountDialog(chocolate)" type="submit" value="Edit Amount"> 
           </div>
         </div>
       </div>
@@ -55,13 +56,15 @@ const router = useRouter();
 const factoryId = route.params.factoryId;
 const factory = ref({});
 const chocolates = ref([]);
-const isManager = ref(false);
-const role = localStorage.getItem("role"); 
+const isManager = ref(false); 
+const isWorker = ref(false);
+const role = localStorage.getItem("role");
 
 onMounted(() => {
   loadFactory();
   loadChocolates();
-  isManager.value = role === 'Manager'; 
+  isManager.value = role === 'Manager';
+  isWorker.value = role === 'Worker';
 });
 
 async function loadFactory() {
@@ -98,6 +101,37 @@ async function deleteChocolate(chocolateId) {
     console.error('Error deleting chocolate:', error);
   }
 }
+function openEditAmountDialog(chocolate) {
+  const newAmount = prompt(`Enter new amount for ${chocolate.name}:`, chocolate.amountOfChocolate);
+  console.log(newAmount);
+  if (newAmount !== null && !isNaN(newAmount)) {
+    updateChocolateAmount(chocolate.id, parseInt(newAmount));
+  }
+}
+
+async function updateChocolateAmount(chocolateId, newAmount) {
+  try {
+    console.log(newAmount);
+    const token = localStorage.getItem('token'); 
+    const response = await axios.put(
+      `http://localhost:8080/WebShopAppREST/rest/factories/${factoryId}/updateChocolateAmount/${chocolateId}?newAmount=${newAmount}`,
+      {}, 
+      {
+        headers: {
+          Authorization: `Bearer ${token}`, 
+        },
+      }
+    );
+    const updatedChocolate = response.data;
+    const index = chocolates.value.findIndex((choc) => choc.id === chocolateId);
+    if (index !== -1) {
+      chocolates.value[index] = updatedChocolate;
+    }
+  } catch (error) {
+    console.error('Error updating chocolate amount:', error);
+  }
+}
+
 </script>
 
 <style>

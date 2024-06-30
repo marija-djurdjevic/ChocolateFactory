@@ -133,6 +133,29 @@ public class FactoryService {
         FactoryDAO dao = (FactoryDAO) ctx.getAttribute("factoryDAO");
         return dao.findFilteredFactories();
     }
+    
+    @PUT
+    @Path("/{factoryId}/updateChocolateAmount/{chocolateId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response updateChocolateAmount(@PathParam("factoryId") int factoryId, 
+                                          @PathParam("chocolateId") int chocolateId, 
+                                          @QueryParam("newAmount") int newAmount, 
+                                          @Context HttpServletRequest request) {
+        // Izvucite token iz zaglavlja zahteva
+       
+
+        // Ako je sve u redu, ažurirajte količinu čokolade
+        FactoryDAO dao = (FactoryDAO) ctx.getAttribute("factoryDAO");
+        System.out.println(newAmount);
+        Chocolate updatedChocolate = dao.updateChocolateAmountInFactory(factoryId, chocolateId, newAmount);
+
+        if (updatedChocolate != null) {
+            return Response.ok(updatedChocolate).build();
+        } else {
+            return Response.status(Response.Status.BAD_REQUEST).entity("Factory or chocolate not found").build();
+        }
+    }
 
     @POST
     @Path("/{factoryId}/addWorker")

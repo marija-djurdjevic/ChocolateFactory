@@ -56,6 +56,21 @@ public class FactoryDAO {
 		}
 		return factories;
 	}
+	
+	   public Chocolate updateChocolateAmountInFactory(int factoryId, int chocolateId, int newAmount) {
+	        loadFactories(contextPath);
+	        Factory factory = findFactory(factoryId);
+	        if (factory != null) {
+	        	System.out.println(newAmount);
+	            Chocolate chocolate = chocolateDAO.updateChocolateAmount(chocolateId, newAmount);
+	            if (chocolate != null) {
+	            	System.out.println(chocolate.getName());
+	                loadChocolatesForFactories(); 
+	                return chocolate;
+	            }
+	        }
+	        return null;
+	    }
 
 	public Factory findFactory(int id) {
 		loadFactories(contextPath);
