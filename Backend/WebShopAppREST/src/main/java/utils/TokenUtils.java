@@ -23,7 +23,7 @@ public class TokenUtils {
 		        .setSubject(username)
 		        .setId(UUID.randomUUID().toString())
 		        .setIssuedAt(Date.from(Instant.now()))
-		        .setExpiration(Date.from(Instant.now().plus(5l, ChronoUnit.MINUTES)))
+		        .setExpiration(Date.from(Instant.now().plus(1, ChronoUnit.DAYS))) 
 		        .signWith(SIGNATURE_ALGORITHM, secret)
 		        .compact();
 		return jwtToken;

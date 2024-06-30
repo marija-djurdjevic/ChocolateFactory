@@ -33,6 +33,17 @@ public class ChocolateDAO {
 		}
 		return chocolates;
 	}
+	
+	public Chocolate updateChocolateAmount(int chocolateId, int newAmount) {
+        loadChocolates(contextPath);
+        Chocolate chocolate = findChocolate(chocolateId);
+        if (chocolate != null) {
+            chocolate.setAmountOfChocolate(newAmount);
+            saveAllChocolates();
+            return chocolate;
+        }
+        return null;
+    }
 
 	public Chocolate findChocolate(int id) {
 		loadChocolates(contextPath);
