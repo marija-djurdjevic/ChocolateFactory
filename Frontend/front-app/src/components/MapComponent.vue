@@ -38,7 +38,7 @@
       ],
       view: new View({
         center: fromLonLat([0, 0]),
-        zoom: 2,
+        zoom: 14,
       }),
     });
   
@@ -62,7 +62,7 @@
             latitude: coordinates[1],
             address: formattedAddress,
           };
-          map.value.getView().animate({ center: event.coordinate, zoom: 14 });
+          map.value.getView().animate({ center: event.coordinate, zoom: 25 });
         });
     });
   });

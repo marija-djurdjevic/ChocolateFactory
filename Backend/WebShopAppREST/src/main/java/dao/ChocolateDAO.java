@@ -38,7 +38,9 @@ public class ChocolateDAO {
         loadChocolates(contextPath);
         Chocolate chocolate = findChocolate(chocolateId);
         if (chocolate != null) {
+        	System.out.println(chocolate.getAmountOfChocolate());
             chocolate.setAmountOfChocolate(newAmount);
+        	System.out.println(chocolate.getAmountOfChocolate());
             saveAllChocolates();
             return chocolate;
         }

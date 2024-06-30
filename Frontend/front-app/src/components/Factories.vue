@@ -287,13 +287,13 @@ function goToLogin() {
 }
 
 function logout() {
-  localStorage.removeItem('token'); // Uklanjanje tokena iz localStorage
-  localStorage.removeItem('username'); // Uklanjanje tokena iz localStorage
-  localStorage.removeItem('role'); // Uklanjanje tokena iz localStorage
-  isLoggedIn.value = false; // Postavljanje stanja prijavljenosti na false
-  isAdmin.value = false; // Resetovanje admin statusa
+  localStorage.removeItem('token'); 
+  localStorage.removeItem('username'); 
+  localStorage.removeItem('role'); 
+  isLoggedIn.value = false; 
+  isAdmin.value = false; 
   isManager.value = false;
-  router.push('/'); // Navigacija na početnu stranicu (fabrike)
+  router.push('/'); 
 }
 
 function goToAddFactory() {

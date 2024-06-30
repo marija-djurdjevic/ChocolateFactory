@@ -5,7 +5,7 @@
     </header>
     <div class="factory-info">
       <div class="factory-logo">
-        <img :src="'../' + factory.image" alt="Factory Logo" />
+              <img :src="'data:image/jpeg;base64,' + factory.imageString" alt="Factory Image" />
       </div>
       <div class="factory-details">
         <div class="location-info" v-if="factory.locationInfo">
@@ -37,7 +37,7 @@
           <div class="button-group">
             <input v-if="isManager" v-on:click="editChocolate(chocolate)" type="submit" value="Edit">
             <input v-if="isManager" v-on:click="deleteChocolate(chocolate.id)" type="submit" value="Delete">
-            <input v-if="isWorker" v-on:click="openEditAmountDialog(chocolate)" type="submit" value="Edit Amount"> <!-- Novo dugme za radnike -->
+            <input v-if="isWorker" v-on:click="openEditAmountDialog(chocolate)" type="submit" value="Edit Amount"> 
           </div>
         </div>
       </div>
@@ -49,21 +49,21 @@
 import axios from 'axios';
 import { onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import LocationMap from './LocationMap.vue'; // Importuj komponentu za mapu
+import LocationMap from './LocationMap.vue';
 
 const route = useRoute();
 const router = useRouter();
 const factoryId = route.params.factoryId;
 const factory = ref({});
 const chocolates = ref([]);
-const isManager = ref(false); // Dodaj ovu liniju
+const isManager = ref(false); 
 const isWorker = ref(false);
-const role = localStorage.getItem("role"); // Dodaj ovu liniju
+const role = localStorage.getItem("role");
 
 onMounted(() => {
   loadFactory();
   loadChocolates();
-  isManager.value = role === 'Manager'; // Add this line
+  isManager.value = role === 'Manager';
   isWorker.value = role === 'Worker';
 });
 
@@ -103,16 +103,19 @@ async function deleteChocolate(chocolateId) {
 }
 function openEditAmountDialog(chocolate) {
   const newAmount = prompt(`Enter new amount for ${chocolate.name}:`, chocolate.amountOfChocolate);
+  console.log(newAmount);
   if (newAmount !== null && !isNaN(newAmount)) {
     updateChocolateAmount(chocolate.id, parseInt(newAmount));
   }
 }
+
 async function updateChocolateAmount(chocolateId, newAmount) {
   try {
+    console.log(newAmount);
     const token = localStorage.getItem('token'); 
     const response = await axios.put(
-      `http://localhost:8080/WebShopAppREST/rest/factories/${factoryId}/updateChocolateAmount/${chocolateId}`,
-      { newAmount },
+      `http://localhost:8080/WebShopAppREST/rest/factories/${factoryId}/updateChocolateAmount/${chocolateId}?newAmount=${newAmount}`,
+      {}, 
       {
         headers: {
           Authorization: `Bearer ${token}`, 
@@ -157,8 +160,8 @@ async function updateChocolateAmount(chocolateId, newAmount) {
 }
 
 .factory-logo img {
-  width: 100px;
-  height: 100px;
+  width: 150px;
+  height: 150px;
   object-fit: cover;
   border-radius: 50%;
   margin-bottom: 20px;

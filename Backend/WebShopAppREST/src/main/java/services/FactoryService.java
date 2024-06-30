@@ -147,6 +147,7 @@ public class FactoryService {
 
         // Ako je sve u redu, ažurirajte količinu čokolade
         FactoryDAO dao = (FactoryDAO) ctx.getAttribute("factoryDAO");
+        System.out.println(newAmount);
         Chocolate updatedChocolate = dao.updateChocolateAmountInFactory(factoryId, chocolateId, newAmount);
 
         if (updatedChocolate != null) {

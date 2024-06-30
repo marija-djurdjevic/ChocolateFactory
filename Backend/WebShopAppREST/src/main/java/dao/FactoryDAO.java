@@ -61,9 +61,11 @@ public class FactoryDAO {
 	        loadFactories(contextPath);
 	        Factory factory = findFactory(factoryId);
 	        if (factory != null) {
+	        	System.out.println(newAmount);
 	            Chocolate chocolate = chocolateDAO.updateChocolateAmount(chocolateId, newAmount);
 	            if (chocolate != null) {
-	                loadChocolatesForFactories(); // reload chocolates for factories
+	            	System.out.println(chocolate.getName());
+	                loadChocolatesForFactories(); 
 	                return chocolate;
 	            }
 	        }
@@ -75,6 +77,7 @@ public class FactoryDAO {
 		loadChocolatesForFactories();
 		for (Factory factory : factories) {
 			if (factory.getId() == id) {
+				factory.loadImageString();
 				return factory;
 			}
 		}
