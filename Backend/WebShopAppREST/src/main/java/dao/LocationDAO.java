@@ -23,10 +23,12 @@ public class LocationDAO {
 	}
 
 	public ArrayList<Location> findAll() {
+		loadLocations(contextPath);
 		return locations;
 	}
 
 	public Location findLocation(int id) {
+		loadLocations(contextPath);
 		for (Location location : locations) {
 			if (location.getId() == id) {
 				return location;
@@ -106,6 +108,7 @@ public class LocationDAO {
 				String latitude = st.nextToken().trim();
 				String longitude = st.nextToken().trim();
 				String address = st.nextToken().trim();
+				System.out.println(id);
 				locations.add(new Location(id, latitude, longitude, address));
 				
 			}

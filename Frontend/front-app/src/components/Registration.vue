@@ -63,21 +63,38 @@
   
   const router = useRouter();
   
+  const role = localStorage.getItem('role');
+  const apiUrl = role === 'Administrator' ? 'http://localhost:8080/WebShopAppREST/rest/users/saveManager' : 'http://localhost:8080/WebShopAppREST/rest/users/saveCustomer';
+
   function register() {
     if (user.value.password !== confirmPassword.value) {
       alert('Passwords do not match!');
       return;
     }
 
-    axios.post('http://localhost:8080/WebShopAppREST/rest/users/saveCustomer', user.value)
-      .then(response => {
-        alert('User added successfully!');
+    if(role == 'Administrator'){
+      const token = localStorage.getItem('token');
+      axios.post(apiUrl, user.value, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
+    .then(response => {
+        alert('Manager successfully registered!');
         router.push('/');
-      })
-      .catch(error => {
-        console.error('Error adding user:', error);
-      });
-
+    }).catch(error => {
+      console.error('Error adding user:', error);
+    });
+   }
+    else{
+      axios.post(apiUrl, user.value)
+    .then(response => {
+        alert('User successfully registered!');
+        router.push('/');
+      }).catch(error => {
+      console.error('Error adding user:', error);
+    });
+  }
   }
   </script>
   

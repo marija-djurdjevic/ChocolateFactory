@@ -46,7 +46,9 @@ public class FactoryDAO {
 			factory.setAvailableChocolates(chocolates);
 		}
 	}
+	
 	public ArrayList<Factory> findAll() {
+		locationDAO.findAll();
 		loadFactories(contextPath);
 		loadChocolatesForFactories();
 		for(Factory f: factories) {
@@ -237,6 +239,7 @@ public class FactoryDAO {
 				int locationId = Integer.parseInt(st.nextToken().trim());
 				String imagePath = st.nextToken().trim();
 				double grade = Double.parseDouble(st.nextToken().trim());
+				System.out.println(locationId);
 				factories.add(new Factory(id, name, new ArrayList<>(), worktime, status, locationId, imagePath, "", grade));
 				
 			}

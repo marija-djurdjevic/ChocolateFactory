@@ -11,6 +11,7 @@
         <div class="location-info" v-if="factory.locationInfo">
           <p>{{ factory.locationInfo.address }}</p>
           <p>{{ factory.locationInfo.longitude }}, {{ factory.locationInfo.latitude }}</p>
+          <LocationMap :longitude="factory.locationInfo.longitude" :latitude="factory.locationInfo.latitude" />
         </div>
         <p><strong>Status:</strong> {{ factory.status ? 'Open' : 'Closed' }}</p>
         <p><strong>Working hours:</strong> {{ factory.worktime }}</p>
@@ -48,15 +49,16 @@
 import axios from 'axios';
 import { onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import LocationMap from './LocationMap.vue'; // Importuj komponentu za mapu
 
 const route = useRoute();
 const router = useRouter();
 const factoryId = route.params.factoryId;
 const factory = ref({});
 const chocolates = ref([]);
-const isManager = ref(false); // Add this line
+const isManager = ref(false); // Dodaj ovu liniju
 const isWorker = ref(false);
-const role = localStorage.getItem("role"); // Add this line
+const role = localStorage.getItem("role"); // Dodaj ovu liniju
 
 onMounted(() => {
   loadFactory();
@@ -237,4 +239,3 @@ async function updateChocolateAmount(chocolateId, newAmount) {
   background-color: #ff4500; /* OrangeRed */
 }
 </style>
-  

@@ -19,6 +19,7 @@ import javax.ws.rs.core.Response;
 
 import beans.User;
 import beans.enums.Role;
+import beans.roles.Customer;
 import beans.roles.Manager;
 import dao.UserDAO;
 import dto.LoginResponseDTO;
@@ -60,18 +61,50 @@ public class UserService {
     @Path("/saveCustomer")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public User newUser(User user) {
+    public Response newUser(User user, @Context HttpServletRequest request) {
+    	String token = tokenUtils.getToken(request);
+        System.out.println("Token: " + token);
+        if (token != null) {
+            return Response.status(Response.Status.FORBIDDEN).entity("You do not have permission to perform this action").build();
+        }
+
         UserDAO dao = (UserDAO) ctx.getAttribute("userDAO");
-        return dao.saveCustomer(user);
+        User usercustomer = dao.saveCustomer(user);
+        return Response.ok(usercustomer).build();
     }
     
     @POST
     @Path("/saveManager")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Manager newManager(User user) {
+    public Response newManager(User user, @Context HttpServletRequest request) {
+    	String token = tokenUtils.getToken(request);
+        System.out.println("Token: " + token);
+        if (token == null || token.isEmpty()) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity("Token is missing").build();
+        }
+
+        // Verifikujte token
+        Claims claims;
+        try {
+            claims = tokenUtils.parseToken(token);
+            if (claims == null) {
+                return Response.status(Response.Status.UNAUTHORIZED).entity("Invalid token").build();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Response.status(Response.Status.UNAUTHORIZED).entity("Token parsing error").build();
+        }
+
+        // Proverite ulogu korisnika
+        String role = claims.get("role", String.class);
+        if (role == null || !"Administrator".equals(role)) {
+            return Response.status(Response.Status.FORBIDDEN).entity("You do not have permission to perform this action").build();
+        }
         UserDAO dao = (UserDAO) ctx.getAttribute("userDAO");
-        return dao.saveManager(user);
+        Manager manager = dao.saveManager(user);
+        
+        return Response.ok(manager).build();
     }
 
     @POST
