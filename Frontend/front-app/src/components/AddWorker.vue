@@ -101,7 +101,6 @@ function addWorker() {
   
   
   <style>
-  /* Your existing styles for the form */
   .add-worker-container {
     text-align: center;
     padding: 20px;

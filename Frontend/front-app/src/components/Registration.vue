@@ -72,25 +72,31 @@
       return;
     }
 
-    axios.post(apiUrl, user.value, {
+    if(role == 'Administrator'){
+      const token = localStorage.getItem('token');
+      axios.post(apiUrl, user.value, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
     })
     .then(response => {
-      if(role == 'Administrator'){
         alert('Manager successfully registered!');
-      }
-      else{
+        router.push('/');
+    }).catch(error => {
+      console.error('Error adding user:', error);
+    });
+   }
+    else{
+      axios.post(apiUrl, user.value)
+    .then(response => {
         alert('User successfully registered!');
-      }
-      router.push('/');
-    })
-    .catch(error => {
+        router.push('/');
+      }).catch(error => {
       console.error('Error adding user:', error);
     });
   }
-    </script>
+  }
+  </script>
   
   <style>
   .register-container {
