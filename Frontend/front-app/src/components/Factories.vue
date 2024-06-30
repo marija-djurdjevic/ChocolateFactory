@@ -51,7 +51,8 @@
             <p><strong>Status:</strong> {{ factory.status ? 'Open' : 'Closed' }}</p>
             <p><strong>Average Grade:</strong> {{ factory.grade }}</p>
             <div class="button-group">
-              <button @click="addChocolate(factory.id)">Add Chocolate</button>
+              <button v-if="isManager" @click="addWorker(factory.id)">Add Worker</button>
+              <button v-if="isManager" @click="addChocolate(factory.id)">Add Chocolate</button>
               <button @click="showChocolates(factory.id)">Show Chocolates</button>
             </div>
           </div>
@@ -60,6 +61,7 @@
     </div>
   </div>
 </template>
+
 
 <script setup>
 import axios from 'axios';
@@ -81,6 +83,7 @@ const showOpenFactories = ref('');
 
 const isLoggedIn = ref(false);
 const isAdmin = ref(false);
+const isManager = ref(false);
 const role = localStorage.getItem("role");
 
 onMounted(() => {
@@ -88,9 +91,14 @@ onMounted(() => {
   console.log(localStorage.getItem("role"));
   isLoggedIn.value = checkLoggedIn();
   isAdmin.value = checkAdmin();
+  isManager.value = checkManager(); 
   console.log(isAdmin.value);
   loadFactories();
 });
+
+function addWorker(factoryId) {
+  router.push({ path: '/addWorker', query: { factoryId } });
+} 
 
 function checkLoggedIn() {
   const token = localStorage.getItem('token');
@@ -100,6 +108,10 @@ function checkLoggedIn() {
 function checkAdmin() {
   console.log(role);
   return role === 'Administrator';
+}
+
+function checkManager() { 
+  return role === 'Manager';
 }
 
 async function loadChocolatesForFactory(factory) {
@@ -274,6 +286,7 @@ function logout() {
   localStorage.removeItem('role'); // Uklanjanje tokena iz localStorage
   isLoggedIn.value = false; // Postavljanje stanja prijavljenosti na false
   isAdmin.value = false; // Resetovanje admin statusa
+  isManager.value = false;
   router.push('/'); // Navigacija na početnu stranicu (fabrike)
 }
 
@@ -285,7 +298,6 @@ const filteredFactories = computed(() => {
   return factories.value;
 });
 </script>
-
 <style>
 body {
   background-color: #dd6755;
@@ -351,19 +363,18 @@ body {
   padding: 10px;
   cursor: pointer;
   transition: background-color 0.3s;
-  font-size: 1rem; /* Adjust font size to match other buttons */
-  width: 80px; /* Match width of other buttons */
-  height: 40px; /* Match height of other buttons */
-  margin-left: auto; /* Align to the right */
+  font-size: 1rem; 
+  width: 80px; 
+  height: 40px;
+  margin-left: auto; 
 }
 
 .login-button:hover {
-  background-color: #ff4500; /* OrangeRed */
+  background-color: #ff4500; 
 }
 
-/* Novo dodati CSS za admin button */
 .admin-button {
-  background-color: #ff6347; /* Tomato */
+  background-color: #ff6347; 
   color: white;
   border: none;
   border-radius: 5px;
@@ -371,19 +382,19 @@ body {
   cursor: pointer;
   transition: background-color 0.3s;
   font-size: 1rem;
-  width: 120px; /* Malo šire od login dugmeta */
-  height: 40px; /* Ista visina kao login dugme */
-  margin-right: 10px; /* Dodaj razmak između dugmadi */
+  width: 120px; 
+  height: 40px; 
+  margin-right: 10px; 
 }
 
 .admin-button:hover {
-  background-color: #ff4500; /* OrangeRed */
+  background-color: #ff4500; 
 }
 
 .filter-bar {
   display: flex;
-  justify-content: center; /* Center the filter bar */
-  gap: 10px; /* Add some space between elements */
+  justify-content: center; 
+  gap: 10px; 
   margin-bottom: 20px;
 }
 
@@ -391,7 +402,7 @@ body {
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 5px;
-  width: 150px; /* Reduce width */
+  width: 150px; 
   height:20px;
 }
 
@@ -401,7 +412,7 @@ body {
 
 .filter-bar button {
   padding: 10px;
-  background-color: #ff6347; /* Tomato */
+  background-color: #ff6347;
   color: white;
   border: none;
   border-radius: 5px;
@@ -412,7 +423,7 @@ body {
 }
 
 .filter-bar button:hover {
-  background-color: #ff4500; /* OrangeRed */
+  background-color: #ff4500; 
 }
 
 .sort-controls {
@@ -432,7 +443,7 @@ body {
 
 .sort-controls button {
   padding: 10px;
-  background-color: #ff6347; /* Tomato */
+  background-color: #ff6347;
   color: white;
   border: none;
   border-radius: 5px;
@@ -441,7 +452,7 @@ body {
 }
 
 .sort-controls button:hover {
-  background-color: #ff4500; /* OrangeRed */
+  background-color: #ff4500; 
 }
 
 .factory-cards {
@@ -510,7 +521,7 @@ body {
   width: 80%;
   margin: 10px 0;
   padding: 10px;
-  background-color: #ff6347; /* Tomato */
+  background-color: #ff6347; 
   color: white;
   border: none;
   border-radius: 5px;
@@ -519,7 +530,7 @@ body {
 }
 
 .button-group input:hover {
-  background-color: #ff4500; /* OrangeRed */
+  background-color: #ff4500; 
 }
 
 </style>

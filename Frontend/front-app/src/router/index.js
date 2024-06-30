@@ -7,7 +7,7 @@ import Login from '@/views/LoginView.vue';
 import Registration from '@/views/RegistrationView.vue';
 import AddFactoryView from '@/views/AddFactoryView.vue';
 import ManagerRegistration from '@/views/ManagerRegistrationView.vue';
-
+import AddWorkerView from '@/views/AddWorkerView.vue';
 const routes = [
   {
     path: '/',
@@ -48,6 +48,11 @@ const routes = [
     path: '/registerManager',
     name: 'ManagerRegistration',
     component: ManagerRegistration
+  },
+  {
+    path: '/addWorker', 
+    name: 'AddWorker',
+    component: AddWorkerView
   }
 ]
 

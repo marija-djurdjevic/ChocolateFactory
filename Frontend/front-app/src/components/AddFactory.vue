@@ -41,228 +41,222 @@
           </div>
           <div v-else>
             <p>No managers available. <br/>
-            <button @click.prevent="registerManager" class="regManButton">Register new manager</button></p>
+            <button @click.prevent="showManagerModal = true" class="regManButton">Register new manager</button></p>
           </div>
         </div>
         <button type="submit" class="button">Add Factory</button>
       </form>
+  
+      <Modal :isVisible="showManagerModal" @close="showManagerModal = false">
+        <ManagerRegistration @manager-added="handleManagerAdded" />
+      </Modal>
     </div>
-  </template>  
-
-<script setup>
-import { ref, onMounted, watch } from 'vue';
-import { useRoute } from 'vue-router';
-import { useRouter } from 'vue-router';
-import axios from 'axios';
-import MapComponent from './MapComponent.vue';
-
-const router = useRouter();
-const route = useRoute();
-
-const factory = ref({
-  name: '',
-  status: false,
-  location: -1,
-  worktime: '',
-  image: '',
-  grade: 0
-});
-
-const selectedLocation = ref({
-  longitude: '',
-  latitude: '',
-  address: ''
-});
-
-const workTimeFrom = ref('');
-const workTimeTo = ref('');
-const managers = ref([]);
-const selectedFile = ref(null);
-const selectedManager = ref(null);
-
-onMounted(() => {
-  fetchManagers();
-  const newManager = route.query.manager ? JSON.parse(route.query.manager) : null;
-  if (newManager) {
-    selectedManager.value = newManager;
-    managers.value.push(newManager);
-  }
-});
-
-watch(route, (newRoute) => {
-  const newManager = newRoute.query.manager ? JSON.parse(newRoute.query.manager) : null;
-  if (newManager) {
-    selectedManager.value = newManager;
-    managers.value.push(newManager);
-  }
-});
-
-function fetchManagers() {
-  axios.get('http://localhost:8080/WebShopAppREST/rest/managers/findAvailable')
-    .then(response => {
-      managers.value = response.data;
-    })
-    .catch(error => {
-      console.error('Error fetching managers:', error);
-    });
-}
-
-function updateLocation(location) {
-  selectedLocation.value = location;
-}
-
-function onFileSelected(event) {
-  selectedFile.value = event.target.files[0];
-}
-
-function submitForm() {
-  if (selectedFile.value) {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      factory.value.imageString = e.target.result.split(",")[1];
-      factory.value.worktime = workTimeFrom.value + "-" + workTimeTo.value;
-      saveLocation();
-    };
-    reader.readAsDataURL(selectedFile.value);
-  } else {
-    factory.value.worktime = workTimeFrom.value + "-" + workTimeTo.value;
-    saveLocation();
-  }
-}
-
-function saveLocation() {
-  axios.post('http://localhost:8080/WebShopAppREST/rest/locations/save', selectedLocation.value)
-    .then(response => {
-      factory.value.location = response.data.id;
-      saveFactory();
-    })
-    .catch(error => {
-      console.error('Error saving location:', error);
-    });
-}
-
-function saveFactory() {
-  const token = localStorage.getItem('token');
-  axios.post('http://localhost:8080/WebShopAppREST/rest/factories/save', factory.value, {
-    headers: {
-      'Authorization': `Bearer ${token}`
-    }
-  })
-  .then(response => {
-    if (response.status === 200) {
-      alert('Factory added successfully!');
-      updateManager(response.data.id);
-      router.push('/');
-    } else {
-      console.error('Error adding factory:', response.data);
-    }
-  })
-  .catch(error => {
-    console.error('Error adding factory:', error);
+  </template>
+  
+  <script setup>
+  import { ref, onMounted } from 'vue';
+  import axios from 'axios';
+  import Modal from './Modal.vue';
+  import ManagerRegistration from './ManagerRegistration.vue';
+  import MapComponent from './MapComponent.vue';
+  import { useRouter } from 'vue-router';
+  
+  const factory = ref({
+    name: '',
+    status: false,
+    location: -1,
+    worktime: '',
+    image: '',
+    grade: 0
   });
-}
-
-function updateManager(factoryId) {
-  const managerToUpdate = selectedManager.value;
-  if (managerToUpdate) {
-    managerToUpdate.factoryId = factoryId;
-    axios.post(`http://localhost:8080/WebShopAppREST/rest/managers/edit`, managerToUpdate)
+  const selectedLocation = ref({
+    longitude: '',
+    latitude: '',
+    address: ''
+  });
+  const workTimeFrom = ref('');
+  const workTimeTo = ref('');
+  const managers = ref([]);
+  const selectedFile = ref(null);
+  const selectedManager = ref(null);
+  const showManagerModal = ref(false);
+  
+  const router = useRouter();
+  
+  onMounted(() => {
+    fetchManagers();
+  });
+  
+  function fetchManagers() {
+    axios.get('http://localhost:8080/WebShopAppREST/rest/managers/findAvailable')
       .then(response => {
-        console.log('Manager updated successfully');
+        managers.value = response.data;
       })
       .catch(error => {
-        console.error('Error updating manager:', error);
+        console.error('Error fetching managers:', error);
       });
   }
-}
-
-function registerManager() {
-  router.push('/registerManager');
-}
-</script>
-
-<style scoped>
-.add-factory {
-  max-width: 700px; 
-  margin: 20px auto;
-  padding: 20px;
-  background-color: #ffe4b5;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.add-factory h1 {
-  text-align: center;
-  margin-bottom: 20px;
-}
-
-.form-group {
-  margin-bottom: 15px;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 5px;
-}
-
-.form-group input,
-.form-group select,
-.form-group textarea {
-  width: 100%;
-  padding: 10px; 
-  box-sizing: border-box;
-}
-
-.locationparams {
-  width: 100%;
-  font-size: medium; 
-  margin-bottom: 10px; 
-}
-
-.work-time-fields {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 15px;
-}
-
-.field-group {
-  flex: 1;
-  margin-right: 10px; 
-}
-
-.field-group:last-child {
-  margin-right: 0; 
-}
-
-.button {
-  display: block;
-  width: 100%;
-  padding: 10px;
-  background-color: #dd6755;
-  color: #fff;
-  border: none;
-  border-radius: 5px;
-  font-size: 16px;
-  cursor: pointer;
-}
-
-.button:hover {
-  background-color: #bf5640;
-}
-
-.regManButton {
-  display: block;
-  width: 50%;
-  padding: 10px;
-  background-color: #dd6755;
-  color: #fff;
-  border: none;
-  border-radius: 5px;
-  font-size: 16px;
-  cursor: pointer;
-}
-
-.regManButton:hover {
-  background-color: #bf5640;
-}
-</style>
+  
+  function updateLocation(location) {
+    selectedLocation.value = location;
+  }
+  
+  function onFileSelected(event) {
+    selectedFile.value = event.target.files[0];
+  }
+  
+  function submitForm() {
+    if (selectedFile.value) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        factory.value.imageString = e.target.result.split(",")[1];
+        factory.value.worktime = workTimeFrom.value + "-" + workTimeTo.value;
+        saveLocation();
+      };
+      reader.readAsDataURL(selectedFile.value);
+    } else {
+      factory.value.worktime = workTimeFrom.value + "-" + workTimeTo.value;
+      saveLocation();
+    }
+  }
+  
+  function saveLocation() {
+    axios.post('http://localhost:8080/WebShopAppREST/rest/locations/save', selectedLocation.value)
+      .then(response => {
+        factory.value.location = response.data.id;
+        saveFactory();
+      })
+      .catch(error => {
+        console.error('Error saving location:', error);
+      });
+  }
+  
+  function saveFactory() {
+    const token = localStorage.getItem('token');
+    axios.post('http://localhost:8080/WebShopAppREST/rest/factories/save', factory.value, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
+    .then(response => {
+      if (response.status === 200) {
+        alert('Factory added successfully!');
+        updateManager(response.data.id);
+        router.push('/');
+      } else {
+        console.error('Error adding factory:', response.data);
+      }
+    })
+    .catch(error => {
+      console.error('Error adding factory:', error);
+    });
+  }
+  
+  function updateManager(factoryId) {
+    const managerToUpdate = selectedManager.value;
+    if (managerToUpdate) {
+      managerToUpdate.factoryId = factoryId;
+      axios.post(`http://localhost:8080/WebShopAppREST/rest/managers/edit`, managerToUpdate)
+        .then(response => {
+          console.log('Manager updated successfully');
+        })
+        .catch(error => {
+          console.error('Error updating manager:', error);
+        });
+    }
+  }
+  
+  function handleManagerAdded(manager) {
+    managers.value.push(manager);
+    selectedManager.value = manager;
+    showManagerModal.value = false;
+  }
+  </script>
+  
+  <style scoped>
+  .add-factory {
+    max-width: 700px; 
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #ffe4b5;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .add-factory h1 {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .form-group {
+    margin-bottom: 15px;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 5px;
+  }
+  
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100%;
+    padding: 10px; 
+    box-sizing: border-box;
+  }
+  
+  .locationparams {
+    width: 100%;
+    font-size: medium; 
+    margin-bottom: 10px; 
+  }
+  
+  .work-time-fields {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+  }
+  
+  .field-group {
+    flex: 1;
+    margin-right: 10px; 
+  }
+  
+  .field-group:last-child {
+    margin-right: 0; 
+  }
+  
+  .button {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    background-color: #dd6755;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  
+  .button:hover {
+    background-color: #bf5640;
+  }
+  
+  .regManButton {
+    display: block;
+    width: 50%;
+    padding: 10px;
+    background-color: #dd6755;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    font-size: 14px;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+  
+  .regManButton:hover {
+    background-color: #bf5640;
+  }
+  </style>
+  
