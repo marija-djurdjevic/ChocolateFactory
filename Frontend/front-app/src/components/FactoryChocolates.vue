@@ -5,7 +5,7 @@
     </header>
     <div class="factory-info">
       <div class="factory-logo">
-        <img :src="'../' + factory.image" alt="Factory Logo" />
+              <img :src="'data:image/jpeg;base64,' + factory.imageString" alt="Factory Image" />
       </div>
       <div class="factory-details">
         <div class="location-info" v-if="factory.locationInfo">
@@ -48,20 +48,20 @@
 import axios from 'axios';
 import { onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import LocationMap from './LocationMap.vue'; // Importuj komponentu za mapu
+import LocationMap from './LocationMap.vue';
 
 const route = useRoute();
 const router = useRouter();
 const factoryId = route.params.factoryId;
 const factory = ref({});
 const chocolates = ref([]);
-const isManager = ref(false); // Dodaj ovu liniju
-const role = localStorage.getItem("role"); // Dodaj ovu liniju
+const isManager = ref(false);
+const role = localStorage.getItem("role"); 
 
 onMounted(() => {
   loadFactory();
   loadChocolates();
-  isManager.value = role === 'Manager'; // Dodaj ovu liniju
+  isManager.value = role === 'Manager'; 
 });
 
 async function loadFactory() {
@@ -126,8 +126,8 @@ async function deleteChocolate(chocolateId) {
 }
 
 .factory-logo img {
-  width: 100px;
-  height: 100px;
+  width: 150px;
+  height: 150px;
   object-fit: cover;
   border-radius: 50%;
   margin-bottom: 20px;

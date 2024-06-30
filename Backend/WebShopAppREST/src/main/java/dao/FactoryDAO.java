@@ -62,6 +62,7 @@ public class FactoryDAO {
 		loadChocolatesForFactories();
 		for (Factory factory : factories) {
 			if (factory.getId() == id) {
+				factory.loadImageString();
 				return factory;
 			}
 		}
