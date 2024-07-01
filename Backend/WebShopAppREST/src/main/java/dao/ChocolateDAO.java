@@ -110,6 +110,7 @@ public class ChocolateDAO {
 	        e.printStackTrace();
 	    }
 	}
+	
 	 public ArrayList<Chocolate> findChocolatesByFactoryId(int factoryId) {
 		 loadChocolates(contextPath);
 	     ArrayList<Chocolate> result = new ArrayList<>();

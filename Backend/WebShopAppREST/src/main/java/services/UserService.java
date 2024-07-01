@@ -10,6 +10,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.OPTIONS;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
@@ -105,6 +106,28 @@ public class UserService {
         Manager manager = dao.saveManager(user);
         
         return Response.ok(manager).build();
+    }
+    
+    @GET
+    @Path("/authenticateUser")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public User authenticateUserFromUsername(@QueryParam("username") String username) {
+    	UserDAO dao = (UserDAO) ctx.getAttribute("userDAO");
+        User authenticatedUser = dao.authenticateUserFromUsername(username);
+        System.out.println(authenticatedUser);
+        return authenticatedUser;
+    }
+    
+    @POST
+    @Path("/edit")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public User editUser(User user) {
+    	UserDAO dao = (UserDAO) ctx.getAttribute("userDAO");
+    	System.out.println("izmjena korisnika");
+        User userToEdit = dao.updateUser(user);
+        return userToEdit;
     }
 
     @POST

@@ -35,6 +35,51 @@ public class CustomerDAO {
 		return customers;
 	}
 	
+	public Customer update(User userEdit) {
+		loadCustomers(contextPath); 
+	    for (Customer customer : customers) {
+	        if (customer.getId() == userEdit.getId()) {
+	            customer.setUsername(userEdit.getUsername());
+	            customer.setPassword(userEdit.getPassword());
+	            customer.setBirthDate(userEdit.getBirthDate());
+	            customer.setGender(userEdit.getGender());
+	            customer.setName(userEdit.getName());
+	            customer.setSurname(userEdit.getSurname());
+	            saveAllCustomers();
+	    		loadCustomers(contextPath);
+	            return customer;
+	            } 
+	    }
+	    
+	    System.out.println("User not found: " + userEdit.getUsername());
+	    return null;
+	}
+	
+	private void saveAllCustomers() {
+	    try {
+	        String filePath = contextPath + "customers.txt";
+	        FileWriter writer = new FileWriter(filePath, false); 
+	        BufferedWriter bufferedWriter = new BufferedWriter(writer);
+	        for (Customer customer : customers) {
+	            String roleString = customer.getRole().toString();
+	            System.out.println(roleString);
+	        	bufferedWriter.write(customer.getId() + ";" +
+	                    customer.getUsername() + ";" +
+	                    customer.getPassword() + ";" +
+	                    customer.getName() + ";" +
+	                    customer.getSurname() + ";" +
+	                    customer.getGender() + ";" +
+	                    customer.getBirthDate().format(formatter) + ";" +
+	                    roleString + ";" +
+	                    customer.getPoints() + "\n");
+	        }
+	        bufferedWriter.flush();
+	        bufferedWriter.close();
+	    } catch (IOException e) {
+	        e.printStackTrace();
+	    }
+	}
+	
 	public Customer save(User user, String contextPath) {
 		loadCustomers(contextPath);
 		Customer customer = new Customer(user.getId(), user.getUsername(), user.getPassword(), user.getName(), user.getSurname(), user.getGender(), user.getBirthDate(), user.getRole());
@@ -47,6 +92,8 @@ public class CustomerDAO {
             String filePath = contextPath + "customers.txt"; // Use the provided path
             FileWriter writer = new FileWriter(filePath, true); // Open in append mode
             BufferedWriter bufferedWriter = new BufferedWriter(writer);
+            String roleString = customer.getRole().toString();
+            System.out.println(roleString);
             bufferedWriter.write(customer.getId() + ";" +
             		customer.getUsername() + ";" +
             		customer.getPassword() + ";" +
@@ -54,7 +101,7 @@ public class CustomerDAO {
             		customer.getSurname() + ";" +
             		customer.getGender() + ";" +
             		customer.getBirthDate().format(formatter) + ";" +
-            		customer.getRole() + ";" +
+            		roleString + ";" +
                     customer.getPoints() + "\n");
             bufferedWriter.flush(); // Ensure all data is written to the file
             bufferedWriter.close();
@@ -86,6 +133,7 @@ public class CustomerDAO {
 				String gender = st.nextToken().trim();
 				LocalDate birthDate = LocalDate.parse(st.nextToken().trim(), formatter); 
 				Role role = Role.valueOf(st.nextToken().trim());
+	            System.out.println(role);
 				int points = Integer.parseInt(st.nextToken().trim());
 				ShoppingCart shoppingCart = new ShoppingCart();
 				CustomerType customerType = new CustomerType();

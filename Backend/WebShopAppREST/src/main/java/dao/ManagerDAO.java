@@ -44,6 +44,27 @@ public class ManagerDAO {
     	
     	return availableManagers;
     }
+    
+    public Manager update(User userEdit) {
+	    System.out.println(contextPath);
+		loadManagers(contextPath); // Ensure users are loaded
+	    for (Manager manager : managers) {
+	        if (manager.getId() == userEdit.getId()) {
+	        	manager.setUsername(userEdit.getUsername());
+	        	manager.setPassword(userEdit.getPassword());
+	        	manager.setBirthDate(userEdit.getBirthDate());
+	        	manager.setGender(userEdit.getGender());
+	        	manager.setName(userEdit.getName());
+	        	manager.setSurname(userEdit.getSurname());
+	            saveAllManagers();
+	    		loadManagers(contextPath);
+	            return manager;
+	            } 
+	    }
+	    
+	    System.out.println("Manager not found: " + userEdit.getUsername());
+	    return null;
+	}
 
     public Manager save(User user, String contextPath) {
         loadManagers(contextPath);
@@ -129,6 +150,7 @@ public class ManagerDAO {
         BufferedReader in = null;
         try {
             File file = new File(contextPath + "/managers.txt");
+            System.out.println("Loading managers from: " + file.getAbsolutePath());
             in = new BufferedReader(new FileReader(file));
             String line;
             StringTokenizer st;

@@ -34,7 +34,7 @@
       ],
       view: new View({
         center: fromLonLat([props.longitude, props.latitude]),
-        zoom: 14,
+        zoom: 17,
       }),
     });
   });
@@ -52,10 +52,10 @@
   </script>
   
   <style scoped>
-  .map {
-    width: 100%;
-    height: 200px;
-    margin-top: 10px;
-  }
-  </style>
+.map {
+  width: 100%;
+  height: 400px; 
+  margin-top: 10px;
+}
+</style>
   
