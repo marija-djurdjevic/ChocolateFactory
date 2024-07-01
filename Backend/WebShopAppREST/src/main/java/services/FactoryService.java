@@ -142,11 +142,36 @@ public class FactoryService {
                                           @PathParam("chocolateId") int chocolateId, 
                                           @QueryParam("newAmount") int newAmount, 
                                           @Context HttpServletRequest request) {
-        // Izvucite token iz zaglavlja zahteva
-       
+    	 String token = tokenUtils.getToken(request);
+         System.out.println("Token: " + token);
+         if (token == null || token.isEmpty()) {
+             return Response.status(Response.Status.UNAUTHORIZED).entity("Token is missing").build();
+         }
 
-        // Ako je sve u redu, ažurirajte količinu čokolade
+         // Verifikujte token
+         Claims claims;
+         try {
+             claims = tokenUtils.parseToken(token);
+             if (claims == null) {
+                 return Response.status(Response.Status.UNAUTHORIZED).entity("Invalid token").build();
+             }
+         } catch (Exception e) {
+             e.printStackTrace();
+             return Response.status(Response.Status.UNAUTHORIZED).entity("Token parsing error").build();
+         }
+
+         // Proverite ulogu korisnika
+         String role = claims.get("role", String.class);
+         if (role == null || !"Worker".equals(role)) {
+             return Response.status(Response.Status.FORBIDDEN).entity("You do not have permission to perform this action").build();
+         }
+        
+         
+        String username = claims.getSubject();
         FactoryDAO dao = (FactoryDAO) ctx.getAttribute("factoryDAO");
+        if (!dao.isWorkerAtFactory(username, factoryId)) {
+            return Response.status(Response.Status.FORBIDDEN).entity("You are not the worker in this factory").build();
+        }
         System.out.println(newAmount);
         Chocolate updatedChocolate = dao.updateChocolateAmountInFactory(factoryId, chocolateId, newAmount);
 
@@ -156,6 +181,8 @@ public class FactoryService {
             return Response.status(Response.Status.BAD_REQUEST).entity("Factory or chocolate not found").build();
         }
     }
+
+
 
     @POST
     @Path("/{factoryId}/addWorker")

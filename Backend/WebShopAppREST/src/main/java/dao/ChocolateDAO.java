@@ -40,7 +40,12 @@ public class ChocolateDAO {
         if (chocolate != null) {
         	System.out.println(chocolate.getAmountOfChocolate());
             chocolate.setAmountOfChocolate(newAmount);
-        	System.out.println(chocolate.getAmountOfChocolate());
+            if(newAmount > 0) 
+            {
+            	chocolate.setAvailable(true);
+    		}
+            	
+            System.out.println(chocolate.getAmountOfChocolate());
             saveAllChocolates();
             return chocolate;
         }
