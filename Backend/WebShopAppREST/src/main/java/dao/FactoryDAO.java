@@ -27,7 +27,7 @@ public class FactoryDAO {
 	private LocationDAO locationDAO;
     private WorkerDAO workerDAO;
     private ManagerDAO managerDAO;
-
+    private UserDAO userDAO;
 	private String contextPath;
 
 	
@@ -37,6 +37,7 @@ public class FactoryDAO {
 		locationDAO = new LocationDAO(contextPath);
 		workerDAO = new WorkerDAO(contextPath);
 		managerDAO = new ManagerDAO(contextPath);
+		userDAO = new UserDAO(contextPath);
 		loadFactories(contextPath);
 		loadChocolatesForFactories();
 	}
@@ -51,50 +52,27 @@ public class FactoryDAO {
 		locationDAO.findAll();
 		loadFactories(contextPath);
 		loadChocolatesForFactories();
+		userDAO.findAll();
 		for(Factory f: factories) {
 			f.loadImageString();
 		}
 		return factories;
 	}
 	
-	public Chocolate updateChocolateAmountInFactory(int factoryId, int chocolateId, int newAmount) {
-	    loadFactories(contextPath);
-	    Factory factory = findFactory(factoryId);
-	    if (factory != null) {
-	        // Pronađi čokoladu u DAO-u i ažuriraj samo količinu
-	        Chocolate chocolate = chocolateDAO.findChocolate(chocolateId);
-	        if (chocolate != null) {
-	            // Spremi trenutne vrijednosti koje ne želimo mijenjati
-	            String name = chocolate.getName();
-	            double price = chocolate.getPrice();
-	            String chocolateSort = chocolate.getChocolateSort();
-	            factoryId = chocolate.getFactoryId();
-	            String chocolateType = chocolate.getChocolateType();
-	            int gramsOfChocolate = chocolate.getGramsOfChocolate();
-	            String chocolateDescription = chocolate.getChocolateDescription();
-	            String imagePath = chocolate.getImagePath();
-	            boolean available = chocolate.isAvailable();
 
-	            // Ažurirajamo samo količinu
-	            Chocolate updatedChocolate = chocolateDAO.updateChocolateAmount(chocolateId, newAmount);
-	            if (updatedChocolate != null) {
-	                // Vrati originalne vrijednosti koje nisu mijenjane
-	                updatedChocolate.setName(name);
-	                updatedChocolate.setPrice(price);
-	                updatedChocolate.setChocolateSort(chocolateSort);
-	                updatedChocolate.setFactoryId(factoryId);
-	                updatedChocolate.setChocolateType(chocolateType);
-	                updatedChocolate.setGramsOfChocolate(gramsOfChocolate);
-	                updatedChocolate.setChocolateDescription(chocolateDescription);
-	                updatedChocolate.setImagePath(imagePath);
-	                updatedChocolate.setAvailable(available);
-
-	                // Ponovo učitaj čokolade za fabriku
-	                loadChocolatesForFactories();
-	                return updatedChocolate;
+	   public Chocolate updateChocolateAmountInFactory(int factoryId, int chocolateId, int newAmount) {
+	        loadFactories(contextPath);
+	        Factory factory = findFactory(factoryId);
+	        if (factory != null) {
+	        	System.out.println(newAmount);
+	            Chocolate chocolate = chocolateDAO.updateChocolateAmount(chocolateId, newAmount);
+	            if (chocolate != null) {
+	            	System.out.println(chocolate.getName());
+	                loadChocolatesForFactories(); 
+	                return chocolate;
 	            }
 	        }
-	    }
+	    
 	    return null;
 	}
 
@@ -104,6 +82,7 @@ public class FactoryDAO {
 		loadChocolatesForFactories();
 		for (Factory factory : factories) {
 			if (factory.getId() == id) {
+				factory.loadImageString();
 				return factory;
 			}
 		}

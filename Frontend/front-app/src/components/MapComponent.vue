@@ -38,7 +38,7 @@
       ],
       view: new View({
         center: fromLonLat([0, 0]),
-        zoom: 2,
+        zoom: 0,
       }),
     });
   
@@ -62,7 +62,7 @@
             latitude: coordinates[1],
             address: formattedAddress,
           };
-          map.value.getView().animate({ center: event.coordinate, zoom: 14 });
+          map.value.getView().animate({ center: event.coordinate, zoom: 17 });
         });
     });
   });
@@ -89,7 +89,7 @@
             latitude: parseFloat(result.lat),
             address: formattedAddress,
           };
-          map.value.getView().animate({ center: fromLonLat([parseFloat(result.lon), parseFloat(result.lat)]), zoom: 14 });
+          map.value.getView().animate({ center: fromLonLat([parseFloat(result.lon), parseFloat(result.lat)]), zoom: 17 });
         } else {
           alert('Location not found');
         }

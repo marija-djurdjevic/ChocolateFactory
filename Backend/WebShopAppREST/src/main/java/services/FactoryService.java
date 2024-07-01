@@ -168,11 +168,15 @@ public class FactoryService {
         }
         String username = claims.getSubject();
         FactoryDAO dao = (FactoryDAO) ctx.getAttribute("factoryDAO");
+
         /*if (!dao.isManagerOfFactory(username, factoryId)) {
             return Response.status(Response.Status.FORBIDDEN).entity("You are not the manager of this factory").build();
         }*/
        
         // Ažurirajte količinu čokolade
+
+        System.out.println(newAmount);
+
         Chocolate updatedChocolate = dao.updateChocolateAmountInFactory(factoryId, chocolateId, newAmount);
 
         if (updatedChocolate != null) {

@@ -22,10 +22,16 @@ public class UserDAO {
 	private ArrayList<User> users = new ArrayList<>();
 	private DateTimeFormatter formatter =  DateTimeFormatter.ofPattern("yyyy-MM-dd");
 	private String contextPath;
-
+	private WorkerDAO workerDAO;
+	private ManagerDAO managerDAO;
+	private CustomerDAO customerDAO;
+ 
 	public UserDAO(String contextPath) {
 		loadUsers(contextPath);
 		this.contextPath = contextPath;
+	    workerDAO = new WorkerDAO(contextPath);
+		managerDAO = new ManagerDAO(contextPath);
+		customerDAO = new CustomerDAO(contextPath);
 	}
 	
 	public ArrayList<User> findAll() {
@@ -136,6 +142,92 @@ public class UserDAO {
 	            } else {
 	                System.out.println("Password does not match for: " + username);
 	            }
+	        }
+	    }
+	    System.out.println("User not found: " + username);
+	    return null;
+	}
+	
+	public User updateUser(User userEdit) {
+	    loadUsers(contextPath); // Ensure users are loaded
+	    System.out.println(contextPath);
+	    System.out.println(userEdit.getId());
+	    System.out.println(userEdit.getRole());
+	    for (User user : users) {
+	    	System.out.println(user.getId());
+	        if (user.getId() == userEdit.getId()) {
+	            System.out.println("user id matches for: " + userEdit.getId());
+	            user.setUsername(userEdit.getUsername());
+	            user.setPassword(userEdit.getPassword());
+	            user.setBirthDate(userEdit.getBirthDate());
+	            user.setGender(userEdit.getGender());
+	            user.setName(userEdit.getName());
+	            user.setSurname(userEdit.getSurname());
+	            if(user.getRole() == Role.valueOf("Administrator")) {
+	            	updateAdministrator(userEdit);
+	            }
+	            else if(user.getRole() == Role.valueOf("Customer")) {
+	            	System.out.println("jeste customer");
+	            	customerDAO.update(userEdit);
+	            }
+	            else if(user.getRole() == Role.valueOf("Manager")) {
+	            	System.out.println("jeste menadzer");
+	            	managerDAO.update(userEdit);
+	            }
+	            else if(user.getRole() == Role.valueOf("Worker")) {
+	            	System.out.println("jeste worker");
+	            	workerDAO.update(userEdit);
+	            }
+	            else {
+	            	System.out.println("invalid user");
+	            }
+	            
+	            saveAllUsers();
+	    		loadUsers(contextPath);
+	            return user;
+	            }
+	        
+	    }
+	    System.out.println("User not found: " + userEdit.getUsername());
+	    return null;
+	}
+	
+	
+	public void updateAdministrator(User user) {
+		
+	}
+	
+	
+	private void saveAllUsers() {
+	    try {
+	        String filePath = contextPath + "users.txt";
+	        FileWriter writer = new FileWriter(filePath, false); 
+	        BufferedWriter bufferedWriter = new BufferedWriter(writer);
+	        for (User user : users) {
+	            String roleString = user.getRole().toString();
+	        	bufferedWriter.write(user.getId() + ";" +
+	                    user.getUsername() + ";" +
+	                    user.getPassword() + ";" +
+	                    user.getName() + ";" +
+	                    user.getSurname() + ";" +
+	                    user.getGender() + ";" +
+	                    user.getBirthDate().format(formatter) + ";" +
+	                    roleString + "\n");
+	        }
+	        bufferedWriter.flush();
+	        bufferedWriter.close();
+	    } catch (IOException e) {
+	        e.printStackTrace();
+	    }
+	}
+	
+	public User authenticateUserFromUsername(String username) {
+	    loadUsers(contextPath); // Ensure users are loaded
+	    for (User user : users) {
+	        System.out.println("Checking user: " + user.getUsername());
+	        if (user.getUsername().equals(username)) {
+	            System.out.println("Username matches for: " + username);
+	            return user;
 	        }
 	    }
 	    System.out.println("User not found: " + username);

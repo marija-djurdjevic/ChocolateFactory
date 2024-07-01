@@ -1,8 +1,12 @@
 <template>
   <div class="factory-display">
     <header class="status-bar">
+      <div v-if="isLoggedIn" class="user-container">
+        <img src="/assets/user.png" style="width: 40px; height: 40px;" @click="showUserDetails" />
+        <span class="username">{{ username }}</span>
+      </div>
       <h1>Factory Display</h1>
-      <button v-if="isLoggedIn && isAdmin" class="admin-button" @click="goToRegisterManager">New manager</button>
+      <button v-if="isLoggedIn && isAdmin" class="admin-button" @click="goToRegisterManager">New Manager</button>
       <button v-if="!isLoggedIn" class="login-button" @click="goToLogin">Login</button>
       <button v-if="isLoggedIn && isAdmin" class="admin-button" @click="goToAddFactory">Add Factory</button>
       <button v-if="isLoggedIn" class="login-button" @click="logout">Logout</button>
@@ -85,6 +89,7 @@ const showOpenFactories = ref('');
 const isLoggedIn = ref(false);
 const isAdmin = ref(false);
 const isManager = ref(false);
+const username = ref(localStorage.getItem("username") || '');
 const role = localStorage.getItem("role");
 
 onMounted(() => {
@@ -117,6 +122,10 @@ function checkManager() {
 
 function goToRegisterManager() {
   router.push('/register');
+}
+
+function showUserDetails() {
+  router.push('/editUser');
 }
 
 async function loadChocolatesForFactory(factory) {
@@ -287,13 +296,13 @@ function goToLogin() {
 }
 
 function logout() {
-  localStorage.removeItem('token'); // Uklanjanje tokena iz localStorage
-  localStorage.removeItem('username'); // Uklanjanje tokena iz localStorage
-  localStorage.removeItem('role'); // Uklanjanje tokena iz localStorage
-  isLoggedIn.value = false; // Postavljanje stanja prijavljenosti na false
-  isAdmin.value = false; // Resetovanje admin statusa
+  localStorage.removeItem('token'); 
+  localStorage.removeItem('username'); 
+  localStorage.removeItem('role'); 
+  isLoggedIn.value = false; 
+  isAdmin.value = false; 
   isManager.value = false;
-  router.push('/'); // Navigacija na početnu stranicu (fabrike)
+  router.push('/'); 
 }
 
 function goToAddFactory() {
@@ -336,6 +345,20 @@ body {
   justify-content: center; /* Center the search bar */
   gap: 10px; /* Add some space between elements */
   margin-bottom: 20px;
+}
+
+.user-container {
+  display: flex;
+  align-items: center;
+}
+
+.user-container img {
+  cursor: pointer;
+  border-radius: 50%;
+}
+
+.user-container .username {
+  margin-left: 10px; /* Adjust the spacing as needed */
 }
 
 .search-bar input {
@@ -537,6 +560,13 @@ body {
 
 .button-group input:hover {
   background-color: #ff4500; 
+}
+
+.user img {
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  border-radius: 50%;
 }
 
 </style>
