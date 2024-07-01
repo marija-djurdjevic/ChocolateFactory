@@ -21,7 +21,7 @@
     <div class="chocolates-list">
       <h2>Chocolates</h2>
       <div class="chocolate-items">
-        <div v-for="(chocolate, index) in chocolates" :key="chocolate.id" class="chocolate-item" :style="{ backgroundColor: index % 2 === 0 ? '#ffe4b5' : '#FFC9AD' }">
+        <div v-for="(chocolate, index) in filterChocolates()" :key="chocolate.id" class="chocolate-item" :style="{ backgroundColor: index % 2 === 0 ? '#ffe4b5' : '#FFC9AD' }">
           <div class="chocolate-details">
             <h3>{{ chocolate.name }}</h3>
             <p><strong>Sort:</strong> {{ chocolate.chocolateSort }}</p>
@@ -35,6 +35,7 @@
             <img :src="'data:image/jpeg;base64,' + chocolate.imageString" alt="Chocolate Image" />
           </div>
           <div class="button-group">
+            <input v-if="isCustomer" v-on:click="AddToCart(chocolate)" type="submit" value="Add to cart">
             <input v-if="isManager" v-on:click="editChocolate(chocolate)" type="submit" value="Edit">
             <input v-if="isManager" v-on:click="deleteChocolate(chocolate.id)" type="submit" value="Delete">
             <input v-if="isWorker" v-on:click="openEditAmountDialog(chocolate)" type="submit" value="Edit Amount"> 
@@ -58,6 +59,7 @@ const factory = ref({});
 const chocolates = ref([]);
 const isManager = ref(false); 
 const isWorker = ref(false);
+const isCustomer = ref(false);
 const role = localStorage.getItem("role");
 
 onMounted(() => {
@@ -65,7 +67,16 @@ onMounted(() => {
   loadChocolates();
   isManager.value = role === 'Manager';
   isWorker.value = role === 'Worker';
+  isCustomer.value = role === 'Customer';
+
 });
+
+function filterChocolates() {
+  if (isCustomer.value) {
+    return chocolates.value.filter(chocolate => chocolate.available);
+  }
+  return chocolates.value;
+}
 
 async function loadFactory() {
   try {
