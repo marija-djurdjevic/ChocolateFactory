@@ -123,6 +123,7 @@ async function updateChocolateAmount(chocolateId, newAmount) {
     const index = chocolates.value.findIndex((choc) => choc.id === chocolateId);
     if (index !== -1) {
       chocolates.value[index] = updatedChocolate;
+      chocolates.value[index].available = updatedChocolate.amountOfChocolate > 0;
     }
   } catch (error) {
     console.error('Error updating chocolate amount:', error);
