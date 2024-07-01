@@ -27,7 +27,7 @@ public class FactoryDAO {
 	private LocationDAO locationDAO;
     private WorkerDAO workerDAO;
     private ManagerDAO managerDAO;
-
+    private UserDAO userDAO;
 	private String contextPath;
 
 	
@@ -37,6 +37,7 @@ public class FactoryDAO {
 		locationDAO = new LocationDAO(contextPath);
 		workerDAO = new WorkerDAO(contextPath);
 		managerDAO = new ManagerDAO(contextPath);
+		userDAO = new UserDAO(contextPath);
 		loadFactories(contextPath);
 		loadChocolatesForFactories();
 	}
@@ -51,6 +52,7 @@ public class FactoryDAO {
 		locationDAO.findAll();
 		loadFactories(contextPath);
 		loadChocolatesForFactories();
+		userDAO.findAll();
 		for(Factory f: factories) {
 			f.loadImageString();
 		}

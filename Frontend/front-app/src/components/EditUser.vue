@@ -1,11 +1,11 @@
 <template>
     <div class="register-container">
       <header class="status-bar">
-        <h1>Registration</h1>
+        <h1>User profile</h1>
       </header>
       <div class="register-form">
-        <h2>Create an Account</h2>
-        <form @submit.prevent="register">
+        <h2>Personal details</h2>
+        <form @submit.prevent="submitForm">
           <div class="form-group">
             <label for="username">Username</label>
             <input type="text" id="username" v-model="user.username" required>
@@ -37,9 +37,10 @@
             <label for="birthDate">Date of Birth</label>
             <input type="date" id="birthDate" v-model="user.birthDate" required>
           </div>
-          <div class="form-group">
-            <button type="submit">Register</button>
-          </div>
+          <div class="form-group buttons">
+          <button type="submit">Submit changes</button>
+          <button type="button" @click="CloseForm">Close</button>
+        </div>
         </form>
       </div>
     </div>
@@ -49,7 +50,8 @@
   import { ref } from 'vue';
   import { useRouter } from 'vue-router';
   import axios from 'axios';
-
+  import { onMounted } from 'vue';
+  
   const confirmPassword = ref('');
 
   const user = ref({
@@ -61,41 +63,81 @@
     birthDate: ''
   });
   
+  const username = ref(localStorage.getItem("username") || '');
+  const role = localStorage.getItem('role');
   const router = useRouter();
   
-  const role = localStorage.getItem('role');
-  const apiUrl = role === 'Administrator' ? 'http://localhost:8080/WebShopAppREST/rest/users/saveManager' : 'http://localhost:8080/WebShopAppREST/rest/users/saveCustomer';
+  onMounted(() => { 
+    loadUser();
+   });
 
-  function register() {
-    if (user.value.password !== confirmPassword.value) {
-      alert('Passwords do not match!');
-      return;
+  function loadUser() {
+    console.log(user.value.username);
+    axios.get(`http://localhost:8080/WebShopAppREST/rest/users/authenticateUser?username=${username.value}`)
+    .then(response => {
+      user.value = response.data;
+      console.log(user.value.username);
+  })
+  .catch(error => {
+    console.error('Login failed:', error);
+    });
+ }
+
+ function logout() {
+  localStorage.removeItem('token'); 
+  localStorage.removeItem('username'); 
+  localStorage.removeItem('role'); 
+}
+
+const axiosInstance = axios.create({
+  baseURL: 'http://localhost:8080/WebShopAppREST/rest',
+  withCredentials: true, 
+});
+
+ function login() {
+  console.log(user.value.username);
+  axiosInstance.post(`http://localhost:8080/WebShopAppREST/rest/users/logging?username=${user.value.username}&password=${user.value.password}`)
+    .then(response => {
+      const token = response.data.token; 
+      console.log(token);
+    if (token) {
+      localStorage.setItem('token', token);
+      localStorage.setItem('username', response.data.username);
+      localStorage.setItem('role', response.data.role);
+      axiosInstance.defaults.headers.common['Authorization'] = `${token}`;
+      router.push('/');
+    } else {
+      console.error('Token not found in response:', response);
+      alert('Token not found in response');
+      router.push('/');
     }
+  })
+  .catch(error => {
+    console.error('Login failed:', error);
+    alert('Login failed, please check your credentials');
+    });
+}
 
-    if(role == 'Administrator'){
-      const token = localStorage.getItem('token');
-      axios.post(apiUrl, user.value, {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
+ const submitForm = () => {
+  if (user.value.password !== confirmPassword.value) {
+    alert('Passwords do not match!');
+    return;
+  }
+
+  axios.post(`http://localhost:8080/WebShopAppREST/rest/users/edit`, user.value)
+    .then(response => {
+      alert('User profile updated successfully!');
+      logout();
+      login();
     })
-    .then(response => {
-        alert('Manager successfully registered!');
-        router.push('/');
-    }).catch(error => {
-      console.error('Error adding user:', error);
+    .catch(error => {
+      console.error('Error updating user profile:', error);
     });
-   }
-    else{
-      axios.post(apiUrl, user.value)
-    .then(response => {
-        alert('User successfully registered!');
-        router.push('/');
-      }).catch(error => {
-      console.error('Error adding user:', error);
-    });
-  }
-  }
+};
+
+ function CloseForm(){
+    router.push('/');
+ }
   </script>
   
   <style>
@@ -145,19 +187,24 @@
     border: 1px solid #ccc;
   }
   
-  .form-group button {
-    width: 100%;
-    padding: 10px;
-    background-color: #ff6347; /* Tomato */
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-  }
-  
-  .form-group button:hover {
-    background-color: #ff4500; /* OrangeRed */
-  }
+  .form-group.buttons {
+  display: flex;
+  justify-content: space-between;
+}
+
+.form-group.buttons button {
+  width: 48%;
+  padding: 10px;
+  background-color: #ff6347; /* Tomato */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.form-group.buttons button:hover {
+  background-color: #ff4500; /* OrangeRed */
+}
   </style>
   

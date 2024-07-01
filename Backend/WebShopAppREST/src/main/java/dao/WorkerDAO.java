@@ -11,7 +11,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 
+import beans.roles.Customer;
 import beans.roles.Worker;
+import beans.User;
 import beans.enums.Role;
 
 public class WorkerDAO {
@@ -28,6 +30,53 @@ public class WorkerDAO {
         loadWorkers(contextPath);
         return workers;
     }
+    
+    public Worker update(User userEdit) {
+		loadWorkers(contextPath); 
+		System.out.println(userEdit.getUsername());
+		System.out.println(userEdit.getId());
+	    for (Worker worker : workers) {
+	        if (worker.getId() == userEdit.getId()) {
+	        	System.out.println("pronadjen worker");
+	        	worker.setUsername(userEdit.getUsername());
+	        	worker.setPassword(userEdit.getPassword());
+	        	worker.setBirthDate(userEdit.getBirthDate());
+	        	worker.setGender(userEdit.getGender());
+	        	worker.setName(userEdit.getName());
+	        	worker.setSurname(userEdit.getSurname());
+	            saveAllWorkers();
+	    		loadWorkers(contextPath);
+	            return worker;
+	            } 
+	    }
+	    
+	    System.out.println("User not found: " + userEdit.getUsername());
+	    return null;
+	}
+    
+    private void saveAllWorkers() {
+	    try {
+	        String filePath = contextPath + "workers.txt";
+	        FileWriter writer = new FileWriter(filePath, false); 
+	        BufferedWriter bufferedWriter = new BufferedWriter(writer);
+	        for (Worker worker : workers) {
+	            String roleString = worker.getRole().toString();
+	        	bufferedWriter.write(worker.getId() + ";" +
+	        			worker.getUsername() + ";" +
+	        			worker.getPassword() + ";" +
+	        			worker.getName() + ";" +
+	        			worker.getSurname() + ";" +
+	        			worker.getGender() + ";" +
+	        			worker.getBirthDate().format(formatter) + ";" +
+	                    roleString + ";" +
+	                    worker.getFactoryId() + "\n");
+	        }
+	        bufferedWriter.flush();
+	        bufferedWriter.close();
+	    } catch (IOException e) {
+	        e.printStackTrace();
+	    }
+	}
 
     public Worker save(Worker worker, String contextPath) {
         loadWorkers(contextPath);
@@ -41,6 +90,7 @@ public class WorkerDAO {
             worker.setRole(Role.Worker);
             
             BufferedWriter workersBufferedWriter = new BufferedWriter(workersWriter);
+            String roleString1 = worker.getRole().toString();
             workersBufferedWriter.write(worker.getId() + ";" +
                     worker.getUsername() + ";" +
                     worker.getPassword() + ";" +
@@ -48,7 +98,7 @@ public class WorkerDAO {
                     worker.getSurname() + ";" +
                     worker.getGender() + ";" +
                     worker.getBirthDate().format(formatter) + ";" +
-                    worker.getRole() + ";" +
+                    roleString1 + ";" +
                     worker.getFactoryId() + "\n");
             workersBufferedWriter.flush();
             workersBufferedWriter.close();
