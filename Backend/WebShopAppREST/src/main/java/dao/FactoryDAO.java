@@ -60,21 +60,21 @@ public class FactoryDAO {
 	}
 	
 
-	   public Chocolate updateChocolateAmountInFactory(int factoryId, int chocolateId, int newAmount) {
-	        loadFactories(contextPath);
-	        Factory factory = findFactory(factoryId);
-	        if (factory != null) {
-	        	System.out.println(newAmount);
-	            Chocolate chocolate = chocolateDAO.updateChocolateAmount(chocolateId, newAmount);
-	            if (chocolate != null) {
-	            	System.out.println(chocolate.getName());
-	                loadChocolatesForFactories(); 
-	                return chocolate;
-	            }
-	        }
-	    
-	    return null;
-	}
+	public Chocolate updateChocolateAmountInFactory(int factoryId, int chocolateId, int newAmount) {
+        loadFactories(contextPath);
+        Factory factory = findFactory(factoryId);
+        if (factory != null) {
+        	System.out.println(newAmount);
+            Chocolate chocolate = chocolateDAO.updateChocolateAmount(chocolateId, newAmount);
+            if (chocolate != null) {
+            	System.out.println(chocolate.getName());
+                loadChocolatesForFactories(); 
+                return chocolate;
+            }
+        }
+        return null;
+    }
+
 
 
 	public Factory findFactory(int id) {
@@ -222,6 +222,25 @@ public class FactoryDAO {
         
         // Provjeriti da li je pronađeni manager zadužen za traženu fabriku
         if (manager != null && manager.getFactoryId() == factoryId) {
+            return true;
+        }
+        
+        return false;
+    }
+    public boolean isWorkerAtFactory(String username, int factoryId) {
+        loadFactories(contextPath);
+        
+        // Pronaći managera sa datim username-om
+        Worker worker = null;
+        for (Worker w : workerDAO.findAll()) {
+            if (w.getUsername().equals(username)) {
+                worker = w;
+                break;
+            }
+        }
+        
+        // Provjeriti da li je pronađeni manager zadužen za traženu fabriku
+        if (worker != null && worker.getFactoryId() == factoryId) {
             return true;
         }
         

@@ -42,6 +42,9 @@
         </div>
       </div>
     </div>
+    <div v-if="errorMessage" class="error-message">
+      <p>{{ errorMessage }}</p>
+    </div>
   </div>
 </template>
 
@@ -59,6 +62,7 @@ const chocolates = ref([]);
 const isManager = ref(false); 
 const isWorker = ref(false);
 const role = localStorage.getItem("role");
+const errorMessage = ref('');
 
 onMounted(() => {
   loadFactory();
@@ -112,13 +116,13 @@ function openEditAmountDialog(chocolate) {
 async function updateChocolateAmount(chocolateId, newAmount) {
   try {
     console.log(newAmount);
-    const token = localStorage.getItem('token'); 
+    const token = localStorage.getItem('token');
     const response = await axios.put(
       `http://localhost:8080/WebShopAppREST/rest/factories/${factoryId}/updateChocolateAmount/${chocolateId}?newAmount=${newAmount}`,
-      {}, 
+      {},
       {
         headers: {
-          Authorization: `Bearer ${token}`, 
+          Authorization: `Bearer ${token}`,
         },
       }
     );
@@ -128,8 +132,14 @@ async function updateChocolateAmount(chocolateId, newAmount) {
       chocolates.value[index] = updatedChocolate;
       chocolates.value[index].available = updatedChocolate.amountOfChocolate > 0;
     }
+    errorMessage.value = ''; // Reset error message on successful update
   } catch (error) {
     console.error('Error updating chocolate amount:', error);
+    if (error.response && error.response.status === 403) {
+      errorMessage.value = 'You do not have permission to update the chocolate amount in this factory.';
+    } else {
+      errorMessage.value = 'An error occurred while updating the chocolate amount.';
+    }
   }
 }
 
