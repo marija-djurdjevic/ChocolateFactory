@@ -9,6 +9,7 @@ import AddFactoryView from '@/views/AddFactoryView.vue';
 import ManagerRegistration from '@/views/ManagerRegistrationView.vue';
 import AddWorkerView from '@/views/AddWorkerView.vue';
 import EditUserView from '@/views/EditUserView.vue';
+import UsersView from '@/views/UsersView.vue';
 const routes = [
   {
     path: '/',
@@ -39,6 +40,11 @@ const routes = [
     path: '/editChocolate',
     name: 'editChocolate',
     component: EditChocolateView
+  },
+  {
+    path: '/users',
+    name: 'users',
+    component: UsersView
   },
   {
     path: '/addFactory',
