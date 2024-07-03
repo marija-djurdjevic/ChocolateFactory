@@ -2,10 +2,11 @@
   <div class="factory-display">
     <header class="status-bar">
       <div v-if="isLoggedIn" class="user-container">
-        <img src="/assets/user.png" style="width: 40px; height: 40px;" @click="showUserDetails" />
+        <img class="user-button" src="/assets/profile.png" style="width: 40px; height: 40px;" @click="showUserDetails" />
         <span class="username">{{ username }}</span>
       </div>
       <h1>Factory Display</h1>
+      <img v-if="isLoggedIn && isCustomer" class="customer-button" src="/assets/cart.png" style="width: 40px; height: 40px;" @click="goToShoppingCart" />
       <button v-if="isLoggedIn && isAdmin" class="admin-button" @click="goToRegisterManager">New Manager</button>
       <button v-if="!isLoggedIn" class="login-button" @click="goToLogin">Login</button>
       <button v-if="isLoggedIn && isAdmin" class="admin-button" @click="goToAddFactory">Add Factory</button>
@@ -89,6 +90,7 @@ const showOpenFactories = ref('');
 const isLoggedIn = ref(false);
 const isAdmin = ref(false);
 const isManager = ref(false);
+const isCustomer = ref(false);
 const username = ref(localStorage.getItem("username") || '');
 const role = localStorage.getItem("role");
 
@@ -97,7 +99,8 @@ onMounted(() => {
   console.log(localStorage.getItem("role"));
   isLoggedIn.value = checkLoggedIn();
   isAdmin.value = checkAdmin();
-  isManager.value = checkManager(); 
+  isManager.value = checkManager();
+  isCustomer.value = role === 'Customer';
   console.log(isAdmin.value);
   loadFactories();
 });
@@ -126,6 +129,10 @@ function goToRegisterManager() {
 
 function showUserDetails() {
   router.push('/editUser');
+}
+
+function goToShoppingCart() {
+  router.push('shoppingCart');
 }
 
 async function loadChocolatesForFactory(factory) {
@@ -418,6 +425,35 @@ body {
 
 .admin-button:hover {
   background-color: #ff4500; 
+}
+
+.user-button {
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  font-size: 1rem;
+  width: 120px; 
+  height: 40px;  
+}
+
+.user-button:hover {
+  background-color: #ff4500; 
+}
+
+.customer-button {
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  font-size: 1rem;
+  width: 120px; 
+  height: 40px; 
+  margin-right: 10px; 
 }
 
 .filter-bar {
