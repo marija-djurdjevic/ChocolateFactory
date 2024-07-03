@@ -78,6 +78,17 @@ public class ChocolateService {
         return dao.updateChocolate(chocolate);
     }
     
+    @POST
+    @Path("/editChocoAmount")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Chocolate editChocolateAmount(@QueryParam("id") int id, @QueryParam("amount") int amount) {
+    	System.out.println("DOBAVLJENI ID JE  " + id);
+    	System.out.println("DOBAVLJENI AMOUNT JE " + amount);
+        ChocolateDAO dao = (ChocolateDAO) ctx.getAttribute("chocolateDAO");
+        return dao.updateChocolateAmount(id, amount);
+    }
+    
     @DELETE
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)

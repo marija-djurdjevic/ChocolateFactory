@@ -29,7 +29,6 @@
             <p><strong>Weight:</strong> {{ chocolate.gramsOfChocolate }} grams</p>
             <p><strong>Description:</strong> {{ chocolate.chocolateDescription }}</p>
             <p><strong>Status:</strong> {{ chocolate.available ? 'Available' : 'Not Available' }}</p>
-            <p><strong>Amount:</strong> {{ chocolate.amountOfChocolate }}</p>
           </div>
           <div class="chocolate-image">
             <img :src="'data:image/jpeg;base64,' + chocolate.imageString" alt="Chocolate Image" />
@@ -50,6 +49,9 @@
     </div>
     <div v-if="errorMessage" class="error-message">
       <p>{{ errorMessage }}</p>
+    </div>
+    <div v-if="isCartCreated" class="shopping-cart-button">
+      <button class="shoppinggoto-button" @click="GoToShoppingCart">See shopping cart</button>
     </div>
   </div>
 </template>
@@ -73,6 +75,7 @@ const role = localStorage.getItem("role");
 const errorMessage = ref('');
 const amount = ref(1);
 const username = ref(localStorage.getItem("username") || '');
+const isCartCreated = ref(false); 
 
 const user = ref({
     username: '',
@@ -174,6 +177,7 @@ async function loadChocolates() {
 
 function AddToCart(chocolateId, amountOfChocolate) {
   loadCart(chocolateId, amountOfChocolate);
+  isCartCreated.value = true; 
 }
 
 function loadCart(chocolateId, amountOfChocolate) {
@@ -181,11 +185,7 @@ function loadCart(chocolateId, amountOfChocolate) {
     axios.get(`http://localhost:8080/WebShopAppREST/rest/shoppingCarts/getByUserId?userId=${user.value.id}`)
     .then(response => {
         shoppingCart.value = response.data;
-        console.log("soping korpa vrijednost u fcokolaatees" + shoppingCart.value);
-        console.log(shoppingCart.value);
         if(!shoppingCart.value || Object.keys(shoppingCart.value).length === 0){
-            console.log("usao gdje treba jebemliga");
-            console.log("user value id" + user.value.id)
             newShoppingCart.value.customerId = user.value.id;
             const token = localStorage.getItem('token');
             axios.post('http://localhost:8080/WebShopAppREST/rest/shoppingCarts/save', newShoppingCart.value, {
@@ -195,7 +195,6 @@ function loadCart(chocolateId, amountOfChocolate) {
             })
             .then(response => {
             if (response.status === 200) {
-                alert('Shopping cart added successfully!');
                 saveCartChocolate(chocolateId, amountOfChocolate);
             } else {
                 console.error('Error adding cart:', response.data);
@@ -215,10 +214,6 @@ function loadCart(chocolateId, amountOfChocolate) {
  }
 
 function saveCartChocolate(chocolateId, amountOfChocolate) {
-  console.log("chocoo id" + chocolateId);
-  console.log("amount of chocoo" + amountOfChocolate);
-  console.log('id cokolade je ' + chocolateId);
-  console.log("new shop cart cust id" + newShoppingCart.value.customerId)
   if(newShoppingCart.value.customerId !== -1){
     cartChocolate.value.shoppingCartId = newShoppingCart.value.id;
   }
@@ -228,7 +223,6 @@ function saveCartChocolate(chocolateId, amountOfChocolate) {
 
   cartChocolate.value.chocolateId = chocolateId;
   cartChocolate.value.amount = chocolateAmounts.value[chocolateId];
-  console.log("amount je " + cartChocolate.value.amount);
   const token = localStorage.getItem('token');
   axios.post('http://localhost:8080/WebShopAppREST/rest/cartChocolates/save', cartChocolate.value, {
     headers: {
@@ -237,7 +231,6 @@ function saveCartChocolate(chocolateId, amountOfChocolate) {
   })
   .then(response => {
     if (response.status === 200) {
-      alert('CartChocolate added successfully!');
       console.log(newShoppingCart.value.customerId);
       if(newShoppingCart.value.customerId === -1){
         editShoppingCart(shoppingCart);
@@ -264,7 +257,6 @@ function editShoppingCart(shoppingCart) {
       })
       .then(response => {
       if (response.status === 200) {
-          alert('Shopping cart edited successfully!');
       } else {
           console.error('Error editing cart:', response.data);
       }
@@ -283,7 +275,6 @@ function editNewShoppingCart(newShoppingCart) {
       })
       .then(response => {
       if (response.status === 200) {
-          alert('New shopping cart edited successfully!');
       } else {
           console.error('Error editing new cart:', response.data);
       }
@@ -320,9 +311,10 @@ function openEditAmountDialog(chocolate) {
 }
 
 async function updateAmountOfChocolateNormal(chocolateId, amountOfChocolate){
-  console.log("cudna amount" + chocolateAmounts.value[chocolateId]);
   amountOfChocolate = amountOfChocolate - chocolateAmounts.value[chocolateId];
-  console.log("nova amouunt " + amountOfChocolate);
+  if(amountOfChocolate === 0){
+    chocolates.value = chocolates.value.filter(chocolatee => chocolatee.id !== chocolateId);
+  }
   const token = localStorage.getItem('token');
   const response = await axios.put(
       `http://localhost:8080/WebShopAppREST/rest/factories/${factoryId}/updateChocolateAmount/${chocolateId}?newAmount=${amountOfChocolate}`,
@@ -334,8 +326,6 @@ async function updateAmountOfChocolateNormal(chocolateId, amountOfChocolate){
       }
     ).then(response => {
     if (response.status === 200) {
-      alert('Amount of chocolate updated successfully!');
-      GoToShoppingCart();
     } else {
       console.error('Error updating chocolate:', response.data);
     }
@@ -364,7 +354,7 @@ async function updateChocolateAmount(chocolateId, newAmount) {
       chocolates.value[index] = updatedChocolate;
       chocolates.value[index].available = updatedChocolate.amountOfChocolate > 0;
     }
-    errorMessage.value = ''; // Reset error message on successful update
+    errorMessage.value = ''; 
   } catch (error) {
     console.error('Error updating chocolate amount:', error);
     if (error.response && error.response.status === 403) {
@@ -384,8 +374,19 @@ async function updateChocolateAmount(chocolateId, newAmount) {
   min-height: 100vh;
 }
 
+ .shopping-cart-button {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: #FFC9AD;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
 .status-bar {
-  background-color: #FFC9AD; /* Bisque */
+  background-color: #FFC9AD;  
   color: #333;
   padding: 10px;
   margin-bottom: 20px;
@@ -398,7 +399,7 @@ async function updateChocolateAmount(chocolateId, newAmount) {
 .user-container {
   display: flex;
   align-items: center;
-  justify-content: center; /* Centriranje dugmadi */
+  justify-content: center; 
 }
 
 .user-container img {
@@ -417,6 +418,13 @@ async function updateChocolateAmount(chocolateId, newAmount) {
   margin: 0 10px;
   width: 120px; 
   height: 40px;  
+}
+
+.shoppinggoto-button {
+  background-color: #ff6347;
+  color: blanchedalmond;  
+  font-weight: bold;
+
 }
 
 .user-button:hover {
@@ -472,6 +480,7 @@ async function updateChocolateAmount(chocolateId, newAmount) {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease;
   cursor: pointer;
+  height: 550px; 
 }
 
 .chocolate-item:hover {
@@ -485,7 +494,7 @@ async function updateChocolateAmount(chocolateId, newAmount) {
 
 .chocolate-image img {
   max-width: 100%;
-  height: auto;
+  max-height: 170px;
   border-radius: 10px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }

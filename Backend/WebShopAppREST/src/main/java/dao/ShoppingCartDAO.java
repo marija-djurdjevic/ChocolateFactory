@@ -154,7 +154,7 @@ public class ShoppingCartDAO {
         return cartToRemove;
     }
 
-	private void saveAll() {
+	public void saveAll() {
 		try {
 	        String filePath = contextPath + "shoppingCarts.txt";
 	        FileWriter writer = new FileWriter(filePath, false); 

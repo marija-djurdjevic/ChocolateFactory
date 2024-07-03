@@ -10,11 +10,14 @@ import java.util.ArrayList;
 import java.util.StringTokenizer;
 
 import beans.CartChocolate;
+import beans.Chocolate;
 import beans.Location;
 import beans.roles.Manager;
 
 public class CartChocolateDAO {
 	private ArrayList<CartChocolate> cartChocolates = new ArrayList<>();
+	private ChocolateDAO chocolateDAO;
+	private ShoppingCartDAO shoppingCartDAO;
 	private String contextPath;
 	
 	public CartChocolateDAO(String contextPath) {
@@ -44,6 +47,9 @@ public class CartChocolateDAO {
 			if(cc.getShoppingCartId() == cartChocolate.getShoppingCartId() && cc.getChocolateId() == cartChocolate.getChocolateId()) {
 				int amountOld = cc.getAmount();
 				cc.setAmount(amountOld + cartChocolate.getAmount());
+				if(cc.getAmount() == 0) {
+					deleteCartChocolate(cc);
+				}
 				saveAll();
 				return cc;
 			}
@@ -64,15 +70,36 @@ public class CartChocolateDAO {
         return cartChocolate; // Return the saved Chocolate object
 	}
 	
-	public void deleteCartChocolate(int cartId, int chocolateId) {
+	public CartChocolate edit(CartChocolate cartChocolate) {
 		loadCartChocolates(contextPath);
 		for(CartChocolate cc : cartChocolates) {
-			if(cc.getShoppingCartId() == cartId) {
-				if(cc.getChocolateId() == chocolateId) {
-					cartChocolates.remove(cc);
-				}
+			if(cc.getShoppingCartId() == cartChocolate.getShoppingCartId() && cc.getChocolateId() == cartChocolate.getChocolateId()) {
+				cc.setAmount(cartChocolate.getAmount());
+				saveAll();
+				return cc;
 			}
-		}	
+		}
+		
+		return null;
+	}
+	
+	public CartChocolate deleteCartChocolate(CartChocolate cartChocolate) {
+		chocolateDAO = new ChocolateDAO(contextPath);
+		shoppingCartDAO = new ShoppingCartDAO(contextPath);
+		Chocolate chocolate = chocolateDAO.findChocolate(cartChocolate.getChocolateId());
+		int newAmount = chocolate.getAmountOfChocolate() + cartChocolate.getAmount();
+		for(CartChocolate cc : cartChocolates) {
+			if(cc.getShoppingCartId() == cartChocolate.getShoppingCartId() && cc.getChocolateId() == cartChocolate.getChocolateId()) {
+				chocolateDAO.updateChocolateAmount(chocolate.getId(), newAmount);
+				cartChocolates.remove(cc);
+				saveAll();
+				shoppingCartDAO.findAll();
+				shoppingCartDAO.saveAll();
+				return cc;
+			}
+		}
+		
+		return null;
 	}
 	
 	public void updateCartChocolateAmount(int cartId, int chocolateId) {
