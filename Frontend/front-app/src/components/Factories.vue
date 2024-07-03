@@ -4,6 +4,7 @@
       <div v-if="isLoggedIn" class="user-container">
         <img class="user-button" src="/assets/profile.png" style="width: 40px; height: 40px;" @click="showUserDetails" />
         <span class="username">{{ username }}</span>
+        <button v-if="isAdmin" class="show-users-button" @click="goToShowUsers">Show Users</button>
       </div>
       <h1>Factory Display</h1>
       <img v-if="isLoggedIn && isCustomer" class="customer-button" src="/assets/cart.png" style="width: 40px; height: 40px;" @click="goToShoppingCart" />
@@ -104,6 +105,10 @@ onMounted(() => {
   console.log(isAdmin.value);
   loadFactories();
 });
+
+function goToShowUsers() {
+  router.push('/users');
+}
 
 function addWorker(factoryId) {
   router.push({ path: '/addWorker', query: { factoryId } });
@@ -323,6 +328,19 @@ const filteredFactories = computed(() => {
 <style>
 body {
   background-color: #dd6755;
+}
+
+.show-users-button {
+  background-color: #ff6347;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  font-size: 1rem;
+  margin-left: 10px;
+  height: 40px;
 }
 
 .factory-display {

@@ -20,7 +20,7 @@
             </div>
             <div class="user-container">
             <img class="user-button" src="/assets/minus-button.png" style="width: 40px; height: 40px;" @click="decrementQuantity(chocolate)" />
-            <span class="amount">{{ getChocolateAmount(chocolateId) }}</span>
+            <span class="amount">{{ getChocolateAmount(chocolate.id) }}</span>
             <img class="user-button" src="/assets/positive.png" style="width: 40px; height: 40px;" @click="incrementQuantity(chocolate)" />
         </div>
             <button @click="removeChocolate(index)" class="remove-button">Remove</button>
@@ -141,6 +141,7 @@
  function incrementQuantity(chocolate) {
   if (chocolateAmounts.value[chocolate.chocolateId]) {
     chocolateAmounts.value[chocolate.chocolateId]++;
+    getChocolateAmount(chocolate.chocolateId);
   } else {
     chocolateAmounts.value[chocolate.chocolateId] = 1;
   }
@@ -149,6 +150,7 @@
 function decrementQuantity(chocolate) {
   if (chocolateAmounts.value[chocolate.chocolateId] && chocolateAmounts.value[chocolate.chocolateId] > 0) {
     chocolateAmounts.value[chocolate.chocolateId]--;
+    getChocolateAmount(chocolate.chocolateId);
   }
 }
 
