@@ -95,7 +95,6 @@ public class LocationDAO {
 		BufferedReader in = null;
 		try {
 			File file = new File(contextPath + "/locations.txt");
-			System.out.println(file.getCanonicalPath());
 			in = new BufferedReader(new FileReader(file));
 			String line;
 			StringTokenizer st;
@@ -108,7 +107,6 @@ public class LocationDAO {
 				String latitude = st.nextToken().trim();
 				String longitude = st.nextToken().trim();
 				String address = st.nextToken().trim();
-				System.out.println(id);
 				locations.add(new Location(id, latitude, longitude, address));
 				
 			}

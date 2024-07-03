@@ -56,6 +56,7 @@ public class ChocolateDAO {
 		loadChocolates(contextPath);
 		for (Chocolate chocolate : chocolates) {
 			if (chocolate.getId() == id) {
+				System.out.println("nasao prokletu cokoladu");
 				chocolate.loadImageString();
 				return chocolate;
 			}
@@ -220,7 +221,7 @@ public class ChocolateDAO {
 				String imagePath = st.nextToken().trim();
 				boolean available = Boolean.parseBoolean(st.nextToken().trim());
 				int amountOfChocolate = Integer.parseInt(st.nextToken().trim());
-				chocolates.add(new Chocolate(id, name, price, chocolateSort, factoryId, chocolateType, gramsOfChocolate, chocolateDescription, imagePath, "", available, amountOfChocolate));
+				this.chocolates.add(new Chocolate(id, name, price, chocolateSort, factoryId, chocolateType, gramsOfChocolate, chocolateDescription, imagePath, "", available, amountOfChocolate));
 
 			}
 		} catch (Exception e) {

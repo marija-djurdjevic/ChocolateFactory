@@ -162,14 +162,17 @@ public class FactoryService {
 
          // Proverite ulogu korisnika
          String role = claims.get("role", String.class);
-         if (role == null || !"Worker".equals(role)) {
+         System.out.println("trenutna uloga jeeee: " + role);
+         if (role == null || (!"Worker".equals(role) && !"Customer".equals(role))) {
+         	System.out.println("ovo se desilo o o o istototo");
              return Response.status(Response.Status.FORBIDDEN).entity("You do not have permission to perform this action").build();
          }
         
          
         String username = claims.getSubject();
         FactoryDAO dao = (FactoryDAO) ctx.getAttribute("factoryDAO");
-        if (!dao.isWorkerAtFactory(username, factoryId)) {
+        if (!dao.isWorkerAtFactory(username, factoryId) && !"Customer".equals(role) && !"Worker".equals(role)) {
+        	System.out.println("ovo se desilo o o o");
             return Response.status(Response.Status.FORBIDDEN).entity("You are not the worker in this factory").build();
         }
         System.out.println(newAmount);

@@ -5,7 +5,7 @@ import java.util.ArrayList;
 public class ShoppingCart {
 	private int id;
 	private int customerId;
-	private ArrayList<Chocolate> chocolates;
+	public ArrayList<Chocolate> chocolates;
 	private double price;
 	
 	public ShoppingCart() {
@@ -52,4 +52,21 @@ public class ShoppingCart {
 	public void setPrice(double price) {
 		this.price = price;
 	}
+
+	@Override
+	public String toString() {
+		return "ShoppingCart [id=" + id + ", customerId=" + customerId + ", chocolates=" + chocolates + ", price="
+				+ price + "]";
+	}
+	
+	
+	public boolean containsChocolateWithId(int chocolateId) {
+        for (Chocolate chocolate : chocolates) {
+            if (chocolate.getId() == chocolateId) {
+                return true;
+            }
+        }
+        return false;
+    }
+	
 }
