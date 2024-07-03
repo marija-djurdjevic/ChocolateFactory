@@ -142,7 +142,7 @@ function goToShoppingCart() {
 
 async function loadChocolatesForFactory(factory) {
   try {
-    const response = await axios.get(`http://localhost:8080/WebShopAppREST/rest/chocolates/${factory.id}`);
+    const response = await axios.get(http://localhost:8080/WebShopAppREST/rest/chocolates/${factory.id});
     factory.chocolates = response.data;
   } catch (error) {
     console.error('Error loading chocolates for factory:', error);
@@ -155,7 +155,7 @@ function loadFactories() {
       factories.value = response.data;
       for (const factory of factories.value) {
         try {
-          const locationResponse = await axios.get(`http://localhost:8080/WebShopAppREST/rest/locations/findLocation?id=${factory.locationId}`);
+          const locationResponse = await axios.get(http://localhost:8080/WebShopAppREST/rest/locations/findLocation?id=${factory.locationId});
           const location = locationResponse.data;
           factory.locationInfo = {
             longitude: location.longitude,
@@ -180,7 +180,7 @@ function searchFactories() {
       factories.value = response.data;
       for (const factory of factories.value) {
         try {
-          const locationResponse = await axios.get(`http://localhost:8080/WebShopAppREST/rest/locations/findLocation?id=${factory.locationId}`);
+          const locationResponse = await axios.get(http://localhost:8080/WebShopAppREST/rest/locations/findLocation?id=${factory.locationId});
           const location = locationResponse.data;
           factory.locationInfo = {
             longitude: location.longitude,
@@ -300,7 +300,7 @@ function addChocolate(factoryId) {
 }
 
 function showChocolates(factoryId) {
-  router.push({ path: `/factory/${factoryId}/chocolates` });
+  router.push({ path: /factory/${factoryId}/chocolates });
 }
 
 function goToLogin() {
