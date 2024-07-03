@@ -68,7 +68,7 @@ public class ManagerDAO {
 
     public Manager save(User user, String contextPath) {
         loadManagers(contextPath);
-		Manager manager = new Manager(user.getId(), user.getUsername(), user.getPassword(), user.getName(), user.getSurname(), user.getGender(), user.getBirthDate(), user.getRole(), -1);
+		Manager manager = new Manager(user.getId(), user.getUsername(), user.getPassword(), user.getName(), user.getSurname(), user.getGender(), user.getBirthDate(), user.getRole(), user.isBlocked(), -1);
         try {
             String filePath = contextPath + "managers.txt"; // Use the provided path
             FileWriter writer = new FileWriter(filePath, true); // Open in append mode
@@ -167,8 +167,9 @@ public class ManagerDAO {
                 String gender = st.nextToken().trim();
                 LocalDate birthDate = LocalDate.parse(st.nextToken().trim(), formatter);
                 Role role = Role.valueOf(st.nextToken().trim());
+                boolean blocked = Boolean.parseBoolean(st.nextToken().trim());
                 int factoryId = Integer.parseInt(st.nextToken().trim());
-                managers.add(new Manager(id, username, password, name, surname, gender, birthDate, role, factoryId));
+                managers.add(new Manager(id, username, password, name, surname, gender, birthDate, role, blocked, factoryId));
             }
         } catch (Exception e) {
             e.printStackTrace();

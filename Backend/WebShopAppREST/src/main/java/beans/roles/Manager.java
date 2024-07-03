@@ -13,8 +13,8 @@ public class Manager  extends User {
 	}
 
 	public Manager(int id, String username, String password, String name, String surname, String gender,
-			LocalDate birthDate, Role role, int factoryId) {
-		super(id, username, password, name, surname, gender, birthDate, role);
+			LocalDate birthDate, Role role, boolean blocked, int factoryId) {
+		super(id, username, password, name, surname, gender, birthDate, role, blocked);
 		this.factoryId = factoryId;
 	}
 

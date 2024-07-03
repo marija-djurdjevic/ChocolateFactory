@@ -9,13 +9,13 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.OPTIONS;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 
 import beans.User;
@@ -137,6 +137,12 @@ public class UserService {
     public Response login(@QueryParam("username") String username, @QueryParam("password") String password) {
         UserDAO dao = (UserDAO) ctx.getAttribute("userDAO");
         User authenticatedUser = dao.authenticateUser(username, password);
+        
+        if (authenticatedUser != null) {
+            if (authenticatedUser.isBlocked()) {
+                return Response.status(Response.Status.FORBIDDEN).entity("Your account is blocked. Please contact support.").build();
+            }
+        }
 
         if (authenticatedUser != null) {
         	String role = authenticatedUser.getRole().toString();
@@ -150,5 +156,82 @@ public class UserService {
             return Response.status(Response.Status.UNAUTHORIZED).entity("Invalid credentials").build();
         }
     }
-       
+
+    @PUT
+    @Path("/block")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response blockUser(@QueryParam("username") String username, @Context HttpServletRequest request) {
+        String token = tokenUtils.getToken(request);
+        if (token == null || token.isEmpty()) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity("Token is missing").build();
+        }
+
+        // Verify token
+        Claims claims;
+        try {
+            claims = tokenUtils.parseToken(token);
+            if (claims == null) {
+                return Response.status(Response.Status.UNAUTHORIZED).entity("Invalid token").build();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Response.status(Response.Status.UNAUTHORIZED).entity("Token parsing error").build();
+        }
+
+        // Check user role
+        String role = claims.get("role", String.class);
+        if (role == null || !"Administrator".equals(role)) {
+            return Response.status(Response.Status.FORBIDDEN).entity("You do not have permission to perform this action").build();
+        }
+
+        UserDAO dao = (UserDAO) ctx.getAttribute("userDAO");
+        User user = dao.findUserByUsername(username);
+        if (user == null) {
+            return Response.status(Response.Status.NOT_FOUND).entity("User not found").build();
+        }
+
+        user.setBlocked(true);
+        dao.updateUser(user);
+
+        return Response.ok(user).build();
+    }
+
+    @PUT
+    @Path("/unblock")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response unblockUser(@QueryParam("username") String username, @Context HttpServletRequest request) {
+        String token = tokenUtils.getToken(request);
+        if (token == null || token.isEmpty()) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity("Token is missing").build();
+        }
+
+        // Verify token
+        Claims claims;
+        try {
+            claims = tokenUtils.parseToken(token);
+            if (claims == null) {
+                return Response.status(Response.Status.UNAUTHORIZED).entity("Invalid token").build();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Response.status(Response.Status.UNAUTHORIZED).entity("Token parsing error").build();
+        }
+
+        // Check user role
+        String role = claims.get("role", String.class);
+        if (role == null || !"Administrator".equals(role)) {
+            return Response.status(Response.Status.FORBIDDEN).entity("You do not have permission to perform this action").build();
+        }
+
+        UserDAO dao = (UserDAO) ctx.getAttribute("userDAO");
+        User user = dao.findUserByUsername(username);
+        if (user == null) {
+            return Response.status(Response.Status.NOT_FOUND).entity("User not found").build();
+        }
+
+        user.setBlocked(false);
+        dao.updateUser(user);
+
+        return Response.ok(user).build();
+    }
 }

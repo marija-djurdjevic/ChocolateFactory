@@ -149,8 +149,9 @@ public class WorkerDAO {
                 String gender = st.nextToken().trim();
                 LocalDate birthDate = LocalDate.parse(st.nextToken().trim(), formatter);
                 Role role = Role.valueOf(st.nextToken().trim());
+                boolean blocked = Boolean.parseBoolean(st.nextToken().trim());
                 int factoryId = Integer.parseInt(st.nextToken().trim());
-                workers.add(new Worker(id, username, password, name, surname, gender, birthDate, role, factoryId));
+                workers.add(new Worker(id, username, password, name, surname, gender, birthDate, role, blocked, factoryId));
             }
         } catch (Exception e) {
             e.printStackTrace();
