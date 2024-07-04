@@ -1,5 +1,10 @@
 package dao;
 
+import java.util.ArrayList;
+
+import beans.Purchase;
+import beans.ShoppingCart;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -11,6 +16,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 
+import beans.CartChocolate;
 import beans.Chocolate;
 import beans.Purchase;
 import beans.enums.PurchaseStatus;
@@ -20,75 +26,139 @@ public class PurchaseDAO {
     private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private final String contextPath;
     private ChocolateDAO chocolateDAO;
+	private CartChocolateDAO cartChocolateDAO;
+	private ShoppingCartDAO shoppingCartDAO;
 
     public PurchaseDAO(String contextPath) {
         this.contextPath = contextPath;
         loadPurchases(contextPath);
         chocolateDAO = new ChocolateDAO(contextPath);
+        cartChocolateDAO = new CartChocolateDAO(contextPath);
+        shoppingCartDAO = new ShoppingCartDAO(contextPath);
     }
 
     public ArrayList<Purchase> findAll() {
         loadPurchases(contextPath);
+        for(Purchase purchase : purchases) {
+			loadChocolatesAndPriceToPurchase(purchase);
+		}
         return purchases;
     }
 
     public Purchase save(Purchase purchase) {
+        System.out.println("usao ovdje i ispisujem " + LocalDateTime.now());
+        purchase.setDateAndTime(LocalDateTime.now());    
+        System.out.println("Date and Time before format: " + purchase.getDateAndTime());
+
         loadPurchases(contextPath);
-        int maxId = 0;
+        int maxId = -1;
+
         for (Purchase p : purchases) {
-            int currentId = Integer.parseInt(p.getId()); // Assuming IDs are of format P1, P2, P3, etc.
-            if (currentId > maxId) {
-                maxId = currentId;
+            String purchaseId = p.getId();
+            int index = Character.getNumericValue(purchaseId.charAt(purchaseId.length() - 1));
+            if (index > maxId) {
+                maxId = index;
             }
         }
+        
         maxId++;
-        purchase.setId("P" + maxId);
-
+        purchase.setId("purchase" + purchase.getCustomerId() + maxId);
+        
         try {
-            String filePath = contextPath + "purchases.txt"; // Use the provided path
-            FileWriter writer = new FileWriter(filePath, true); // Open in append mode
+            // Ensure dateAndTime is properly set
+            // Print for debugging purposes
+            System.out.println("Date and Time before format: " + purchase.getDateAndTime());
+            System.out.println("Formatted Date and Time: " + purchase.getDateAndTime().format(formatter));
+            
+            purchase.setStatus(PurchaseStatus.Processing);
+            String filePath = contextPath + "purchases.txt";
+            FileWriter writer = new FileWriter(filePath, true);
             BufferedWriter bufferedWriter = new BufferedWriter(writer);
             bufferedWriter.write(purchase.getId() + ";" +
-                    serializeChocolates(purchase.getChocolates()) + ";" +
                     purchase.getFactoryId() + ";" +
                     purchase.getDateAndTime().format(formatter) + ";" +
                     purchase.getPrice() + ";" +
-                    purchase.getCustomerName() + ";" +
-                    purchase.getCustomerSurname() + ";" +
+                    purchase.getCustomerId() + ";" +
                     purchase.getStatus() + "\n");
-            bufferedWriter.flush(); // Ensure all data is written to the file
+            bufferedWriter.flush();
             bufferedWriter.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        return purchase; // Return the saved Purchase object
+        
+        ShoppingCart shoppingCart = shoppingCartDAO.deleteByCustomerId(purchase.getCustomerId());
+        updateCartChocolates(purchase, shoppingCart);
+        return purchase;
+    }
+    
+    private void updateCartChocolates(Purchase purchase, ShoppingCart shoppingCart) {
+    	cartChocolateDAO.updateCartPurchase(purchase, shoppingCart);		
     }
 
-    private String serializeChocolates(ArrayList<Chocolate> chocolates) {
-        StringBuilder sb = new StringBuilder();
-        for (Chocolate chocolate : chocolates) {
-            sb.append(chocolate.getId()).append(",");
-        }
-        if (sb.length() > 0) {
-            sb.deleteCharAt(sb.length() - 1); // Remove the last comma
-        }
-        return sb.toString();
-    }
 
-    private ArrayList<Chocolate> deserializeChocolates(String chocolatesString) {
-        ArrayList<Chocolate> chocolates = new ArrayList<>();
-        StringTokenizer tokenizer = new StringTokenizer(chocolatesString, ",");
-        while (tokenizer.hasMoreTokens()) {
-            int chocolateId = Integer.parseInt(tokenizer.nextToken().trim());
+   // private String serializeChocolates(ArrayList<Chocolate> chocolates) {
+     //   StringBuilder sb = new StringBuilder();
+       // for (Chocolate chocolate : chocolates) {
+         //   sb.append(chocolate.getId()).append(",");
+        //}
+        //if (sb.length() > 0) {
+          //  sb.deleteCharAt(sb.length() - 1); // Remove the last comma
+        //}
+        //return sb.toString();
+    //}
+
+    //private ArrayList<Chocolate> deserializeChocolates(String chocolatesString) {
+      //  ArrayList<Chocolate> chocolates = new ArrayList<>();
+        //StringTokenizer tokenizer = new StringTokenizer(chocolatesString, ",");
+        //while (tokenizer.hasMoreTokens()) {
+          //  int chocolateId = Integer.parseInt(tokenizer.nextToken().trim());
             // Assuming there's a method to find Chocolate by ID
-            Chocolate chocolate = chocolateDAO.findChocolate(chocolateId);
-            if (chocolate != null) {
-                chocolates.add(chocolate);
-            }
-        }
-        return chocolates;
-    }
+           // Chocolate chocolate = chocolateDAO.findChocolate(chocolateId);
+            //if (chocolate != null) {
+              //  chocolates.add(chocolate);
+            //}
+        //}
+        //return chocolates;
+    //}
+    
+    public void loadChocolatesAndPriceToPurchase(Purchase pc) {
+		chocolateDAO = new ChocolateDAO(contextPath);
+		for(Chocolate chocolate : chocolateDAO.findAll()) {
+			System.out.println(chocolate);
+		}
+		for(Purchase purchase : purchases) {
+			if(pc.getId() == purchase.getId()) {
+				System.out.println("NASAO ODGOVARAJUCI SHOPPING CART");
+				double price = 0;
+				purchase.chocolates = new ArrayList<>();
+				for(CartChocolate cc : cartChocolateDAO.findAll()) {
+					System.out.println(cc);
+					if(purchase.getId() == cc.getPurchaseId()) {
+						System.out.println("NASAO CARTCHOCOLATE");
+						Chocolate chocolate = chocolateDAO.findChocolate(cc.getChocolateId());
+						if(chocolate == null) {
+							System.out.println(cc.getChocolateId());
+							for(Chocolate chocolateee : chocolateDAO.findAll()) {
+								System.out.println(chocolateee);
+							}
+							System.out.println("*********************");
+						}
+						price += chocolate.getPrice() * cc.getAmount();
+						System.out.println("CIJENA TRENUTNA" + price);
+						if (!purchase.containsChocolateWithId(chocolate.getId())) {
+							purchase.chocolates.add(chocolate);
+							System.out.println("DODAO COKOLADU U SOP CART");
+							System.out.println(chocolate); 
+						}
+						
+					}
+				}
+				
+				purchase.setPrice(price);
+				System.out.println(purchase);
+			}
+		}
+	}	
 
     private Chocolate findChocolateById(int chocolateId) {
         // Implement your logic to find Chocolate by ID here
@@ -120,14 +190,12 @@ public class PurchaseDAO {
                     continue;
                 st = new StringTokenizer(line, ";");
                 String id = st.nextToken().trim();
-                ArrayList<Chocolate> chocolates = deserializeChocolates(st.nextToken().trim());
                 int factoryId = Integer.parseInt(st.nextToken().trim());
                 LocalDateTime dateAndTime = LocalDateTime.parse(st.nextToken().trim(), formatter);
                 double price = Double.parseDouble(st.nextToken().trim());
-                String customerName = st.nextToken().trim();
-                String customerSurname = st.nextToken().trim();
+                int customerId = Integer.parseInt(st.nextToken().trim());
                 PurchaseStatus status = PurchaseStatus.valueOf(st.nextToken().trim());
-                this.purchases.add(new Purchase(id, chocolates, factoryId, dateAndTime, price, customerName, customerSurname, status));
+                this.purchases.add(new Purchase(id, new ArrayList<Chocolate>(), factoryId, dateAndTime, price, customerId, status));
             }
         } catch (Exception e) {
             e.printStackTrace();

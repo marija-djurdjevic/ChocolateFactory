@@ -8,6 +8,7 @@
       </div>
       <h1>Factory Display</h1>
       <img v-if="isLoggedIn && isCustomer" class="customer-button" src="/assets/cart.png" style="width: 40px; height: 40px;" @click="goToShoppingCart" />
+      <img v-if="isLoggedIn && isCustomer" class="customer-button" src="/assets/box.png" style="width: 50px; height: 50px;" @click="goToPurchases" />
       <button v-if="isLoggedIn && isAdmin" class="admin-button" @click="goToRegisterManager">New Manager</button>
       <button v-if="!isLoggedIn" class="login-button" @click="goToLogin">Login</button>
       <button v-if="isLoggedIn && isAdmin" class="admin-button" @click="goToAddFactory">Add Factory</button>
@@ -142,7 +143,7 @@ function goToShoppingCart() {
 
 async function loadChocolatesForFactory(factory) {
   try {
-    const response = await axios.get(http://localhost:8080/WebShopAppREST/rest/chocolates/${factory.id});
+    const response = await axios.get(`http://localhost:8080/WebShopAppREST/rest/chocolates/${factory.id}`);
     factory.chocolates = response.data;
   } catch (error) {
     console.error('Error loading chocolates for factory:', error);
@@ -155,7 +156,7 @@ function loadFactories() {
       factories.value = response.data;
       for (const factory of factories.value) {
         try {
-          const locationResponse = await axios.get(http://localhost:8080/WebShopAppREST/rest/locations/findLocation?id=${factory.locationId});
+          const locationResponse = await axios.get(`http://localhost:8080/WebShopAppREST/rest/locations/findLocation?id=${factory.locationId}`);          
           const location = locationResponse.data;
           factory.locationInfo = {
             longitude: location.longitude,
@@ -180,10 +181,9 @@ function searchFactories() {
       factories.value = response.data;
       for (const factory of factories.value) {
         try {
-          const locationResponse = await axios.get(http://localhost:8080/WebShopAppREST/rest/locations/findLocation?id=${factory.locationId});
-          const location = locationResponse.data;
+          const locationResponse = await axios.get(`http://localhost:8080/WebShopAppREST/rest/locations/findLocation?id=${factory.locationId}`);          const location = locationResponse.data;
           factory.locationInfo = {
-            longitude: location.longitude,
+            longitude: location.longitude, 
             latitude: location.latitude,
             address: location.address
           };
@@ -300,7 +300,7 @@ function addChocolate(factoryId) {
 }
 
 function showChocolates(factoryId) {
-  router.push({ path: /factory/${factoryId}/chocolates });
+  router.push({ path: `/factory/${factoryId}/chocolates` });
 }
 
 function goToLogin() {

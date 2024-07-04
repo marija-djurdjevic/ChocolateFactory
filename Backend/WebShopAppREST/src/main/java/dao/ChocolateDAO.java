@@ -37,14 +37,17 @@ public class ChocolateDAO {
 	public Chocolate updateChocolateAmount(int chocolateId, int newAmount) {
         loadChocolates(contextPath);
         Chocolate chocolate = findChocolate(chocolateId);
+        System.out.println("alooooooooooooo" + chocolate);
         if (chocolate != null) {
-        	System.out.println(chocolate.getAmountOfChocolate());
+        	System.out.println("kolicina glupe najgluplje cokolade" + chocolate.getAmountOfChocolate());
             chocolate.setAmountOfChocolate(newAmount);
             if(newAmount > 0) 
             {
             	chocolate.setAvailable(true);
     		}
-            	
+            else {
+            	chocolate.setAvailable(false);
+            }
             System.out.println(chocolate.getAmountOfChocolate());
             saveAllChocolates();
             return chocolate;
@@ -55,6 +58,8 @@ public class ChocolateDAO {
 	public Chocolate findChocolate(int id) {
 		loadChocolates(contextPath);
 		for (Chocolate chocolate : chocolates) {
+			System.out.println("jedna po jedna " + chocolate);
+			System.out.println("chocolate id " + chocolate.getId() + " i id  " + id);
 			if (chocolate.getId() == id) {
 				System.out.println("nasao prokletu cokoladu");
 				chocolate.loadImageString();
@@ -70,7 +75,6 @@ public class ChocolateDAO {
 		Chocolate c = findChocolate(chocolate.getId());
 		if(c != null) {
 			c.setName(chocolate.getName());
-			System.out.println(c.getName());
 			c.setPrice(chocolate.getPrice());
 			c.setChocolateSort(chocolate.getChocolateSort());
 			c.setFactoryId(chocolate.getFactoryId());
@@ -80,7 +84,6 @@ public class ChocolateDAO {
 			String path = this.contextPath + "images\\chocolate" + chocolate.getId() + izmjena + ".jpg"; 
             saveImage(path, chocolate.getImageString());
             c.setImagePath(path);
-            System.out.println(path);
 			c.setAvailable(chocolate.isAvailable());
 			c.setAmountOfChocolate(chocolate.getAmountOfChocolate());
 			saveAllChocolates();

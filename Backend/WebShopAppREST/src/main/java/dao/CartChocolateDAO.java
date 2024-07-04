@@ -10,11 +10,16 @@ import java.util.ArrayList;
 import java.util.StringTokenizer;
 
 import beans.CartChocolate;
+import beans.Chocolate;
 import beans.Location;
+import beans.Purchase;
+import beans.ShoppingCart;
 import beans.roles.Manager;
 
 public class CartChocolateDAO {
 	private ArrayList<CartChocolate> cartChocolates = new ArrayList<>();
+	private ChocolateDAO chocolateDAO;
+	private ShoppingCartDAO shoppingCartDAO;
 	private String contextPath;
 	
 	public CartChocolateDAO(String contextPath) {
@@ -44,17 +49,22 @@ public class CartChocolateDAO {
 			if(cc.getShoppingCartId() == cartChocolate.getShoppingCartId() && cc.getChocolateId() == cartChocolate.getChocolateId()) {
 				int amountOld = cc.getAmount();
 				cc.setAmount(amountOld + cartChocolate.getAmount());
+				if(cc.getAmount() == 0) {
+					deleteCartChocolate(cc);
+				}
 				saveAll();
 				return cc;
 			}
 		}
+		cartChocolate.setPurchaseId("empty");
         try {
             String filePath = contextPath + "cartChocolates.txt"; // Use the provided path
             FileWriter writer = new FileWriter(filePath, true); // Open in append mode
             BufferedWriter bufferedWriter = new BufferedWriter(writer);
             bufferedWriter.write(cartChocolate.getShoppingCartId() + ";" +
                     cartChocolate.getChocolateId() + ";" +
-            		cartChocolate.getAmount() + "\n");
+                    cartChocolate.getAmount() + ";" +
+            		cartChocolate.getPurchaseId() + "\n");
             bufferedWriter.flush(); // Ensure all data is written to the file
             bufferedWriter.close();
         } catch (IOException e) {
@@ -64,15 +74,47 @@ public class CartChocolateDAO {
         return cartChocolate; // Return the saved Chocolate object
 	}
 	
-	public void deleteCartChocolate(int cartId, int chocolateId) {
+	public void updateCartPurchase(Purchase purchase, ShoppingCart shoppingCart) {
+		loadCartChocolates(contextPath);
+		for(CartChocolate cartChocolate : cartChocolates) {
+    		if(cartChocolate.getShoppingCartId() == shoppingCart.getId()) {
+    			cartChocolate.setShoppingCartId(-1);
+    			cartChocolate.setPurchaseId(purchase.getId());
+    			saveAll();
+    		}
+    	}
+	}
+	
+	public CartChocolate edit(CartChocolate cartChocolate) {
 		loadCartChocolates(contextPath);
 		for(CartChocolate cc : cartChocolates) {
-			if(cc.getShoppingCartId() == cartId) {
-				if(cc.getChocolateId() == chocolateId) {
-					cartChocolates.remove(cc);
-				}
+			if(cc.getShoppingCartId() == cartChocolate.getShoppingCartId() && cc.getChocolateId() == cartChocolate.getChocolateId()) {
+				cc.setAmount(cartChocolate.getAmount());
+				saveAll();
+				return cc;
 			}
-		}	
+		}
+		
+		return null;
+	}
+	
+	public CartChocolate deleteCartChocolate(CartChocolate cartChocolate) {
+		chocolateDAO = new ChocolateDAO(contextPath);
+		shoppingCartDAO = new ShoppingCartDAO(contextPath);
+		Chocolate chocolate = chocolateDAO.findChocolate(cartChocolate.getChocolateId());
+		int newAmount = chocolate.getAmountOfChocolate() + cartChocolate.getAmount();
+		for(CartChocolate cc : cartChocolates) {
+			if(cc.getShoppingCartId() == cartChocolate.getShoppingCartId() && cc.getChocolateId() == cartChocolate.getChocolateId()) {
+				chocolateDAO.updateChocolateAmount(chocolate.getId(), newAmount);
+				cartChocolates.remove(cc);
+				saveAll();
+				shoppingCartDAO.findAll();
+				shoppingCartDAO.saveAll();
+				return cc;
+			}
+		}
+		
+		return null;
 	}
 	
 	public void updateCartChocolateAmount(int cartId, int chocolateId) {
@@ -98,9 +140,10 @@ public class CartChocolateDAO {
 	        FileWriter writer = new FileWriter(filePath, false); 
 	        BufferedWriter bufferedWriter = new BufferedWriter(writer);
 	        for (CartChocolate cartChocolate : cartChocolates) {
-	            bufferedWriter.write(cartChocolate.getShoppingCartId() + ";" +
-	            		cartChocolate.getChocolateId() + ";" +
-	                    cartChocolate.getAmount() + "\n");
+	        	bufferedWriter.write(cartChocolate.getShoppingCartId() + ";" +
+	                    cartChocolate.getChocolateId() + ";" +
+	                    cartChocolate.getAmount() + ";" +
+	            		cartChocolate.getPurchaseId() + "\n");
 	        }
 	        bufferedWriter.flush();
 	        bufferedWriter.close();
@@ -126,8 +169,9 @@ public class CartChocolateDAO {
 				int shoppingCartid = Integer.parseInt(st.nextToken().trim());
 				int chocolateId = Integer.parseInt(st.nextToken().trim());
 				int amountId = Integer.parseInt(st.nextToken().trim());
+				String purchaseId = st.nextToken().trim();
 				System.out.println("dosao do ovde crrtitititi");
-				cartChocolates.add(new CartChocolate(shoppingCartid, chocolateId, amountId));
+				cartChocolates.add(new CartChocolate(shoppingCartid, chocolateId, amountId, purchaseId));
 				
 			}
 		} catch (Exception e) {

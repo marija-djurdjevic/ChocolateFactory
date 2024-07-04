@@ -8,7 +8,7 @@
       </div>
       <div v-else>
         <div class="cart-items">
-          <div v-for="(chocolate, index) in chocolates" :key="index" class="cart-item">
+          <div v-for="chocolate in chocolates" :key="chocolate.id" class="cart-item">
             <img :src="'data:image/jpeg;base64,' + chocolate.imageString" alt="Chocolate Image" />
             <div class="chocolate-details">
               <h2>{{ chocolate.name }}</h2>
@@ -22,15 +22,17 @@
             <img class="user-button" src="/assets/minus-button.png" style="width: 40px; height: 40px;" @click="decrementQuantity(chocolate)" />
             <span class="amount">{{ getChocolateAmount(chocolate.id) }}</span>
             <img class="user-button" src="/assets/positive.png" style="width: 40px; height: 40px;" @click="incrementQuantity(chocolate)" />
-        </div>
-            <button @click="removeChocolate(index)" class="remove-button">Remove</button>
+             </div>
+            <button @click="removeChocolate(chocolate)" class="remove-button">Remove</button>
           </div>
         </div>
         <div class="total-price">
-        <h2>Total Price: {{ someShoppingCart.price }}</h2>
+          <h2 class="total-price">Total Price: {{ someShoppingCart.price }}</h2>
       </div>
-        <button class="checkout-button" @click="checkout">Checkout</button>
       </div>
+      <footer  v-if="chocolates.length !== 0" class="status-bar">
+        <button class="checkout-button" @click="checkout()">Buy</button>
+    </footer>
     </div>
   </template>
   
@@ -55,6 +57,12 @@
     birthDate: ''
   });
 
+  const purchase = ref({
+    factoryId: -1,
+    customerId: -1,
+    price: 0
+  });
+
   const someShoppingCart = ref({
     customerId: -1,
     price: 0
@@ -65,11 +73,6 @@
     loadUser();
   });
 
-  function initializeAmounts() {
-    cartChocolates.value.forEach(item => {
-        chocolateAmounts.value[item.chocolateId] = item.amount; 
-    });
-  }
   function loadUser() {
     axios.get(`http://localhost:8080/WebShopAppREST/rest/users/authenticateUser?username=${username.value}`)
     .then(response => {
@@ -89,80 +92,127 @@
         someShoppingCart.value = response.data.shoppingCart;
         chocolates.value = someShoppingCart.value.chocolates;
         cartChocolates.value = response.data.cartChocolates;
-        console.log("Chocolates:", chocolates.value);
-        console.log("Shopping Cart:", someShoppingCart.value);
-        console.log("Cart chocolates:", cartChocolates.value);
-        console.log("usao ovdjeeee");
         cartChocolates.value.forEach(item => {
         chocolateAmounts.value[item.chocolateId] = item.amount; 
-        console.log(chocolateAmounts.value[item.chocolateId]);
         });
       } catch (error) {
         console.error('Loading cart failed:', error);
       }
-    }
-
- function loadCart() {
-    console.log(user.value.id);
-    axios.get(`http://localhost:8080/WebShopAppREST/rest/shoppingCarts/getByUserId?userId=` + user.value.id)
-    .then(response => {
-        someShoppingCart.value = response.data;
-        chocolates.value = response.data.chocolates;
-        console.log("soping korpa vrijednost" + someShoppingCart.value);
-        loadCartChocolates();  
-    })
-    .catch(error => {
-    console.error('loading cart failed:', error);
-    });
  }
-
- function loadCartChocolates() {
-    console.log(user.value.id);
-    axios.get(`http://localhost:8080/WebShopAppREST/rest/cartChocolates/getByCartId?cartId=` + someShoppingCart.value.id)
-    .then(response => {
-        cartChocolates.value = response.data;  
-        console.log(cartChocolates.value);
-        createChocolateAmountMap();
-    })
-    .catch(error => {
-    console.error('loading cart failed:', error);
-    });
- }
-
-
- function createChocolateAmountMap() {
-    console.log("usao ovdjeeee");
-  cartChocolates.value.forEach(item => {
-    chocolateAmounts.value[item.chocolateId] = item.amount; 
-    console.log(chocolateAmounts.value[item.chocolateId]);
-  });
-}
 
  function incrementQuantity(chocolate) {
-  if (chocolateAmounts.value[chocolate.chocolateId]) {
-    chocolateAmounts.value[chocolate.chocolateId]++;
-    getChocolateAmount(chocolate.chocolateId);
+  if (chocolate.amountOfChocolate > 0) {
+    console.log("amooonutnt  " + chocolate.amountOfChocolate);
+    chocolateAmounts.value[chocolate.id]++;
+    const cartChocolate = cartChocolates.value.find(cartChocolate => cartChocolate.chocolateId === chocolate.id);
+    cartChocolate.amount = chocolateAmounts.value[chocolate.id];
+    someShoppingCart.value.price = someShoppingCart.value.price + chocolate.price;
+    console.log(someShoppingCart.price);
+    chocolate.amountOfChocolate = chocolate.amountOfChocolate - 1;
+    editCartChocolate(cartChocolate, chocolate);
   } else {
     chocolateAmounts.value[chocolate.chocolateId] = 1;
   }
 }
 
 function decrementQuantity(chocolate) {
-  if (chocolateAmounts.value[chocolate.chocolateId] && chocolateAmounts.value[chocolate.chocolateId] > 0) {
-    chocolateAmounts.value[chocolate.chocolateId]--;
-    getChocolateAmount(chocolate.chocolateId);
+  if (chocolateAmounts.value[chocolate.id] && chocolateAmounts.value[chocolate.id] > 1) {
+    chocolateAmounts.value[chocolate.id]--;
+    const cartChocolate = cartChocolates.value.find(cartChocolate => cartChocolate.chocolateId === chocolate.id);
+    cartChocolate.amount = chocolateAmounts.value[chocolate.id];
+    someShoppingCart.value.price = someShoppingCart.value.price - chocolate.price;
+    console.log(someShoppingCart.value.price); 
+    chocolate.amountOfChocolate = chocolate.amountOfChocolate + 1;
+    editCartChocolate(cartChocolate, chocolate);
   }
 }
 
-function getChocolateAmount(chocolateId) {
-  return chocolateAmounts.value[chocolateId] || 0;
+function editCartChocolate(cartChocolate, chocolate) {
+  console.log(cartChocolate);
+  const token = localStorage.getItem('token');
+  axios.post('http://localhost:8080/WebShopAppREST/rest/cartChocolates/edit', cartChocolate, {
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
+  })
+  .then(response => {
+    if (response.status === 200) {
+      editShoppingCart();
+      updateAmountOfChocolateNormal(chocolate.id, chocolate.amountOfChocolate);
+    } else {
+      console.error('Error adding CartChocolate:', response.data);
+    }
+  })
+  .catch(error => {
+    console.error('Error adding CartChocolate:', error);
+  });
 }
-  
-  function removeChocolate(index) {
-    chocolates.value.splice(index, 1);
+
+function editShoppingCart() {
+      const token = localStorage.getItem('token');
+      axios.post('http://localhost:8080/WebShopAppREST/rest/shoppingCarts/edit', someShoppingCart.value, {
+      headers: {
+          'Authorization': `Bearer ${token}`
+      }
+      })
+      .then(response => {
+      if (response.status === 200) {
+      } else {
+          console.error('Error editing cart:', response.data);
+      }
+      })
+      .catch(error => {
+      console.error('Error editing cart:', error);
+      });
+}
+
+async function updateAmountOfChocolateNormal(chocolateId, amountOfChocolate){
+  try {
+      const response = await axios.post(`http://localhost:8080/WebShopAppREST/rest/chocolates/editChocoAmount?id=${chocolateId}&amount=${amountOfChocolate}`);
   }
-  
-  async function checkout() {
+  catch (error) {
+        console.error('Loading cart failed:', error);
+  }
+}
+
+  function removeChocolate(chocolate){
+    chocolates.value = chocolates.value.filter(chocolatee => chocolatee.id !== chocolate.id);
+    const cartChocolate = cartChocolates.value.find(cartChocolate => cartChocolate.chocolateId === chocolate.id);
+    someShoppingCart.value.price = someShoppingCart.value.price - cartChocolate.amount * chocolate.price;
+    console.log("POSLATI CART CHOCOLATE " + cartChocolate);
+    axios.post(`http://localhost:8080/WebShopAppREST/rest/cartChocolates/delete`, cartChocolate)
+      .then(response => {
+      })
+      .catch(error => {
+        console.error('Error updating chocolate:', error);
+      });
+  }
+
+  function getChocolateAmount(chocolateId) {
+    return chocolateAmounts.value[chocolateId] || 0;
+  }
+
+  function checkout() {
+   purchase.value.factoryId = chocolates.value[0].factoryId;
+   purchase.value.customerId = user.value.id;
+   purchase.value.price = someShoppingCart.value.price;
+    const token = localStorage.getItem('token');
+    axios.post('http://localhost:8080/WebShopAppREST/rest/purchases/save', purchase.value, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
+    .then(response => {
+      if (response.status === 200) {
+        alert('Purchase created successfully!');
+        router.push('/');
+      } else {
+        console.error('Error creating purchase:', response.data);
+      }
+    })
+    .catch(error => {
+      console.error('Error creating purchase:', error);
+    });
   }
   </script>
   

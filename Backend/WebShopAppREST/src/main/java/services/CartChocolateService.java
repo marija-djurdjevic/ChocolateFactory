@@ -18,9 +18,11 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import beans.CartChocolate;
+import beans.Chocolate;
 import beans.Factory;
 import beans.ShoppingCart;
 import dao.CartChocolateDAO;
+import dao.ChocolateDAO;
 import dao.FactoryDAO;
 import dao.ShoppingCartDAO;
 import io.jsonwebtoken.Claims;
@@ -59,6 +61,51 @@ public class CartChocolateService {
         return false;
     }
 
+    @POST
+    @Path("/edit")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response editCartChocolate(CartChocolate cartChocolate, @Context HttpServletRequest request) {
+    	System.out.println("dosao sam do ovde");
+        String token = tokenUtils.getToken(request);
+        System.out.println("Token: " + token);
+        if (token == null || token.isEmpty()) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity("Token is missing").build();
+        }
+
+        Claims claims;
+        try {
+            claims = tokenUtils.parseToken(token);
+            if (claims == null) {
+                return Response.status(Response.Status.UNAUTHORIZED).entity("Invalid token").build();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Response.status(Response.Status.UNAUTHORIZED).entity("Token parsing error").build();
+        }
+
+        String role = claims.get("role", String.class);
+        if (role == null || !"Customer".equals(role)) {
+            return Response.status(Response.Status.FORBIDDEN).entity("You do not have permission to perform this action").build();
+        }
+
+        CartChocolateDAO dao = (CartChocolateDAO) ctx.getAttribute("cartChocolateDAO");
+        CartChocolate savedCartChocolate = dao.edit(cartChocolate);
+
+        return Response.ok(savedCartChocolate).build();
+    }
+    
+    @POST
+    @Path("/delete")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public CartChocolate deleteChocolate(CartChocolate cartChocolate) {
+    	System.out.println("DOBAVLJENI CART CHOCOLATE" + cartChocolate);
+    	CartChocolateDAO dao = (CartChocolateDAO) ctx.getAttribute("cartChocolateDAO");
+        CartChocolate deletedCartChocolate = dao.deleteCartChocolate(cartChocolate);
+        return deletedCartChocolate;
+    }
+    
     @POST
     @Path("/save")
     @Produces(MediaType.APPLICATION_JSON)
