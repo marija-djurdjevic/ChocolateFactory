@@ -33,6 +33,44 @@ public class ManagerDAO {
         return managers;
     }
     
+    /*public boolean isManagerOfFactory(int managerId, int factoryId) {
+        loadManagers(contextPath);
+        
+        // Pronaći managera sa datim ID-om
+        Manager manager = findManager(managerId);
+        
+        // Provjeriti da li je pronađeni manager zadužen za traženu fabriku
+        if (manager != null && manager.getFactoryId() == factoryId) {
+            return true;
+        }
+        
+        return false;
+    }*/
+    public boolean isManagerOfFactory(String username, int factoryId) {
+        loadManagers(contextPath);
+        
+        // Pronaći managera sa datim username-om
+        Manager manager = findManagerByUsername(username);
+        
+        // Provjeriti da li je pronađeni manager zadužen za traženu fabriku
+        if (manager != null && manager.getFactoryId() == factoryId) {
+            return true;
+        }
+        
+        return false;
+    }
+
+    private Manager findManagerByUsername(String username) {
+        loadManagers(contextPath);
+        for (Manager manager : managers) {
+            if (manager.getUsername().equals(username)) {
+                return manager;
+            }
+        }
+        return null;
+    }
+
+    
     public ArrayList<Manager> findAvailableManagers(){
     	loadManagers(contextPath);
     	availableManagers = new ArrayList<>();
