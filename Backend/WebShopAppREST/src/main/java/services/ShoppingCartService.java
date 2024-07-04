@@ -70,9 +70,11 @@ public class ShoppingCartService {
         // Dobavljanje korpe za datog korisnika
         ShoppingCartDAO cartDao = (ShoppingCartDAO) ctx.getAttribute("shoppingCartDAO");
         ShoppingCart shoppingCart = cartDao.findShoppingCart(userId);
-        
+        System.out.println("SOPING KORPA PLS RECI STA SI " + shoppingCart);
+
         // Ako korpa nije pronađena, možete vratiti odgovarajući status ili obraditi grešku
         if (shoppingCart == null) {
+            System.out.println("SOPING KORPA PLS RECI STA SI " + shoppingCart);
             // Na primer, ovde možete dodati logiku za rukovanje greškom ako korpa nije pronađena
             return null;
         }
