@@ -50,7 +50,7 @@
     <div v-if="errorMessage" class="error-message">
       <p>{{ errorMessage }}</p>
     </div>
-    <div v-if="isCartCreated && isthisfactory" class="shopping-cart-button">
+    <div v-if="showButton" class="shopping-cart-button">
       <button class="shoppinggoto-button" @click="GoToShoppingCart">See shopping cart</button>
     </div>
   </div>
@@ -78,6 +78,7 @@ const errorMessage = ref('');
 const amount = ref(1);
 const username = ref(localStorage.getItem("username") || '');
 const isCartCreated = ref(false); 
+const showButton = ref(false);
 
 const user = ref({
     username: '',
@@ -205,6 +206,7 @@ async function loadCartProbno() {
           console.log(factoryId);
           if(existingchocolates.value[0].factoryId == factoryId){
                   isthisfactory.value = true;
+                  showButton.value = true;
         }
         }
         
@@ -219,6 +221,7 @@ function loadCart(chocolateId, amountOfChocolate) {
   isCartCreated.value = true;
   if(isthisfactory.value === false){
            alert('You already have one cart preparing. Finish your order and than continue.');
+           showButton.value = true;
         return;
   }
     axios.get(`http://localhost:8080/WebShopAppREST/rest/shoppingCarts/getByUserId?userId=${user.value.id}`)
