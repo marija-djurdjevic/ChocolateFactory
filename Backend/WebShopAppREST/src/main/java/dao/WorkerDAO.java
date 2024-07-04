@@ -127,6 +127,15 @@ public class WorkerDAO {
         return worker; // Return the saved Worker object
     }
 
+    public ArrayList<Worker> findByFactoryId(int factoryId) {
+        ArrayList<Worker> factoryWorkers = new ArrayList<>();
+        for (Worker worker : workers) {
+            if (worker.getFactoryId() == factoryId) {
+                factoryWorkers.add(worker);
+            }
+        }
+        return factoryWorkers;
+    }
 
     private void loadWorkers(String contextPath) {
         this.workers = new ArrayList<Worker>();
