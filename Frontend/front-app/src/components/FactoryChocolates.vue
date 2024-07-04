@@ -50,7 +50,7 @@
     <div v-if="errorMessage" class="error-message">
       <p>{{ errorMessage }}</p>
     </div>
-    <div v-if="isCartCreated || isthisfactory" class="shopping-cart-button">
+    <div v-if="isCartCreated && isthisfactory" class="shopping-cart-button">
       <button class="shoppinggoto-button" @click="GoToShoppingCart">See shopping cart</button>
     </div>
   </div>
@@ -124,7 +124,6 @@ function loadUser() {
     .then(response => {
       user.value = response.data;
       console.log(user.value.username);
-      console.log(shoppingCart.value.customerId);
       loadCartProbno();
   })
   .catch(error => {
@@ -191,13 +190,24 @@ function AddToCart(chocolateId, amountOfChocolate) {
 async function loadCartProbno() {
       try {
         const response = await axios.get(`http://localhost:8080/WebShopAppREST/rest/shoppingCarts/getCartDetailsByUserId?userId=${user.value.id}`);
+        console.log(!response.data);
+        if(!response.data){
+          isthisfactory.value = true;
+          isCartCreated.value = false;
+          return;
+        }
         existingCart.value = response.data.shoppingCart;
-        existingchocolates.value = existingCart.value.chocolates;
-        console.log(existingchocolates.value[0].factoryId);
-        console.log(factoryId);
-        if(existingchocolates.value[0].factoryId == factoryId){
+        if(existingCart.customerId === user.id){
+          console.log(existingCart.customerId);
+          console.log("existingCart" + existingCart);
+          existingchocolates.value = existingCart.value.chocolates;
+          console.log(existingchocolates.value[0].factoryId);
+          console.log(factoryId);
+          if(existingchocolates.value[0].factoryId == factoryId){
                   isthisfactory.value = true;
         }
+        }
+        
         console.log("vrijednost isthisfactory" + isthisfactory.value);
        
       } catch (error) {
@@ -206,6 +216,7 @@ async function loadCartProbno() {
  }
 
 function loadCart(chocolateId, amountOfChocolate) {
+  isCartCreated.value = true;
   if(isthisfactory.value === false){
            alert('You already have one cart preparing. Finish your order and than continue.');
         return;
