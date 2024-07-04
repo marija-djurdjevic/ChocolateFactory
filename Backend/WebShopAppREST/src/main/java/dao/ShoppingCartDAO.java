@@ -74,6 +74,25 @@ public class ShoppingCartDAO {
 		}
 		return shoppingCarts;
 	}
+	
+	public ShoppingCart deleteByCustomerId(int id) {
+		loadShoppingCarts(contextPath);
+		ShoppingCart cartToRemove = null;
+		for(ShoppingCart shoppingCart : shoppingCarts) {
+			if(shoppingCart.getCustomerId() == id) {
+				System.out.println("nasao koga treba obrisati");
+				cartToRemove = shoppingCart;
+	             break;
+			}
+		}
+		if (cartToRemove != null) {
+			shoppingCarts.remove(cartToRemove.getId());
+			System.out.println("obrisao");
+			saveAll();
+			return cartToRemove;
+		}
+		return null;
+	}
 
 	public ShoppingCart findShoppingCart(int customerId) {
 		loadShoppingCarts(contextPath);

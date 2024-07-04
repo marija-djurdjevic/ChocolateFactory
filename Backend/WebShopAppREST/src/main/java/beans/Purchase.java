@@ -7,12 +7,11 @@ import beans.enums.PurchaseStatus;
 
 public class Purchase {
 	private String id;
-	private ArrayList<Chocolate> chocolates;
-	private int FactoryId;
-	private LocalDateTime DateAndTime;
+	public ArrayList<Chocolate> chocolates;
+	private int factoryId;
+	private LocalDateTime dateAndTime;
 	private double price;
-	private String CustomerName;
-	private String CustomerSurname;
+	private int customerId; //treba dobaviti ime i prezime kupca
 	private PurchaseStatus status;
 	
 	public Purchase() {
@@ -21,15 +20,14 @@ public class Purchase {
 	}
 
 	public Purchase(String id, ArrayList<Chocolate> chocolates, int factoryId, LocalDateTime dateAndTime, double price,
-			String customerName, String customerSurname, PurchaseStatus status) {
+			int customerId, PurchaseStatus status) {
 		super();
 		this.id = id;
 		this.chocolates = chocolates;
-		FactoryId = factoryId;
-		DateAndTime = dateAndTime;
+		this.factoryId = factoryId;
+		this.dateAndTime = dateAndTime;
 		this.price = price;
-		CustomerName = customerName;
-		CustomerSurname = customerSurname;
+		this.customerId = customerId;
 		this.status = status;
 	}
 
@@ -50,19 +48,19 @@ public class Purchase {
 	}
 
 	public int getFactoryId() {
-		return FactoryId;
+		return factoryId;
 	}
 
 	public void setFactoryId(int factoryId) {
-		FactoryId = factoryId;
+		this.factoryId = factoryId;
 	}
 
 	public LocalDateTime getDateAndTime() {
-		return DateAndTime;
+		return dateAndTime;
 	}
 
 	public void setDateAndTime(LocalDateTime dateAndTime) {
-		DateAndTime = dateAndTime;
+		this.dateAndTime = dateAndTime;
 	}
 
 	public double getPrice() {
@@ -72,21 +70,14 @@ public class Purchase {
 	public void setPrice(double price) {
 		this.price = price;
 	}
+	
 
-	public String getCustomerName() {
-		return CustomerName;
+	public int getCustomerId() {
+		return customerId;
 	}
 
-	public void setCustomerName(String customerName) {
-		CustomerName = customerName;
-	}
-
-	public String getCustomerSurname() {
-		return CustomerSurname;
-	}
-
-	public void setCustomerSurname(String customerSurname) {
-		CustomerSurname = customerSurname;
+	public void setCustomerId(int customerId) {
+		this.customerId = customerId;
 	}
 
 	public PurchaseStatus getStatus() {
@@ -97,4 +88,19 @@ public class Purchase {
 		this.status = status;
 	}
 
+	@Override
+	public String toString() {
+		return "Purchase [id=" + id + ", chocolates=" + chocolates + ", FactoryId=" + factoryId + ", DateAndTime="
+				+ dateAndTime + ", price=" + price + ", customerId=" + customerId + ", status=" + status + "]";
+	}
+	
+	public boolean containsChocolateWithId(int chocolateId) {
+        for (Chocolate chocolate : chocolates) {
+            if (chocolate.getId() == chocolateId) {
+                return true;
+            }
+        }
+        return false;
+    }
+	
 }

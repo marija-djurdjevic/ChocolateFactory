@@ -50,7 +50,7 @@
     <div v-if="errorMessage" class="error-message">
       <p>{{ errorMessage }}</p>
     </div>
-    <div v-if="isCartCreated" class="shopping-cart-button">
+    <div v-if="isCartCreated || isthisfactory" class="shopping-cart-button">
       <button class="shoppinggoto-button" @click="GoToShoppingCart">See shopping cart</button>
     </div>
   </div>
@@ -67,10 +67,12 @@ const router = useRouter();
 const factoryId = route.params.factoryId;
 const factory = ref({});
 const chocolates = ref([]);
+const existingchocolates = ref([]);
 const chocolateAmounts = ref({});
 const isManager = ref(false); 
 const isWorker = ref(false);
 const isCustomer = ref(false);
+const isthisfactory = ref(false);
 const role = localStorage.getItem("role");
 const errorMessage = ref('');
 const amount = ref(1);
@@ -86,6 +88,11 @@ const user = ref({
     birthDate: ''
   });
 
+  const existingCart = ref({
+      customerId: -1,
+      price: 0
+  }); 
+
   const shoppingCart = ref({
       customerId: -1,
       price: 0
@@ -99,6 +106,7 @@ const user = ref({
 const cartChocolate = ref({
   customerId: -1,
   chocolateId: -1,
+  purchaseId: 'empty',
   amount: 0
   });
 
@@ -109,7 +117,6 @@ onMounted(() => {
   isWorker.value = role === 'Worker';
   isCustomer.value = role === 'Customer';
   loadUser();
-
 });
 
 function loadUser() {
@@ -118,6 +125,7 @@ function loadUser() {
       user.value = response.data;
       console.log(user.value.username);
       console.log(shoppingCart.value.customerId);
+      loadCartProbno();
   })
   .catch(error => {
     console.error('Login failed:', error);
@@ -180,8 +188,28 @@ function AddToCart(chocolateId, amountOfChocolate) {
   isCartCreated.value = true; 
 }
 
+async function loadCartProbno() {
+      try {
+        const response = await axios.get(`http://localhost:8080/WebShopAppREST/rest/shoppingCarts/getCartDetailsByUserId?userId=${user.value.id}`);
+        existingCart.value = response.data.shoppingCart;
+        existingchocolates.value = existingCart.value.chocolates;
+        console.log(existingchocolates.value[0].factoryId);
+        console.log(factoryId);
+        if(existingchocolates.value[0].factoryId == factoryId){
+                  isthisfactory.value = true;
+        }
+        console.log("vrijednost isthisfactory" + isthisfactory.value);
+       
+      } catch (error) {
+        console.error('Loading cart failed:', error);
+      }
+ }
+
 function loadCart(chocolateId, amountOfChocolate) {
-    console.log(user.value.id);
+  if(isthisfactory.value === false){
+           alert('You already have one cart preparing. Finish your order and than continue.');
+        return;
+  }
     axios.get(`http://localhost:8080/WebShopAppREST/rest/shoppingCarts/getByUserId?userId=${user.value.id}`)
     .then(response => {
         shoppingCart.value = response.data;

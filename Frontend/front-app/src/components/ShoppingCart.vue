@@ -31,7 +31,7 @@
       </div>
       </div>
       <footer  v-if="chocolates.length !== 0" class="status-bar">
-        <button class="checkout-button" @click="checkout">Buy</button>
+        <button class="checkout-button" @click="checkout()">Buy</button>
     </footer>
     </div>
   </template>
@@ -55,6 +55,12 @@
     surname: '',
     gender: '',
     birthDate: ''
+  });
+
+  const purchase = ref({
+    factoryId: -1,
+    customerId: -1,
+    price: 0
   });
 
   const someShoppingCart = ref({
@@ -92,7 +98,7 @@
       } catch (error) {
         console.error('Loading cart failed:', error);
       }
-    }
+ }
 
  function incrementQuantity(chocolate) {
   if (chocolate.amountOfChocolate > 0) {
@@ -186,7 +192,27 @@ async function updateAmountOfChocolateNormal(chocolateId, amountOfChocolate){
     return chocolateAmounts.value[chocolateId] || 0;
   }
 
-  async function checkout() {
+  function checkout() {
+   purchase.value.factoryId = chocolates.value[0].factoryId;
+   purchase.value.customerId = user.value.id;
+   purchase.value.price = someShoppingCart.value.price;
+    const token = localStorage.getItem('token');
+    axios.post('http://localhost:8080/WebShopAppREST/rest/purchases/save', purchase.value, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
+    .then(response => {
+      if (response.status === 200) {
+        alert('Purchase created successfully!');
+        router.push('/');
+      } else {
+        console.error('Error creating purchase:', response.data);
+      }
+    })
+    .catch(error => {
+      console.error('Error creating purchase:', error);
+    });
   }
   </script>
   
