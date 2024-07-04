@@ -186,6 +186,8 @@ async function loadChocolates() {
 function AddToCart(chocolateId, amountOfChocolate) {
   loadCart(chocolateId, amountOfChocolate);
   isCartCreated.value = true; 
+  showButton.value = true;
+  alert('You added chocolate to cart!');
 }
 
 async function loadCartProbno() {

@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
+import java.util.UUID;
 
 import beans.CartChocolate;
 import beans.Chocolate;
@@ -28,6 +29,7 @@ public class PurchaseDAO {
     private ChocolateDAO chocolateDAO;
 	private CartChocolateDAO cartChocolateDAO;
 	private ShoppingCartDAO shoppingCartDAO;
+	private CustomerDAO customerDAO;
 
     public PurchaseDAO(String contextPath) {
         this.contextPath = contextPath;
@@ -35,6 +37,7 @@ public class PurchaseDAO {
         chocolateDAO = new ChocolateDAO(contextPath);
         cartChocolateDAO = new CartChocolateDAO(contextPath);
         shoppingCartDAO = new ShoppingCartDAO(contextPath);
+    	customerDAO = new CustomerDAO(contextPath);
     }
 
     public ArrayList<Purchase> findAll() {
@@ -46,27 +49,25 @@ public class PurchaseDAO {
     }
 
     public Purchase save(Purchase purchase) {
-        System.out.println("usao ovdje i ispisujem " + LocalDateTime.now());
         purchase.setDateAndTime(LocalDateTime.now());    
-        System.out.println("Date and Time before format: " + purchase.getDateAndTime());
-
         loadPurchases(contextPath);
-        int maxId = -1;
+        String uniqueId;
+        boolean isUnique;
 
-        for (Purchase p : purchases) {
-            String purchaseId = p.getId();
-            int index = Character.getNumericValue(purchaseId.charAt(purchaseId.length() - 1));
-            if (index > maxId) {
-                maxId = index;
+        do {
+            uniqueId = UUID.randomUUID().toString().replaceAll("-", "").substring(0, 10);
+            isUnique = true;
+
+            for (Purchase p : purchases) {
+                if (p.getId().equals(uniqueId)) {
+                    isUnique = false;
+                    break;
+                }
             }
-        }
-        
-        maxId++;
-        purchase.setId("purchase" + purchase.getCustomerId() + maxId);
+        } while (!isUnique);
+        purchase.setId(uniqueId);
         
         try {
-            // Ensure dateAndTime is properly set
-            // Print for debugging purposes
             System.out.println("Date and Time before format: " + purchase.getDateAndTime());
             System.out.println("Formatted Date and Time: " + purchase.getDateAndTime().format(formatter));
             
@@ -87,6 +88,7 @@ public class PurchaseDAO {
         }
         
         ShoppingCart shoppingCart = shoppingCartDAO.deleteByCustomerId(purchase.getCustomerId());
+        customerDAO.updatePoints(shoppingCart.getCustomerId(), shoppingCart.getPrice());
         updateCartChocolates(purchase, shoppingCart);
         return purchase;
     }
@@ -94,32 +96,6 @@ public class PurchaseDAO {
     private void updateCartChocolates(Purchase purchase, ShoppingCart shoppingCart) {
     	cartChocolateDAO.updateCartPurchase(purchase, shoppingCart);		
     }
-
-
-   // private String serializeChocolates(ArrayList<Chocolate> chocolates) {
-     //   StringBuilder sb = new StringBuilder();
-       // for (Chocolate chocolate : chocolates) {
-         //   sb.append(chocolate.getId()).append(",");
-        //}
-        //if (sb.length() > 0) {
-          //  sb.deleteCharAt(sb.length() - 1); // Remove the last comma
-        //}
-        //return sb.toString();
-    //}
-
-    //private ArrayList<Chocolate> deserializeChocolates(String chocolatesString) {
-      //  ArrayList<Chocolate> chocolates = new ArrayList<>();
-        //StringTokenizer tokenizer = new StringTokenizer(chocolatesString, ",");
-        //while (tokenizer.hasMoreTokens()) {
-          //  int chocolateId = Integer.parseInt(tokenizer.nextToken().trim());
-            // Assuming there's a method to find Chocolate by ID
-           // Chocolate chocolate = chocolateDAO.findChocolate(chocolateId);
-            //if (chocolate != null) {
-              //  chocolates.add(chocolate);
-            //}
-        //}
-        //return chocolates;
-    //}
     
     public void loadChocolatesAndPriceToPurchase(Purchase pc) {
 		chocolateDAO = new ChocolateDAO(contextPath);
@@ -161,9 +137,7 @@ public class PurchaseDAO {
 	}	
 
     private Chocolate findChocolateById(int chocolateId) {
-        // Implement your logic to find Chocolate by ID here
-        // You can use a ChocolateDAO method or any other approach to fetch Chocolate by ID
-        return null; // Placeholder
+        return null;
     }
     
     public ArrayList<Purchase> getPurchasesByFactoryId(int factoryId) {

@@ -13,7 +13,7 @@ public class Customer  extends User {
 	private ArrayList<Purchase> purchases;
 	private CustomerType type;
 	private ShoppingCart shoppingCart;
-	private int points;
+	private double points;
 	
 	public Customer() {
 		super();
@@ -21,7 +21,7 @@ public class Customer  extends User {
 	}
 	
 	public Customer(int id, String username, String password, String name, String surname, String gender,
-			LocalDate birthDate, Role role, boolean blocked,  CustomerType type, ShoppingCart shoppingCart, int points) {
+			LocalDate birthDate, Role role, boolean blocked,  CustomerType type, ShoppingCart shoppingCart, double points) {
 		super(id, username, password, name, surname, gender, birthDate, role, blocked);
 		this.type = type;
 		this.shoppingCart = shoppingCart;
@@ -51,10 +51,10 @@ public class Customer  extends User {
 	public void setShoppingCart(ShoppingCart shoppingCart) {
 		this.shoppingCart = shoppingCart;
 	}
-	public int getPoints() {
+	public double getPoints() {
 		return points;
 	}
-	public void setPoints(int points) {
+	public void setPoints(double points) {
 		this.points = points;
 	}
 
