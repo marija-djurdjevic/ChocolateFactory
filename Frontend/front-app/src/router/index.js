@@ -11,6 +11,7 @@ import AddWorkerView from '@/views/AddWorkerView.vue';
 import EditUserView from '@/views/EditUserView.vue';
 import ShoppingCartView from '@/views/ShoppingCartView.vue';
 import UsersView from '@/views/UsersView.vue';
+import ManagerFactoryView from '@/views/ManagerFactoryView.vue';
 const routes = [
   {
     path: '/',
@@ -71,6 +72,11 @@ const routes = [
     path: '/shoppingCart', 
     name: 'ShoppingCart',
     component: ShoppingCartView
+  },
+  {
+    path: '/managerFactory/:username', 
+    name: 'managerFactory',
+    component: ManagerFactoryView
   }
 ]
 
