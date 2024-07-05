@@ -1,5 +1,9 @@
 package services;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import javax.annotation.PostConstruct;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -16,6 +20,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import beans.Purchase;
+import beans.roles.Customer;
+import dao.CustomerDAO;
 import dao.PurchaseDAO;
 import utils.TokenUtils;
 import io.jsonwebtoken.Claims;
@@ -24,6 +30,8 @@ import io.jsonwebtoken.Claims;
 public class PurchaseService {
 	
 	private TokenUtils tokenUtils = new TokenUtils();
+	private PurchaseDAO purchaseDAO;
+	private CustomerDAO customerDAO;
 	
     @Context
     ServletContext ctx;
@@ -80,14 +88,14 @@ public class PurchaseService {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getPurchasesByFactory(@PathParam("factoryId") int factoryId, @Context HttpServletRequest request) {
         PurchaseDAO purchaseDAO = (PurchaseDAO) ctx.getAttribute("purchaseDAO");
-        String token = request.getHeader("Authorization");
+        /*String token = request.getHeader("Authorization");
 
         // Proveri validnost tokena i ulogu korisnika (ovo treba implementirati)
         if (token == null) {
             return Response.status(Response.Status.FORBIDDEN).entity("You do not have permission to perform this action").build();
-        }
+        }*/
 
-        ArrayList<Purchase> purchases = purchaseDAO.getPurchasesByFactoryId(factoryId);
+        List<Purchase> purchases = purchaseDAO.loadPurchasesWithChocolatesForFactory(factoryId);;
         return Response.ok(purchases).build();
     }
 
@@ -95,7 +103,29 @@ public class PurchaseService {
         // Implementiraj proveru tokena i uloge korisnika
         return true; // Placeholder
     }
-
+    /*@GET
+    @Path("/factory/{factoryId}/customers")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getCustomersByFactory(@PathParam("factoryId") int factoryId) {
+        List<Purchase> purchases = purchaseDAO.findByFactoryId(factoryId);
+        Set<Customer> customers = new HashSet<>();
+        for (Purchase purchase : purchases) {
+            Customer customer = customerDAO.findById(purchase.getCustomerId());
+            if (customer != null) {
+                customers.add(customer);
+            }
+        }
+        return Response.ok(customers).build();
+    }*/
+    
+    @GET
+    @Path("/factory/{factoryId}/customers")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getCustomersByFactory(@PathParam("factoryId") int factoryId) {
+    	PurchaseDAO dao = (PurchaseDAO) ctx.getAttribute("purchaseDAO");
+        List<Customer> customers = dao.findCustomersByFactoryId(factoryId);
+        return Response.ok(customers).build();
+    }
     /*@GET
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)

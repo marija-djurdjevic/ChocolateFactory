@@ -1,6 +1,9 @@
 package dao;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import beans.Purchase;
 import beans.ShoppingCart;
@@ -15,17 +18,20 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
+import java.util.stream.Collectors;
 
 import beans.CartChocolate;
 import beans.Chocolate;
 import beans.Purchase;
 import beans.enums.PurchaseStatus;
+import beans.roles.Customer;
 
 public class PurchaseDAO {
     private ArrayList<Purchase> purchases = new ArrayList<>();
     private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private final String contextPath;
     private ChocolateDAO chocolateDAO;
+    private CustomerDAO customerDAO;
 	private CartChocolateDAO cartChocolateDAO;
 	private ShoppingCartDAO shoppingCartDAO;
 
@@ -35,6 +41,7 @@ public class PurchaseDAO {
         chocolateDAO = new ChocolateDAO(contextPath);
         cartChocolateDAO = new CartChocolateDAO(contextPath);
         shoppingCartDAO = new ShoppingCartDAO(contextPath);
+        customerDAO = new CustomerDAO(contextPath);
     }
 
     public ArrayList<Purchase> findAll() {
@@ -94,6 +101,41 @@ public class PurchaseDAO {
     private void updateCartChocolates(Purchase purchase, ShoppingCart shoppingCart) {
     	cartChocolateDAO.updateCartPurchase(purchase, shoppingCart);		
     }
+    
+    public List<Purchase> findByFactoryId(int factoryId) {
+        List<Purchase> filteredPurchases = new ArrayList<>();
+        for (Purchase purchase : purchases) {
+            if (purchase.getFactoryId() == factoryId) {
+                filteredPurchases.add(purchase);
+            }
+        }
+        return filteredPurchases;
+    }
+   public List<Customer> findCustomersByFactoryId(int factoryId) {
+        List<Purchase> purchases = findByFactoryId(factoryId);
+        Set<Customer> customers = new HashSet<>();
+        for (Purchase purchase : purchases) {
+            Customer customer = customerDAO.findById(purchase.getCustomerId());
+            if (customer != null) {
+                customers.add(customer);
+            }
+        }
+        return new ArrayList<>(customers);
+    }
+
+    /*public List<Customer> findCustomersByFactoryId(int factoryId) {
+        List<Purchase> purchases = findByFactoryId(factoryId);
+        List<Customer> customers = new ArrayList<>();
+        
+        for (Purchase purchase : purchases) {
+            Customer customer = customerDAO.findById(purchase.getCustomerId());
+            if (customer != null) {
+                customers.add(customer);
+            }
+        }
+        
+        return customers;
+    }*/
 
 
    // private String serializeChocolates(ArrayList<Chocolate> chocolates) {
@@ -159,6 +201,36 @@ public class PurchaseDAO {
 			}
 		}
 	}	
+
+    public List<Purchase> loadPurchasesWithChocolatesForFactory(int factoryId) {
+        chocolateDAO = new ChocolateDAO(contextPath);
+        cartChocolateDAO = new CartChocolateDAO(contextPath);
+        List<Purchase> factoryPurchases = new ArrayList<>();
+
+        for (Purchase purchase : purchases) {
+            if (purchase.getFactoryId() == factoryId) {
+                double price = 0;
+                purchase.chocolates = new ArrayList<>();
+
+                for (CartChocolate cc : cartChocolateDAO.findAll()) {
+                    if (purchase.getId().equals(cc.getPurchaseId())) {
+                        Chocolate chocolate = chocolateDAO.findChocolate(cc.getChocolateId());
+                        if (chocolate != null) {
+                            price += chocolate.getPrice() * cc.getAmount();
+                            if (!purchase.containsChocolateWithId(chocolate.getId())) {
+                                purchase.chocolates.add(chocolate);
+                            }
+                        }
+                    }
+                }
+
+                purchase.setPrice(price);
+                factoryPurchases.add(purchase);
+            }
+        }
+
+        return factoryPurchases;
+    }
 
     private Chocolate findChocolateById(int chocolateId) {
         // Implement your logic to find Chocolate by ID here
