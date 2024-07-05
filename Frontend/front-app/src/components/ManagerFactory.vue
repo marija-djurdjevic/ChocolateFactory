@@ -47,7 +47,7 @@
     <section v-if="purchases.length > 0" class="card purchases">
       <h2>Purchases</h2>
       <ul>
-        <li v-for="purchase in purchases" :key="purchase.id">
+        <li v-for="purchase in purchases" :key="purchase.id" class="card purchase-card">
           <div class="purchase-details">
             <div>
               <strong>Date & Time:</strong> {{ purchase.dateAndTime }}
@@ -58,6 +58,7 @@
             <div>
               <strong>Status:</strong> {{ purchase.status }}
             </div>
+            
             <div>
               <strong>Chocolates:</strong>
               <ul>
@@ -65,6 +66,14 @@
                   {{ chocolate.name }} (x{{ chocolate.amountOfChocolate }})
                 </li>
               </ul>
+            </div>
+            <div v-if="purchase.status === 'Processing'" class="actions">
+              <button @click="updatePurchaseStatus(purchase.id, 'Accepted')">Accept</button>
+              <button @click="purchase.showDenyReasonDialog = true">Decline</button>
+            </div>
+            <div v-if="purchase.showDenyReasonDialog" class="deny-reason">
+              <textarea v-model="purchase.denyReason" placeholder="Enter reason for denial"></textarea>
+              <button @click="denyPurchase(purchase.id)">Submit</button>
             </div>
           </div>
         </li>
@@ -162,7 +171,11 @@ export default {
       axios
         .get(`http://localhost:8080/WebShopAppREST/rest/purchases/factory/${factory.value.id}`)
         .then(response => {
-          purchases.value = response.data;
+          purchases.value = response.data.map(purchase => ({
+            ...purchase,
+            showDenyReasonDialog: false,
+            denyReason: ''
+          }));
         })
         .catch(error => {
           console.error('Error fetching purchases data', error);
@@ -201,6 +214,36 @@ export default {
         });
     };
 
+    const updatePurchaseStatus = (purchaseId, newStatus) => {
+      axios
+        .put(`http://localhost:8080/WebShopAppREST/rest/purchases/updateStatus?id=${purchaseId}&status=${newStatus}`)
+        .then(response => {
+          const updatedPurchase = purchases.value.find(purchase => purchase.id === purchaseId);
+          if (updatedPurchase) {
+            updatedPurchase.status = newStatus;
+          }
+        })
+        .catch(error => {
+          console.error('Error updating purchase status', error);
+        });
+    };
+
+    const denyPurchase = purchaseId => {
+      const denyReason = purchases.value.find(purchase => purchase.id === purchaseId).denyReason;
+      axios
+        .put(`http://localhost:8080/WebShopAppREST/rest/purchases/updateStatus?id=${purchaseId}&status=Declined&reason=${denyReason}`)
+        .then(response => {
+          const updatedPurchase = purchases.value.find(purchase => purchase.id === purchaseId);
+          if (updatedPurchase) {
+            updatedPurchase.status = 'Declined';
+            updatedPurchase.showDenyReasonDialog = false; // Hide deny reason dialog after submission
+          }
+        })
+        .catch(error => {
+          console.error('Error denying purchase', error);
+        });
+    };
+
     return {
       factory,
       chocolates,
@@ -208,6 +251,8 @@ export default {
       customers,
       location, // Return location as part of the output
       loadFactoryData,
+      updatePurchaseStatus, // Return updatePurchaseStatus method
+      denyPurchase, // Return denyPurchase method
     };
   },
 };
@@ -279,5 +324,113 @@ export default {
   padding: 20px;
   font-size: 18px;
   color: #333; /* Grey */
+}
+
+/* Styles for purchase card */
+.card.purchase-card {
+  margin-bottom: 15px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+}
+
+.card.purchase-card .actions {
+  margin-top: 10px;
+}
+
+.card.purchase-card .actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+}
+
+.card.purchase-card button {
+  background-color: #ff6347;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  font-size: 1rem;
+  margin-left: 10px;
+  height: 40px;
+  width: 100px; /* Prilagodite širinu prema potrebi */
+}
+
+.card.purchase-card button:hover {
+  background-color: tomato;
+}
+
+.card.purchase-card button:first-of-type {
+  margin-left: 0;
+}
+
+.card.purchase-card button:last-of-type {
+  margin-right: 0;
+}
+
+.card.purchase-card button {
+  margin-right: 5px;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.card.purchase-card button:first-of-type {
+  background-color: #ff6347;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  font-size: 1rem;
+  margin-left: 10px;
+  height: 40px;
+  width:140px;
+}
+.deny-reason {
+  margin-top: 10px;
+}
+
+.deny-reason button {
+  margin-top: 10px;
+  padding: 8px 15px;
+  background-color: #ffc0cb;
+  color: #dd6755;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.deny-reason button:hover {
+  background-color: tomato;
+  color: #ffffff;
+}
+
+
+.deny-reason textarea {
+  width: 100%;
+  height: 60px;
+  padding: 10px;
+  border: 1px solid #e0e0e0;
+  border-radius: 5px;
+}
+.card.purchase-card button:last-of-type {
+  background-color: #ff6347;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  font-size: 1rem;
+  margin-left: 10px;
+  height: 40px;
+  width:140px;
 }
 </style>

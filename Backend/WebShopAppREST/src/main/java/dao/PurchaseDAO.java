@@ -122,6 +122,54 @@ public class PurchaseDAO {
         }
         return new ArrayList<>(customers);
     }
+   
+   public Purchase findPurchaseById(String id) {
+	    for (Purchase purchase : purchases) {
+	        if (purchase.getId().equals(id)) {
+	            return purchase;
+	        }
+	    }
+	    return null;
+	}
+   
+   public void updatePurchase(Purchase purchase) {
+	    loadPurchases(contextPath);
+	    
+	    for (int i = 0; i < purchases.size(); i++) {
+	        if (purchases.get(i).getId().equals(purchase.getId())) {
+	            purchases.set(i, purchase);
+	            break;
+	        }
+	    }
+
+	    savePurchases(contextPath);
+	}
+   private void savePurchases(String contextPath) {
+	    BufferedWriter writer = null;
+	    try {
+	        File file = new File(contextPath + "/purchases.txt");
+	        writer = new BufferedWriter(new FileWriter(file));
+
+	        for (Purchase purchase : purchases) {
+	            writer.write(purchase.getId() + ";" +
+	                         purchase.getFactoryId() + ";" +
+	                         purchase.getDateAndTime().format(formatter) + ";" +
+	                         purchase.getPrice() + ";" +
+	                         purchase.getCustomerId() + ";" +
+	                         purchase.getStatus() + "\n");
+	        }
+	    } catch (IOException e) {
+	        e.printStackTrace();
+	    } finally {
+	        if (writer != null) {
+	            try {
+	                writer.close();
+	            } catch (IOException e) {
+	                e.printStackTrace();
+	            }
+	        }
+	    }
+	}
 
     /*public List<Customer> findCustomersByFactoryId(int factoryId) {
         List<Purchase> purchases = findByFactoryId(factoryId);

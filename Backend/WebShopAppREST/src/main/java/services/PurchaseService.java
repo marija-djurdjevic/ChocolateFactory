@@ -20,6 +20,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import beans.Purchase;
+import beans.enums.PurchaseStatus;
 import beans.roles.Customer;
 import dao.CustomerDAO;
 import dao.PurchaseDAO;
@@ -125,6 +126,22 @@ public class PurchaseService {
     	PurchaseDAO dao = (PurchaseDAO) ctx.getAttribute("purchaseDAO");
         List<Customer> customers = dao.findCustomersByFactoryId(factoryId);
         return Response.ok(customers).build();
+    }
+    
+    @PUT
+    @Path("/updateStatus")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response updatePurchaseStatus(@QueryParam("id") String id, @QueryParam("status") String status) {
+    	PurchaseDAO dao = (PurchaseDAO) ctx.getAttribute("purchaseDAO");
+        Purchase purchase = dao.findPurchaseById(id);
+        if (purchase == null) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+
+        purchase.setStatus(PurchaseStatus.valueOf(status));
+        dao.updatePurchase(purchase);
+        return Response.ok(purchase).build();
     }
     /*@GET
     @Path("/{id}")
