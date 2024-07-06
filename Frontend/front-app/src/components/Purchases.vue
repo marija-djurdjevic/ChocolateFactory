@@ -64,7 +64,7 @@
       <option value="4">4 (Very Good)</option>
       <option value="5">5 (Excellent)</option>
     </select>
-    <button @click="submitRating">Submit</button>
+    <button @click="submitRating(selectedPurchase)">Submit</button>
   </div>
 </div>
 
@@ -79,6 +79,7 @@ const purchases = ref([]);
 const factories = ref([]);
 const filteredPurchases = ref([]);
 const username = ref(localStorage.getItem("username") || '');
+const selectedPurchase = ref(null);
 
 const user = ref({
   username: '',
@@ -164,6 +165,7 @@ function getFactoryName(factoryId) {
 }
 
 function rateFactory(purchase) {
+  selectedPurchase.value = purchase; 
   selectedFactoryId.value = purchase.factoryId;
   selectedFactoryName.value = getFactoryName(purchase.factoryId);
   showRatingModal.value = true;
