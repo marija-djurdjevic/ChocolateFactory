@@ -4,6 +4,8 @@ import beans.Factory;
 import beans.ShoppingCart;
 import beans.enums.CommentStatus;
 import beans.enums.PurchaseStatus;
+import beans.roles.Manager;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -17,12 +19,12 @@ import java.util.StringTokenizer;
 public class CommentDAO {
     private ArrayList<Comment> comments = new ArrayList<>();
     private String contextPath;
-    private FactoryDAO factoryDAO;
+    private ManagerDAO managerDAO;
 
     public CommentDAO(String contextPath) {
         this.contextPath = contextPath;
         loadComments();
-        factoryDAO = new FactoryDAO(contextPath);
+        managerDAO = new ManagerDAO(contextPath);
     }
 
     public ArrayList<Comment> getAllComments() {
@@ -37,6 +39,8 @@ public class CommentDAO {
         comments.add(comment);
         saveCommentsToFile();
     }
+    
+   
 
     private void saveCommentsToFile() {
         try {
@@ -59,18 +63,10 @@ public class CommentDAO {
     
     public ArrayList<Comment> findManagersFactoryComments(String username) {
     	ArrayList<Comment> compatibileComments = new ArrayList<Comment>();
-    	System.out.println("USAO OVDJEEEJEJEJEJEJJEE");
     	loadComments();
-		System.out.println(comments);
-        Factory factory = factoryDAO.findFactoryByManagerId(username);
-        System.out.println(factory);
+        Manager manager = managerDAO.getByUsername(username);
     	for(Comment comment : comments) {
-        	System.out.println("USAO OVDJEEEJEJEJEJEJJEE");
-    		System.out.println(comment);
-    		System.out.println(comment.getFactoryId());
-    		System.out.println(factory.getId());
-    		if(comment.getFactoryId() == factory.getId()) {
-    	    	System.out.println("USAO OVDJEEEJEJEJEJEJJEE");
+    		if(comment.getFactoryId() == manager.getFactoryId()) {
     	    	compatibileComments.add(comment);
     		}
     	}
