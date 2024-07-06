@@ -28,6 +28,7 @@
             <p><strong>Type:</strong> {{ chocolate.chocolateType }}</p>
             <p><strong>Weight:</strong> {{ chocolate.gramsOfChocolate }} grams</p>
             <p><strong>Description:</strong> {{ chocolate.chocolateDescription }}</p>
+            <p><strong>Price:</strong> {{ chocolate.price }}</p>
             <p><strong>Status:</strong> {{ chocolate.available ? 'Available' : 'Not Available' }}</p>
           </div>
           <div class="chocolate-image">
@@ -186,6 +187,8 @@ async function loadChocolates() {
 function AddToCart(chocolateId, amountOfChocolate) {
   loadCart(chocolateId, amountOfChocolate);
   isCartCreated.value = true; 
+  showButton.value = true;
+  alert('You added chocolate to cart!');
 }
 
 async function loadCartProbno() {

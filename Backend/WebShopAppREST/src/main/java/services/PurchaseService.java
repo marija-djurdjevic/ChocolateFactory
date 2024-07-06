@@ -19,7 +19,12 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import beans.CartChocolate;
+import beans.Chocolate;
 import beans.Purchase;
+import dao.CartChocolateDAO;
+import dao.ChocolateDAO;
+import dao.FactoryDAO;
 import beans.enums.PurchaseStatus;
 import beans.roles.Customer;
 import dao.CustomerDAO;
@@ -51,6 +56,14 @@ public class PurchaseService {
     public ArrayList<Purchase> getAllPurchases() {
         PurchaseDAO dao = (PurchaseDAO) ctx.getAttribute("purchaseDAO");
         return dao.findAll();
+    }
+   
+    @GET
+    @Path("/{customerId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public ArrayList<Purchase> getPurchasesByCustomerId(@PathParam("customerId") int customerId) {
+    	PurchaseDAO dao = (PurchaseDAO) ctx.getAttribute("purchaseDAO");
+        return dao.findCustomersPurchases(customerId);
     }
 
     @POST
@@ -104,6 +117,28 @@ public class PurchaseService {
         // Implementiraj proveru tokena i uloge korisnika
         return true; // Placeholder
     }
+    
+    @POST
+    @Path("/cancel")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Purchase cancelPurchase(Purchase purchase) {
+        PurchaseDAO dao = (PurchaseDAO) ctx.getAttribute("purchaseDAO");
+        Purchase deletedPurchase = dao.cancel(purchase);
+        return deletedPurchase;
+    }
+    
+    @POST
+    @Path("/delete")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public CartChocolate deleteChocolate(CartChocolate cartChocolate) {
+    	System.out.println("DOBAVLJENI CART CHOCOLATE" + cartChocolate);
+    	CartChocolateDAO dao = (CartChocolateDAO) ctx.getAttribute("cartChocolateDAO");
+        CartChocolate deletedCartChocolate = dao.deleteCartChocolate(cartChocolate);
+        return deletedCartChocolate;
+    }
+    
     /*@GET
     @Path("/factory/{factoryId}/customers")
     @Produces(MediaType.APPLICATION_JSON)
@@ -143,6 +178,7 @@ public class PurchaseService {
         dao.updatePurchase(purchase);
         return Response.ok(purchase).build();
     }
+    
     @GET
     @Path("/suspiciousCustomers")
     @Produces(MediaType.APPLICATION_JSON)

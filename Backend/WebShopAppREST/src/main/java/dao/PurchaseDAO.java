@@ -1,13 +1,10 @@
 package dao;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import beans.Purchase;
 import beans.ShoppingCart;
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -17,13 +14,11 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.StringTokenizer;
+import java.util.UUID;
 import java.util.stream.Collectors;
-
 import beans.CartChocolate;
 import beans.Chocolate;
-import beans.Purchase;
 import beans.enums.PurchaseStatus;
 import beans.roles.Customer;
 
@@ -42,7 +37,7 @@ public class PurchaseDAO {
         chocolateDAO = new ChocolateDAO(contextPath);
         cartChocolateDAO = new CartChocolateDAO(contextPath);
         shoppingCartDAO = new ShoppingCartDAO(contextPath);
-        customerDAO = new CustomerDAO(contextPath);
+    	customerDAO = new CustomerDAO(contextPath);
     }
 
     public ArrayList<Purchase> findAll() {
@@ -74,27 +69,25 @@ public class PurchaseDAO {
     }
 
     public Purchase save(Purchase purchase) {
-        System.out.println("usao ovdje i ispisujem " + LocalDateTime.now());
         purchase.setDateAndTime(LocalDateTime.now());    
-        System.out.println("Date and Time before format: " + purchase.getDateAndTime());
-
         loadPurchases(contextPath);
-        int maxId = -1;
+        String uniqueId;
+        boolean isUnique;
 
-        for (Purchase p : purchases) {
-            String purchaseId = p.getId();
-            int index = Character.getNumericValue(purchaseId.charAt(purchaseId.length() - 1));
-            if (index > maxId) {
-                maxId = index;
+        do {
+            uniqueId = UUID.randomUUID().toString().replaceAll("-", "").substring(0, 10);
+            isUnique = true;
+
+            for (Purchase p : purchases) {
+                if (p.getId().equals(uniqueId)) {
+                    isUnique = false;
+                    break;
+                }
             }
-        }
-        
-        maxId++;
-        purchase.setId("purchase" + purchase.getCustomerId() + maxId);
+        } while (!isUnique);
+        purchase.setId(uniqueId);
         
         try {
-            // Ensure dateAndTime is properly set
-            // Print for debugging purposes
             System.out.println("Date and Time before format: " + purchase.getDateAndTime());
             System.out.println("Formatted Date and Time: " + purchase.getDateAndTime().format(formatter));
             
@@ -115,13 +108,73 @@ public class PurchaseDAO {
         }
         
         ShoppingCart shoppingCart = shoppingCartDAO.deleteByCustomerId(purchase.getCustomerId());
+        customerDAO.updatePoints(shoppingCart.getCustomerId(), shoppingCart.getPrice());
         updateCartChocolates(purchase, shoppingCart);
         return purchase;
+    }
+    
+    public ArrayList<Purchase> findCustomersPurchases(int customerId) {   	
+        loadPurchases(contextPath);
+        ArrayList<Purchase> filteredPurchases = new ArrayList<Purchase>();
+        for(Purchase purchase : purchases) {
+        	if(purchase.getCustomerId() == customerId) {
+        		filteredPurchases.add(purchase);
+        	}
+        }
+        
+        return filteredPurchases;
     }
     
     private void updateCartChocolates(Purchase purchase, ShoppingCart shoppingCart) {
     	cartChocolateDAO.updateCartPurchase(purchase, shoppingCart);		
     }
+    
+    public Purchase cancel(Purchase p) {
+        loadPurchases(contextPath);
+        for (Purchase purchase : purchases) {
+            if (purchase.getId().equals(p.getId())) {
+                purchase.setStatus(PurchaseStatus.Canceled);
+                customerDAO.updatePointsMinus(p.getCustomerId(), p.getPrice());
+                updateCanceledChocolatesAmounts(p);
+                saveAll();
+                return purchase;
+            }
+        }
+        return null;
+    }
+    
+    private void updateCanceledChocolatesAmounts(Purchase purchase) {
+		for(CartChocolate cc : cartChocolateDAO.findAll()) {
+			if(purchase.getId().equals(cc.getPurchaseId())) {
+				System.out.println("USAO NASAO PROSAO");
+				Chocolate chocolate = chocolateDAO.findChocolate(cc.getChocolateId());
+				int newAmount = chocolate.getAmountOfChocolate() + cc.getAmount();
+				chocolate.setAmountOfChocolate(newAmount);
+			}
+		}
+		
+		chocolateDAO.saveAllChocolates();
+    }
+    
+    public void saveAll() {
+		try {
+	        String filePath = contextPath + "purchases.txt";
+	        FileWriter writer = new FileWriter(filePath, false); 
+	        BufferedWriter bufferedWriter = new BufferedWriter(writer);
+	        for (Purchase purchase : purchases) {
+	        	bufferedWriter.write(purchase.getId() + ";" +
+	                    purchase.getFactoryId() + ";" +
+	                    purchase.getDateAndTime().format(formatter) + ";" +
+	                    purchase.getPrice() + ";" +
+	                    purchase.getCustomerId() + ";" +
+	                    purchase.getStatus() + "\n");
+	        }
+	        bufferedWriter.flush();
+	        bufferedWriter.close();
+	    } catch (IOException e) {
+	        e.printStackTrace();
+	    }
+	}
     
     public List<Purchase> findByFactoryId(int factoryId) {
         List<Purchase> filteredPurchases = new ArrayList<>();
@@ -244,7 +297,7 @@ public class PurchaseDAO {
 				purchase.chocolates = new ArrayList<>();
 				for(CartChocolate cc : cartChocolateDAO.findAll()) {
 					System.out.println(cc);
-					if(purchase.getId() == cc.getPurchaseId()) {
+					if(purchase.getId().equals(cc.getPurchaseId())) {
 						System.out.println("NASAO CARTCHOCOLATE");
 						Chocolate chocolate = chocolateDAO.findChocolate(cc.getChocolateId());
 						if(chocolate == null) {
@@ -302,9 +355,7 @@ public class PurchaseDAO {
     }
 
     private Chocolate findChocolateById(int chocolateId) {
-        // Implement your logic to find Chocolate by ID here
-        // You can use a ChocolateDAO method or any other approach to fetch Chocolate by ID
-        return null; // Placeholder
+        return null;
     }
     
     public ArrayList<Purchase> getPurchasesByFactoryId(int factoryId) {

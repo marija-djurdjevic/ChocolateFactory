@@ -151,6 +151,10 @@ function goToShoppingCart() {
   router.push('shoppingCart');
 }
 
+function goToPurchases() {
+  router.push('purchases');
+}
+
 async function loadChocolatesForFactory(factory) {
   try {
     const response = await axios.get(`http://localhost:8080/WebShopAppREST/rest/chocolates/${factory.id}`);

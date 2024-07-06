@@ -80,10 +80,69 @@ public class CustomerDAO {
 	    }
 	}
 	
+	public Customer updatePoints(int customerId, double price) {
+		loadCustomers(contextPath);
+		for(Customer customer : customers) {
+			if(customer.getId() == customerId) {
+				double newPoints = customer.getPoints() + price / 1000 * 133;
+				customer.setPoints(newPoints);
+				saveAll();
+				return customer;
+			}
+		}
+		
+		return null;
+	}
+	
+	public Customer updatePointsMinus(int customerId, double price) {
+		loadCustomers(contextPath);
+		for(Customer customer : customers) {
+			if(customer.getId() == customerId) {
+				double newPoints = customer.getPoints() - price / 1000 * 133 * 4;
+			    System.out.println(newPoints);
+				if(newPoints < 0) {
+					newPoints = 0;
+				}
+				
+			    System.out.println(newPoints);
+				customer.setPoints(newPoints);
+				saveAll();
+				return customer;
+			}
+		}
+		
+		return null;
+	}
+	
+	public void saveAll() {
+		try {
+	        String filePath = contextPath + "customers.txt";
+	        FileWriter writer = new FileWriter(filePath, false); 
+	        BufferedWriter bufferedWriter = new BufferedWriter(writer);
+	        for (Customer customer : customers) {
+	            String roleString = customer.getRole().toString();
+	        	bufferedWriter.write(customer.getId() + ";" +
+	            		customer.getUsername() + ";" +
+	            		customer.getPassword() + ";" +
+	            		customer.getName() + ";" +
+	            		customer.getSurname() + ";" +
+	            		customer.getGender() + ";" +
+	            		customer.getBirthDate().format(formatter) + ";" +
+	            		roleString + ";" +
+	            		customer.isBlocked() + ";" +
+	                    customer.getPoints() + "\n");
+	        }
+	        bufferedWriter.flush();
+	        bufferedWriter.close();
+	    } catch (IOException e) {
+	        e.printStackTrace();
+	    }
+	}
+	
 	public Customer save(User user, String contextPath) {
 		loadCustomers(contextPath);
 		Customer customer = new Customer(user.getId(), user.getUsername(), user.getPassword(), user.getName(), user.getSurname(), user.getGender(), user.getBirthDate(), user.getRole(), user.isBlocked());
-		customer.setPoints(0);
+		customer.setPoints(0.0);
 		customer.setPurchases(null);
 		customer.setShoppingCart(null);
 		customer.setType(null);
@@ -102,6 +161,7 @@ public class CustomerDAO {
             		customer.getGender() + ";" +
             		customer.getBirthDate().format(formatter) + ";" +
             		roleString + ";" +
+            		customer.isBlocked() + ";" +
                     customer.getPoints() + "\n");
             bufferedWriter.flush(); // Ensure all data is written to the file
             bufferedWriter.close();
@@ -135,7 +195,7 @@ public class CustomerDAO {
 				Role role = Role.valueOf(st.nextToken().trim());
 				boolean blocked = Boolean.parseBoolean(st.nextToken().trim());
 	            System.out.println(role);
-				int points = Integer.parseInt(st.nextToken().trim());
+				double points = Double.parseDouble(st.nextToken().trim());
 				ShoppingCart shoppingCart = new ShoppingCart();
 				CustomerType customerType = new CustomerType();
 ;				customers.add(new Customer(id, username, password, name, surname, gender, birthDate, role, blocked, customerType, shoppingCart, points));

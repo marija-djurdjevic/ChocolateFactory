@@ -95,7 +95,7 @@ public class ChocolateDAO {
 		}
 	}
 	
-	private void saveAllChocolates() {
+	public void saveAllChocolates() {
 	    try {
 	        String filePath = contextPath + "chocolates.txt";
 	        FileWriter writer = new FileWriter(filePath, false); 

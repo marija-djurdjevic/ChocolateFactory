@@ -16,9 +16,11 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import beans.Chocolate;
 import beans.User;
 import beans.roles.Customer;
 import dao.CustomerDAO;
+import dao.FactoryDAO;
 import io.jsonwebtoken.Claims;
 import utils.TokenUtils;
 
@@ -45,6 +47,7 @@ public class CustomerService {
         CustomerDAO dao = (CustomerDAO) ctx.getAttribute("customerDAO");
         return dao.findAll();
     }
+    
 
     @PUT
     @Path("/update")
