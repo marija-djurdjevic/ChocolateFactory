@@ -143,6 +143,16 @@ public class PurchaseService {
         dao.updatePurchase(purchase);
         return Response.ok(purchase).build();
     }
+    @GET
+    @Path("/suspiciousCustomers")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getSuspiciousCustomers(@Context HttpServletRequest request) {
+    	PurchaseDAO dao = (PurchaseDAO) ctx.getAttribute("purchaseDAO");
+        
+
+        List<Customer> suspiciousCustomers = dao.findSuspiciousCustomers();
+        return Response.ok(suspiciousCustomers).build();
+    }
     /*@GET
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
