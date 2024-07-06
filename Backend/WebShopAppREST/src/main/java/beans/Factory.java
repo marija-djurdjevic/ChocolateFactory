@@ -137,5 +137,14 @@ public class Factory {
 			e.printStackTrace();
 		}	
 	}
+
+	@Override
+	public String toString() {
+		return "Factory [id=" + id + ", name=" + name + ", availableChocolates=" + availableChocolates + ", worktime="
+				+ worktime + ", status=" + status + ", locationId=" + locationId + ", imagePath=" + imagePath
+				+ ", imageString=" + imageString + ", grade=" + grade + "]";
+	}
+	
+	
 	
 }

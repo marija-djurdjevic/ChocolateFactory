@@ -189,6 +189,7 @@ async function submitRating(purchase) {
     await axios.post('http://localhost:8080/WebShopAppREST/rest/comments/add', newComment);
     console.log('Comment added successfully:', newComment);
 
+    console.log(purchase.id);
     await updatePurchaseStatus(purchase.id, 'Rated');
 
     comment.value = '';
@@ -200,6 +201,7 @@ async function submitRating(purchase) {
 }
 
 async function updatePurchaseStatus(purchaseId, newStatus) {
+console.log(purchaseId);
   try {
     // Ažuriranje statusa porudžbine na serveru
     await axios.put(`http://localhost:8080/WebShopAppREST/rest/purchases/updateStatus?id=${purchaseId}&status=${newStatus}`);
