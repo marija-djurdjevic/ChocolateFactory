@@ -4,7 +4,7 @@
       <h1>Your Purchases</h1>
     </header>
     <div class="search-bar">
-      <input v-model="searchFactory" type="text" placeholder="Factory Name" />
+      <input v-model="searchFactory" type="text" placeholder="Search by Factory Name" />
       <input v-model="priceFrom" type="number" placeholder="Price From" />
       <input v-model="priceTo" type="number" placeholder="Price To" />
       <input v-model="dateFrom" type="date" placeholder="Date From" />
@@ -36,6 +36,12 @@
             <p><strong>Order created on:</strong> {{ formatDate(purchase.dateAndTime) }}</p>
           </div>
           <button 
+            v-if="purchase.status === 'Accepted'" 
+            @click="rateFactory(purchase)" 
+            class="rate-button">
+            Rate this factory
+          </button>
+          <button 
             v-if="purchase.status === 'Processing'" 
             @click="cancelPurchase(purchase.id)" 
             class="cancel-button">
@@ -44,6 +50,24 @@
         </div>
       </div>
     </div>
+    <!-- Modal for rating -->
+    <!-- Modal for rating -->
+<div v-if="showRatingModal" class="rating-modal">
+  <div class="rating-modal-content">
+    <span class="close" @click="closeRatingModal">&times;</span>
+    <h2>Rate {{ selectedFactoryName }}</h2>
+    <textarea v-model="comment" placeholder="Enter your comment"></textarea>
+    <select v-model="rating">
+      <option value="1">1 (Poor)</option>
+      <option value="2">2 (Fair)</option>
+      <option value="3">3 (Good)</option>
+      <option value="4">4 (Very Good)</option>
+      <option value="5">5 (Excellent)</option>
+    </select>
+    <button @click="submitRating">Submit</button>
+  </div>
+</div>
+
   </div>
 </template>
 
@@ -72,10 +96,29 @@ const dateFrom = ref('');
 const dateTo = ref('');
 const sortBy = ref('factory');
 const sortOrder = ref('asc');
+const showRatingModal = ref(false);
+const selectedFactoryId = ref('');
+const selectedFactoryName = ref('');
+const comment = ref('');
+const rating = ref(1);
 
 onMounted(() => {
   loadUser();
 });
+
+function cancelPurchase(purchaseId) {
+  const purchase = purchases.value.find(p => p.id === purchaseId);
+  console.log(purchase);
+  axios.post(`http://localhost:8080/WebShopAppREST/rest/purchases/cancel`, purchase)
+    .then(response => {
+      if (purchase) {
+        purchase.status = 'Canceled';
+      }
+    })
+    .catch(error => {
+      console.error('Error updating chocolate:', error);
+    });
+}
 
 function loadUser() {
   axios.get(`http://localhost:8080/WebShopAppREST/rest/users/authenticateUser?username=${username.value}`)
@@ -120,18 +163,53 @@ function getFactoryName(factoryId) {
   return factory ? factory.name : 'Unknown Factory';
 }
 
-function cancelPurchase(purchaseId) {
-  const purchase = purchases.value.find(p => p.id === purchaseId);
-  console.log(purchase);
-  axios.post(`http://localhost:8080/WebShopAppREST/rest/purchases/cancel`, purchase)
-    .then(response => {
-      if (purchase) {
-        purchase.status = 'Canceled';
-      }
-    })
-    .catch(error => {
-      console.error('Error updating chocolate:', error);
-    });
+function rateFactory(purchase) {
+  selectedFactoryId.value = purchase.factoryId;
+  selectedFactoryName.value = getFactoryName(purchase.factoryId);
+  showRatingModal.value = true;
+}
+
+function closeRatingModal() {
+  showRatingModal.value = false;
+}
+
+
+async function submitRating(purchase) {
+  const newComment = {
+    factoryId: selectedFactoryId.value,
+    customerId: user.value.id,
+    comment: comment.value,
+    rating: rating.value
+  };
+
+  try {
+    
+    await axios.post('http://localhost:8080/WebShopAppREST/rest/comments/add', newComment);
+    console.log('Comment added successfully:', newComment);
+
+    await updatePurchaseStatus(purchase.id, 'Rated');
+
+    comment.value = '';
+    rating.value = 1;
+    closeRatingModal();
+  } catch (error) {
+    console.error('Error adding comment:', error);
+  }
+}
+
+async function updatePurchaseStatus(purchaseId, newStatus) {
+  try {
+    // Ažuriranje statusa porudžbine na serveru
+    await axios.put(`http://localhost:8080/WebShopAppREST/rest/purchases/updateStatus?id=${purchaseId}&status=${newStatus}`);
+    
+    // Pronalaženje i ažuriranje lokalnog kopija porudžbine
+    const updatedPurchase = purchases.value.find(purchase => purchase.id === purchaseId);
+    if (updatedPurchase) {
+      updatedPurchase.status = newStatus;
+    }
+  } catch (error) {
+    console.error('Error updating purchase status', error);
+  }
 }
 
 function applyFilters() {
@@ -163,6 +241,7 @@ function applySorting() {
   });
 }
 </script>
+
 
 <style scoped>
 body {
@@ -228,7 +307,6 @@ body {
   margin: 5px;
   padding: 10px;
   font-size: 1rem;
-  width: 100px;
 }
 
 .sort-bar button {
@@ -238,6 +316,7 @@ body {
   border-radius: 5px;
   cursor: pointer;
   transition: background-color 0.3s;
+  width:100px;
 }
 
 .sort-bar button:hover {
@@ -269,7 +348,21 @@ body {
 .purchase-item:hover {
   border: 1px solid blanchedalmond;
 }
+.cancel-button {
+  background-color: #ff6347; 
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  width: fit-content;
+  margin-left: auto;
+}
 
+.cancel-button:hover {
+  background-color: #ff4500;
+}
 .purchase-details {
   padding: 20px;
   text-align: left;
@@ -302,8 +395,90 @@ body {
   background-color: #ff4500;
 }
 
+.rate-button {
+  background-color: #ff6347;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  width: fit-content;
+  margin-top: 10px;
+}
+
+.rate-button:hover {
+  background-color: #45a049;
+}
+
 .empty-purchases p {
   font-size: 1.5rem;
   color: #333;
+}
+
+/* Modal styles */
+.rating-modal {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  z-index: 999;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.4);
+}
+
+.rating-modal-content {
+  background-color: #fefefe;
+  padding: 20px;
+  width: 400px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+}
+
+.rating-modal-content textarea {
+  width: 100%;
+  height: 100px;
+  margin-bottom: 10px;
+  padding: 10px;
+  font-size: 1rem;
+}
+
+.rating-modal-content select,
+.rating-modal-content button {
+  margin-top: 10px;
+  padding: 10px;
+  font-size: 1rem;
+}
+
+.rating-modal-content button {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  width: 100px;
+}
+
+.rating-modal-content button:hover {
+  background-color: #45a049;
+}
+
+.rating-modal-content .close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.rating-modal-content .close:hover,
+.rating-modal-content .close:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
 }
 </style>

@@ -4,5 +4,6 @@ public enum PurchaseStatus {
 	Processing,
 	Accepted,
 	Declined,
-	Canceled
+	Canceled,
+	Rated
 }
