@@ -443,7 +443,7 @@ body {
 }
 
 .rating-modal-content textarea {
-  width: 100%;
+  width: 90%;
   height: 100px;
   margin-bottom: 10px;
   padding: 10px;

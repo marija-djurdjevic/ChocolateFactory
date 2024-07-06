@@ -53,7 +53,7 @@
       <div class="comment-items">
         <div v-for="(comment, index) in filteredComments" :key="comment.id" class="comment-item" :style="{ backgroundColor: index % 2 === 0 ? '#ffe4b5' : '#FFC9AD' }">
           <div class="comment-details">
-            <p><strong>User:</strong> {{ comment.username }}</p>
+            <p><strong>User:</strong> {{ comment.customerId }}</p>
             <p><strong>Rating:</strong> {{ comment.rating }}</p>
             <p><strong>Comment:</strong> {{ comment.comment }}</p>
             <p><strong>Status:</strong> {{ comment.status }}</p>
@@ -137,6 +137,7 @@ onMounted(() => {
   isAdministrator.value = role === 'Administrator';
   loadUser();
 });
+
 
 function loadUser() {
     axios.get(`http://localhost:8080/WebShopAppREST/rest/users/authenticateUser?username=${username.value}`)

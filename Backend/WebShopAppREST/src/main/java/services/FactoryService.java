@@ -56,7 +56,9 @@ public class FactoryService {
     @Produces(MediaType.APPLICATION_JSON)
     public Factory getFactoryById(@PathParam("factoryId") int factoryId) {
         FactoryDAO dao = (FactoryDAO) ctx.getAttribute("factoryDAO");
-        return dao.findFactory(factoryId);
+        Factory factory = dao.findFactory(factoryId);
+        System.out.println(factory);
+        return factory;
     }
     
     @GET

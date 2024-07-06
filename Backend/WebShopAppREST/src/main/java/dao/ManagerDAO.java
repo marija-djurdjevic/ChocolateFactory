@@ -33,6 +33,17 @@ public class ManagerDAO {
         return managers;
     }
     
+    public Manager getByUsername(String username) {
+        loadManagers(contextPath);
+        for(Manager manager : managers) {
+        	if(manager.getUsername().equals(username)) {
+        		return manager;
+        	}
+        }
+        
+        return null;
+    }
+    
     /*public boolean isManagerOfFactory(int managerId, int factoryId) {
         loadManagers(contextPath);
         

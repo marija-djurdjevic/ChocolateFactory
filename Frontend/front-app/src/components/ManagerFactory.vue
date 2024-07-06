@@ -46,7 +46,7 @@
         <li v-for="purchase in purchases" :key="purchase.id" class="card purchase-card">
           <div class="purchase-details">
             <div>
-              <strong>Date & Time:</strong> {{ purchase.dateAndTime }}
+              <strong>Date & Time:</strong> {{ formatDate(purchase.dateAndTime) }}
             </div>
             <div>
               <strong>Price:</strong> {{ purchase.price }}
@@ -85,13 +85,7 @@
               <strong>Username:</strong> {{ customer.username }}
             </div>
             <div>
-              <strong>Name:</strong> {{ customer.name }}
-            </div>
-            <div>
-              <strong>Surname:</strong> {{ customer.surname }}
-            </div>
-            <div>
-              <strong>Email:</strong> {{ customer.email }}
+              <strong>First and last name:</strong> {{ customer.name }}  {{ customer.surname }}
             </div>
           </div>
         </li>
@@ -115,10 +109,7 @@
           <div class="comment-status">
             <template v-if="comment.status === 'Processing'">
               <button @click="denyComment(comment.id)">Deny</button>
-              <button @click="approveComment(comment.id)">Approve</button>
-            </template>
-            <template v-else>
-              <span>{{ comment.status }}</span>
+              <button @click="updateCommentAndGrade(comment.id)">Approve</button>
             </template>
           </div>
         </div>
@@ -141,6 +132,7 @@ export default {
   setup() {
     const factory = ref(null);
     const chocolates = ref([]);
+    const newFactories = ref([]);
     const purchases = ref([]);
     const customers = ref([]);
     const comments = ref([]);
@@ -157,6 +149,16 @@ export default {
       const customer = customers.value.find(customer => customer.id === customerId);
       return customer ? `${customer.name} ${customer.surname}` : 'Unknown';
     }
+
+    function formatDate(dateString) {
+  const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+  return new Date(dateString).toLocaleDateString(undefined, options);
+  }
+
+  function updateCommentAndGrade(commentId) {
+    approveComment(commentId);
+    updateFactoryGrade();
+}
 
    
     const loadFactoryData = () => {
@@ -297,6 +299,7 @@ export default {
         });
     };
 
+    
     const approveComment = commentId => {
       axios
         .put(`http://localhost:8080/WebShopAppREST/rest/comments/updateStatus?id=${commentId}&status=Accepted`)
@@ -310,6 +313,21 @@ export default {
           console.error('Error denying comment', error);
         });
     };
+
+    const updateFactoryGrade = () =>  {
+      console.log("APDEJTUJEM");
+      console.log(factory.value.id);
+      axios.get(`http://localhost:8080/WebShopAppREST/rest/factories/${factory.value.id}`)
+    .then(response => {
+      factory.value = response.data;
+      console.log("fektori value" + factory.value);
+      console.log(factory.value.grade);
+    })
+        .catch(error => {
+          console.error('Error updating factory', error);
+        });
+    };
+
 
     const loadComments = () => {
       console.log("DOBAVLJENI USERNAME MANAGERA "+ username.value);
@@ -343,7 +361,10 @@ export default {
       comments,
       getCustomerById,
       denyComment,
-      approveComment
+      approveComment,
+      updateFactoryGrade,
+      formatDate,
+      updateCommentAndGrade
     };
   },
 };

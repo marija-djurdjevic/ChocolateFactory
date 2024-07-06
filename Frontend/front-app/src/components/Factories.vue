@@ -205,6 +205,7 @@ function searchFactories() {
   axios.get('http://localhost:8080/WebShopAppREST/rest/factories/')
     .then(async response => {
       factories.value = response.data;
+      console.log(factories.value);
       for (const factory of factories.value) {
         try {
           const locationResponse = await axios.get(`http://localhost:8080/WebShopAppREST/rest/locations/findLocation?id=${factory.locationId}`);          const location = locationResponse.data;

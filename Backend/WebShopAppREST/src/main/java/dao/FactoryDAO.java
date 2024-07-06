@@ -13,8 +13,11 @@ import java.util.Base64;
 import java.util.StringTokenizer;
 
 import beans.Chocolate;
+import beans.Comment;
 import beans.Factory;
 import beans.Location;
+import beans.ShoppingCart;
+import beans.enums.CommentStatus;
 import beans.roles.Manager;
 import beans.roles.Worker;
 import io.jsonwebtoken.Claims;
@@ -27,6 +30,7 @@ public class FactoryDAO {
 	private LocationDAO locationDAO;
     private WorkerDAO workerDAO;
     private ManagerDAO managerDAO;
+    private CommentDAO commentDAO;
     private UserDAO userDAO;
 	private String contextPath;
 	
@@ -39,6 +43,7 @@ public class FactoryDAO {
 		workerDAO = new WorkerDAO(contextPath);
 		managerDAO = new ManagerDAO(contextPath);
 		userDAO = new UserDAO(contextPath);
+		commentDAO = new CommentDAO(contextPath);
 		loadFactories(contextPath);
 		loadChocolatesForFactories();
 	}
@@ -54,6 +59,7 @@ public class FactoryDAO {
 		locationDAO.findAll();
 		loadFactories(contextPath);
 		loadChocolatesForFactories();
+		calculateFactoriesGrades();
 		userDAO.findAll();
 		for(Factory f: factories) {
 			f.loadImageString();
@@ -81,8 +87,10 @@ public class FactoryDAO {
 	public Factory findFactory(int id) {
 		loadFactories(contextPath);
 		loadChocolatesForFactories();
+		calculateFactoriesGrades();
 		for (Factory factory : factories) {
 			if (factory.getId() == id) {
+				System.out.println(factory);
 				factory.loadImageString();
 				return factory;
 			}
@@ -100,6 +108,7 @@ public class FactoryDAO {
 	
 	public Factory findFactoryByManagerId(String username) {
 	    loadFactories(contextPath);
+		calculateFactoriesGrades();
 	    for (Factory factory : factories) {
 	        if (managerDAO.isManagerOfFactory(username, factory.getId())) {
 	        	System.out.println("dasdasdadsa");
@@ -110,6 +119,52 @@ public class FactoryDAO {
 	    return null;
 	}
 	
+	  public void calculateFactoriesGrades() {
+		 ArrayList<Comment> comments = commentDAO.getAllComments();
+	    	for(Factory factory : factories) {
+	    		double avgGrade = 0;
+	    		double counter = 0; 
+	    		double sum = 0;
+	    		for(Comment comment : comments) {
+	    			if(comment.getStatus() == CommentStatus.Accepted && comment.getFactoryId() == factory.getId()) {
+	    				counter++;
+	    				sum += comment.getRating();
+	    			}
+	    		}
+	    		
+	    		if(counter != 0) {
+	    			avgGrade = sum / counter;
+		    		factory.setGrade(avgGrade);
+		    		System.out.println("fabrika " + factory + "grade " + factory.getGrade());
+	    		}
+	    		
+	    	}
+	    	
+	    	saveAll();
+	    }
+	    
+	  public void saveAll() {
+			try {
+		        String filePath = contextPath + "factories.txt";
+		        FileWriter writer = new FileWriter(filePath, false); 
+		        BufferedWriter bufferedWriter = new BufferedWriter(writer);
+		        for (Factory factory : factories) {
+		        	bufferedWriter.write(factory.getId() + ";" +
+		                    factory.getName() + ";" +
+		            		factory.getWorktime() + ";" +
+		                    factory.isStatus() + ";" +
+		                    factory.getLocation() + ";" +
+		                    factory.getImagePath() + ";" +
+		                    factory.getGrade() + "\n");
+		        }
+		        bufferedWriter.flush();
+		        bufferedWriter.close();
+		    } catch (IOException e) {
+		        e.printStackTrace();
+		    }
+		}
+	    
+	    
 	
 	//public Factory updateFactory(int id, Factory factory) {
 		//loadFactories(contextPath);
@@ -248,6 +303,7 @@ public class FactoryDAO {
     public ArrayList<Factory> filterFactoriesByStatus(boolean status) {
     	loadFactories(contextPath);
 		loadChocolatesForFactories();
+		calculateFactoriesGrades();
         ArrayList<Factory> filteredFactories = new ArrayList<>();
         for (Factory factory : factories) {
             if (factory.isStatus() == status) {
@@ -261,6 +317,7 @@ public class FactoryDAO {
     public ArrayList<Factory> findFilteredFactories() {
     	loadFactories(contextPath);
 		loadChocolatesForFactories();
+		calculateFactoriesGrades();
         // Ovdje implementirati logiku za pronalaženje filtriranih tvornica
         // Na primjer, možete filtrirati tvornice prema nekom kriteriju
         // Ovdje ćemo samo vratiti sve tvornice za demonstraciju
@@ -269,7 +326,6 @@ public class FactoryDAO {
     public Worker addWorkerToFactory(int factoryId, Worker worker) {
         loadFactories(contextPath);
         loadChocolatesForFactories();
-        
         Factory factory = findFactory(factoryId);
         if (factory != null) {
             worker.setFactoryId(factoryId);
