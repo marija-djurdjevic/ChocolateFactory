@@ -41,6 +41,12 @@
             class="rate-button">
             Rate this factory
           </button>
+          <button 
+            v-if="purchase.status === 'Processing'" 
+            @click="cancelPurchase(purchase.id)" 
+            class="cancel-button">
+            Cancel
+          </button>
         </div>
       </div>
     </div>
@@ -100,6 +106,20 @@ onMounted(() => {
   loadUser();
 });
 
+function cancelPurchase(purchaseId) {
+  const purchase = purchases.value.find(p => p.id === purchaseId);
+  console.log(purchase);
+  axios.post(`http://localhost:8080/WebShopAppREST/rest/purchases/cancel`, purchase)
+    .then(response => {
+      if (purchase) {
+        purchase.status = 'Canceled';
+      }
+    })
+    .catch(error => {
+      console.error('Error updating chocolate:', error);
+    });
+}
+
 function loadUser() {
   axios.get(`http://localhost:8080/WebShopAppREST/rest/users/authenticateUser?username=${username.value}`)
     .then(response => {
@@ -153,7 +173,8 @@ function closeRatingModal() {
   showRatingModal.value = false;
 }
 
-async function submitRating() {
+
+async function submitRating(purchase) {
   const newComment = {
     factoryId: selectedFactoryId.value,
     customerId: user.value.id,
@@ -162,14 +183,32 @@ async function submitRating() {
   };
 
   try {
+    
     await axios.post('http://localhost:8080/WebShopAppREST/rest/comments/add', newComment);
     console.log('Comment added successfully:', newComment);
-    // Reset fields after successful submission
+
+    await updatePurchaseStatus(purchase.id, 'Rated');
+
     comment.value = '';
     rating.value = 1;
     closeRatingModal();
   } catch (error) {
     console.error('Error adding comment:', error);
+  }
+}
+
+async function updatePurchaseStatus(purchaseId, newStatus) {
+  try {
+    // Ažuriranje statusa porudžbine na serveru
+    await axios.put(`http://localhost:8080/WebShopAppREST/rest/purchases/updateStatus?id=${purchaseId}&status=${newStatus}`);
+    
+    // Pronalaženje i ažuriranje lokalnog kopija porudžbine
+    const updatedPurchase = purchases.value.find(purchase => purchase.id === purchaseId);
+    if (updatedPurchase) {
+      updatedPurchase.status = newStatus;
+    }
+  } catch (error) {
+    console.error('Error updating purchase status', error);
   }
 }
 
@@ -309,7 +348,21 @@ body {
 .purchase-item:hover {
   border: 1px solid blanchedalmond;
 }
+.cancel-button {
+  background-color: #ff6347; 
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  width: fit-content;
+  margin-left: auto;
+}
 
+.cancel-button:hover {
+  background-color: #ff4500;
+}
 .purchase-details {
   padding: 20px;
   text-align: left;

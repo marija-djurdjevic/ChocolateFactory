@@ -8,6 +8,7 @@ public class Comment {
 	private int factoryId;
 	private String comment;
 	private int rating;
+	
 	public Comment() {
 		super();
 		// TODO Auto-generated constructor stub
@@ -19,6 +20,7 @@ public class Comment {
 		this.factoryId = factoryId;
 		this.comment = comment;
 		this.rating = rating;
+		
 	}
 	public int getId() {
 		return id;
