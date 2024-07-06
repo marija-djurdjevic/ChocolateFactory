@@ -212,6 +212,13 @@ public class CustomerDAO {
 			}
 		}
 	}
-	
+	public Customer findById(int id) {
+	    for (Customer customer : customers) {
+	        if (customer.getId() == id) {
+	            return customer;
+	        }
+	    }
+	    return null; 
+	}
 	
 }

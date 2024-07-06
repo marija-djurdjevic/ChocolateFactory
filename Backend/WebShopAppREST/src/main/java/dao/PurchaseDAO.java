@@ -1,35 +1,35 @@
 package dao;
-
 import java.util.ArrayList;
-
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import beans.Purchase;
 import beans.ShoppingCart;
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.StringTokenizer;
 import java.util.UUID;
-
+import java.util.stream.Collectors;
 import beans.CartChocolate;
 import beans.Chocolate;
-import beans.Purchase;
 import beans.enums.PurchaseStatus;
+import beans.roles.Customer;
 
 public class PurchaseDAO {
     private ArrayList<Purchase> purchases = new ArrayList<>();
     private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private final String contextPath;
     private ChocolateDAO chocolateDAO;
+    private CustomerDAO customerDAO;
 	private CartChocolateDAO cartChocolateDAO;
 	private ShoppingCartDAO shoppingCartDAO;
-	private CustomerDAO customerDAO;
 
     public PurchaseDAO(String contextPath) {
         this.contextPath = contextPath;
@@ -46,6 +46,26 @@ public class PurchaseDAO {
 			loadChocolatesAndPriceToPurchase(purchase);
 		}
         return purchases;
+    }
+    
+    public int countCancelledPurchasesByCustomerId(int customerId) {
+        int count = 0;
+        for (Purchase purchase : purchases) {
+            if (purchase.getCustomerId() == customerId && purchase.getStatus() == PurchaseStatus.Canceled) {
+                count++;
+            }
+        }
+        return count;
+    }
+    public List<Customer> findSuspiciousCustomers() {
+        LocalDate oneMonthAgo = LocalDate.now().minusMonths(1);
+        return findAll().stream()
+            .filter(purchase -> purchase.getStatus() == PurchaseStatus.Canceled)
+            .collect(Collectors.groupingBy(Purchase::getCustomerId, Collectors.counting()))
+            .entrySet().stream()
+            .filter(entry -> entry.getValue() > 5)
+            .map(entry -> customerDAO.findById(entry.getKey()))
+            .collect(Collectors.toList());
     }
 
     public Purchase save(Purchase purchase) {
@@ -156,6 +176,115 @@ public class PurchaseDAO {
 	    }
 	}
     
+    public List<Purchase> findByFactoryId(int factoryId) {
+        List<Purchase> filteredPurchases = new ArrayList<>();
+        for (Purchase purchase : purchases) {
+            if (purchase.getFactoryId() == factoryId) {
+                filteredPurchases.add(purchase);
+            }
+        }
+        return filteredPurchases;
+    }
+   public List<Customer> findCustomersByFactoryId(int factoryId) {
+        List<Purchase> purchases = findByFactoryId(factoryId);
+        Set<Customer> customers = new HashSet<>();
+        for (Purchase purchase : purchases) {
+            Customer customer = customerDAO.findById(purchase.getCustomerId());
+            if (customer != null) {
+                customers.add(customer);
+            }
+        }
+        return new ArrayList<>(customers);
+    }
+   
+   public Purchase findPurchaseById(String id) {
+	    for (Purchase purchase : purchases) {
+	        if (purchase.getId().equals(id)) {
+	            return purchase;
+	        }
+	    }
+	    return null;
+	}
+   
+   public void updatePurchase(Purchase purchase) {
+	    loadPurchases(contextPath);
+	    
+	    for (int i = 0; i < purchases.size(); i++) {
+	        if (purchases.get(i).getId().equals(purchase.getId())) {
+	            purchases.set(i, purchase);
+	            break;
+	        }
+	    }
+
+	    savePurchases(contextPath);
+	}
+   private void savePurchases(String contextPath) {
+	    BufferedWriter writer = null;
+	    try {
+	        File file = new File(contextPath + "/purchases.txt");
+	        writer = new BufferedWriter(new FileWriter(file));
+
+	        for (Purchase purchase : purchases) {
+	            writer.write(purchase.getId() + ";" +
+	                         purchase.getFactoryId() + ";" +
+	                         purchase.getDateAndTime().format(formatter) + ";" +
+	                         purchase.getPrice() + ";" +
+	                         purchase.getCustomerId() + ";" +
+	                         purchase.getStatus() + "\n");
+	        }
+	    } catch (IOException e) {
+	        e.printStackTrace();
+	    } finally {
+	        if (writer != null) {
+	            try {
+	                writer.close();
+	            } catch (IOException e) {
+	                e.printStackTrace();
+	            }
+	        }
+	    }
+	}
+
+    /*public List<Customer> findCustomersByFactoryId(int factoryId) {
+        List<Purchase> purchases = findByFactoryId(factoryId);
+        List<Customer> customers = new ArrayList<>();
+        
+        for (Purchase purchase : purchases) {
+            Customer customer = customerDAO.findById(purchase.getCustomerId());
+            if (customer != null) {
+                customers.add(customer);
+            }
+        }
+        
+        return customers;
+    }*/
+
+
+   // private String serializeChocolates(ArrayList<Chocolate> chocolates) {
+     //   StringBuilder sb = new StringBuilder();
+       // for (Chocolate chocolate : chocolates) {
+         //   sb.append(chocolate.getId()).append(",");
+        //}
+        //if (sb.length() > 0) {
+          //  sb.deleteCharAt(sb.length() - 1); // Remove the last comma
+        //}
+        //return sb.toString();
+    //}
+
+    //private ArrayList<Chocolate> deserializeChocolates(String chocolatesString) {
+      //  ArrayList<Chocolate> chocolates = new ArrayList<>();
+        //StringTokenizer tokenizer = new StringTokenizer(chocolatesString, ",");
+        //while (tokenizer.hasMoreTokens()) {
+          //  int chocolateId = Integer.parseInt(tokenizer.nextToken().trim());
+            // Assuming there's a method to find Chocolate by ID
+           // Chocolate chocolate = chocolateDAO.findChocolate(chocolateId);
+            //if (chocolate != null) {
+              //  chocolates.add(chocolate);
+            //}
+        //}
+        //return chocolates;
+    //}
+    
     public void loadChocolatesAndPriceToPurchase(Purchase pc) {
 		chocolateDAO = new ChocolateDAO(contextPath);
 		for(Chocolate chocolate : chocolateDAO.findAll()) {
@@ -194,6 +323,36 @@ public class PurchaseDAO {
 			}
 		}
 	}	
+
+    public List<Purchase> loadPurchasesWithChocolatesForFactory(int factoryId) {
+        chocolateDAO = new ChocolateDAO(contextPath);
+        cartChocolateDAO = new CartChocolateDAO(contextPath);
+        List<Purchase> factoryPurchases = new ArrayList<>();
+
+        for (Purchase purchase : purchases) {
+            if (purchase.getFactoryId() == factoryId) {
+                double price = 0;
+                purchase.chocolates = new ArrayList<>();
+
+                for (CartChocolate cc : cartChocolateDAO.findAll()) {
+                    if (purchase.getId().equals(cc.getPurchaseId())) {
+                        Chocolate chocolate = chocolateDAO.findChocolate(cc.getChocolateId());
+                        if (chocolate != null) {
+                            price += chocolate.getPrice() * cc.getAmount();
+                            if (!purchase.containsChocolateWithId(chocolate.getId())) {
+                                purchase.chocolates.add(chocolate);
+                            }
+                        }
+                    }
+                }
+
+                purchase.setPrice(price);
+                factoryPurchases.add(purchase);
+            }
+        }
+
+        return factoryPurchases;
+    }
 
     private Chocolate findChocolateById(int chocolateId) {
         return null;

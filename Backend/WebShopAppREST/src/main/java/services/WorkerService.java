@@ -7,6 +7,7 @@ import javax.servlet.ServletContext;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
@@ -33,5 +34,13 @@ public class WorkerService {
     public ArrayList<Worker> getAllWorkers() {
         WorkerDAO dao = (WorkerDAO) ctx.getAttribute("workerDAO");
         return dao.findAll();
+    }
+    
+    @GET
+    @Path("/byFactory")
+    @Produces(MediaType.APPLICATION_JSON)
+    public ArrayList<Worker> getWorkersByFactoryId(@QueryParam("factoryId") int factoryId) {
+        WorkerDAO dao = (WorkerDAO) ctx.getAttribute("workerDAO");
+        return dao.findByFactoryId(factoryId);
     }
 }
