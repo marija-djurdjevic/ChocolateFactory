@@ -119,7 +119,18 @@ public class ChocolateDAO {
 	        e.printStackTrace();
 	    }
 	}
-	
+	public ArrayList<Chocolate> deleteChocolatesByFactoryId(int factoryId) {
+	    loadChocolates(contextPath);
+	    ArrayList<Chocolate> chocolatesToRemove = new ArrayList<>();
+	    for (Chocolate chocolate : chocolates) {
+	        if (chocolate.getFactoryId() == factoryId) {
+	            chocolatesToRemove.add(chocolate);
+	        }
+	    }
+	    chocolates.removeAll(chocolatesToRemove);
+	    saveAllChocolates();
+	    return chocolatesToRemove;
+	}
 	 public ArrayList<Chocolate> findChocolatesByFactoryId(int factoryId) {
 		 loadChocolates(contextPath);
 	     ArrayList<Chocolate> result = new ArrayList<>();

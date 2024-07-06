@@ -187,7 +187,7 @@ public class FactoryDAO {
         }
         return factoryToRemove;
     }*/
-	public Factory deleteFactoryById(int id) {
+	/*public Factory deleteFactoryById(int id) {
 	    Factory factoryToRemove = null;
 	    for (Factory factory : factories) {
 	        if (factory.getId() == id) {
@@ -202,7 +202,27 @@ public class FactoryDAO {
 	    }
 	    
 	    return factoryToRemove;
+	}*/
+	public Factory deleteFactoryById(int id) {
+	    Factory factoryToRemove = null;
+	    for (Factory factory : factories) {
+	        if (factory.getId() == id) {
+	            factoryToRemove = factory;
+	            // Brišemo povezane čokolade
+	            ChocolateDAO chocolateDAO = new ChocolateDAO(contextPath);
+	            chocolateDAO.deleteChocolatesByFactoryId(id);
+	            break;
+	        }
+	    }
+	    
+	    if (factoryToRemove != null) {
+	        factories.remove(factoryToRemove);
+	        saveFactoriesToFile();
+	    }
+	    
+	    return factoryToRemove;
 	}
+
 
 	private void saveFactoriesToFile() {
 	    try {
