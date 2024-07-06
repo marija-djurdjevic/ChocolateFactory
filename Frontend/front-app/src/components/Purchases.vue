@@ -64,7 +64,7 @@
       <option value="4">4 (Very Good)</option>
       <option value="5">5 (Excellent)</option>
     </select>
-    <button @click="submitRating">Submit</button>
+    <button @click="submitRating(selectedPurchase)">Submit</button>
   </div>
 </div>
 
@@ -79,6 +79,7 @@ const purchases = ref([]);
 const factories = ref([]);
 const filteredPurchases = ref([]);
 const username = ref(localStorage.getItem("username") || '');
+const selectedPurchase = ref(null);
 
 const user = ref({
   username: '',
@@ -164,6 +165,7 @@ function getFactoryName(factoryId) {
 }
 
 function rateFactory(purchase) {
+  selectedPurchase.value = purchase; 
   selectedFactoryId.value = purchase.factoryId;
   selectedFactoryName.value = getFactoryName(purchase.factoryId);
   showRatingModal.value = true;
@@ -187,6 +189,7 @@ async function submitRating(purchase) {
     await axios.post('http://localhost:8080/WebShopAppREST/rest/comments/add', newComment);
     console.log('Comment added successfully:', newComment);
 
+    console.log(purchase.id);
     await updatePurchaseStatus(purchase.id, 'Rated');
 
     comment.value = '';
@@ -198,6 +201,7 @@ async function submitRating(purchase) {
 }
 
 async function updatePurchaseStatus(purchaseId, newStatus) {
+console.log(purchaseId);
   try {
     // Ažuriranje statusa porudžbine na serveru
     await axios.put(`http://localhost:8080/WebShopAppREST/rest/purchases/updateStatus?id=${purchaseId}&status=${newStatus}`);

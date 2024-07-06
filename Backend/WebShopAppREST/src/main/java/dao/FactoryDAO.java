@@ -102,6 +102,7 @@ public class FactoryDAO {
 	    loadFactories(contextPath);
 	    for (Factory factory : factories) {
 	        if (managerDAO.isManagerOfFactory(username, factory.getId())) {
+	        	System.out.println("dasdasdadsa");
 	            factory.loadImageString();
 	            return factory;
 	        }
