@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -50,6 +51,26 @@ public class PurchaseDAO {
 			loadChocolatesAndPriceToPurchase(purchase);
 		}
         return purchases;
+    }
+    
+    public int countCancelledPurchasesByCustomerId(int customerId) {
+        int count = 0;
+        for (Purchase purchase : purchases) {
+            if (purchase.getCustomerId() == customerId && purchase.getStatus() == PurchaseStatus.Canceled) {
+                count++;
+            }
+        }
+        return count;
+    }
+    public List<Customer> findSuspiciousCustomers() {
+        LocalDate oneMonthAgo = LocalDate.now().minusMonths(1);
+        return findAll().stream()
+            .filter(purchase -> purchase.getStatus() == PurchaseStatus.Canceled)
+            .collect(Collectors.groupingBy(Purchase::getCustomerId, Collectors.counting()))
+            .entrySet().stream()
+            .filter(entry -> entry.getValue() > 5)
+            .map(entry -> customerDAO.findById(entry.getKey()))
+            .collect(Collectors.toList());
     }
 
     public Purchase save(Purchase purchase) {
