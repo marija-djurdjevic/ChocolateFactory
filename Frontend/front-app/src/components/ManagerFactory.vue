@@ -1,11 +1,9 @@
 <template>
   <div class="factory-details">
-    <!-- Header -->
     <header>
       <h1>Factory Details</h1>
     </header>
 
-    <!-- Factory Info Card -->
     <section v-if="factory" class="card factory-info">
       <h2>Factory Information</h2>
       <div class="info-item">
@@ -33,7 +31,6 @@
       </div>
     </section>
 
-    <!-- Chocolates Produced Card -->
     <section v-if="chocolates.length > 0" class="card chocolates-produced">
       <h2>Chocolates Produced</h2>
       <ul>
@@ -43,7 +40,6 @@
       </ul>
     </section>
 
-    <!-- Purchases Card -->
     <section v-if="purchases.length > 0" class="card purchases">
       <h2>Purchases</h2>
       <ul>
@@ -80,7 +76,6 @@
       </ul>
     </section>
 
-    <!-- Customers Card -->
     <section v-if="customers.length > 0" class="card customers">
       <h2>Customers</h2>
       <ul>
@@ -90,17 +85,42 @@
               <strong>Username:</strong> {{ customer.username }}
             </div>
             <div>
-              <strong>Name:</strong> {{ customer.name }} {{ customer.surname }}
+              <strong>Name:</strong> {{ customer.name }}
+            </div>
+            <div>
+              <strong>Surname:</strong> {{ customer.surname }}
+            </div>
+            <div>
+              <strong>Email:</strong> {{ customer.email }}
             </div>
           </div>
         </li>
       </ul>
     </section>
 
-    <!-- Loading Message -->
-    <div v-else class="loading">
-      <p>Loading...</p>
-    </div>
+    <section class="card comments">
+      <h2>Comments</h2>
+      <ul>
+        <li v-for="comment in comments">
+          <div class="comment-details">
+            <div>
+              <strong>Content:</strong> {{ comment.content }}
+            </div>
+            <div>
+              <strong>Grade:</strong> {{ comment.grade }}
+            </div>
+            <div>
+              <strong>Customer:</strong> {{ comment.customer }}
+            </div>
+          </div>
+        </li>
+      </ul>
+    </section>
+
+    <section v-if="!factory" class="card no-factory">
+      <p>No factory data available.</p>
+    </section>
+
   </div>
 </template>
 
@@ -114,8 +134,10 @@ export default {
     const chocolates = ref([]);
     const purchases = ref([]);
     const customers = ref([]);
+    const comments = ref([]);
     const location = ref(null); // New state for location
     const username = ref(localStorage.getItem('username') || '');
+    const isLoading = ref(true); // New state for loading
 
     onMounted(() => {
       // Retrieve factory data when component is mounted
@@ -138,6 +160,8 @@ export default {
             loadChocolates();
             loadPurchases();
             loadCustomers(factory.value.id); // Pass factory ID to load customers
+            loadComments();
+            console.log("ucitani komentari" + comments)
             loadLocationDetails(factory.value.locationId); // Pass locationId to load location details
           }
         })
@@ -244,6 +268,30 @@ export default {
         });
     };
 
+    const loadComments = () => {
+      console.log("DOBAVLJENI USERNAME MANAGERA "+ username.value);
+      if (!username.value) {
+        console.error('Username is not defined in local storage');
+        return;
+      }
+
+      axios
+        .get(`http://localhost:8080/WebShopAppREST/rest/comments/${username.value}`)
+        .then(response => {
+          comments.value = response.data;
+          console.log(comments.value);
+        })
+        .catch(error => {
+          console.error('Error fetching comments data', error);
+        });
+    };
+
+    const getCustomerById = (customerId) => {
+      const customer = customers.value.find(customer => customer.id === customerId);
+      return customer ? `${customer.name} ${customer.surname}` : 'Unknown';
+    };
+
+
     return {
       factory,
       chocolates,
@@ -253,6 +301,7 @@ export default {
       loadFactoryData,
       updatePurchaseStatus, // Return updatePurchaseStatus method
       denyPurchase, // Return denyPurchase method
+      isLoading
     };
   },
 };

@@ -1,6 +1,8 @@
 package dao;
-
 import beans.Comment;
+import beans.Factory;
+import beans.enums.CommentStatus;
+import beans.enums.PurchaseStatus;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -10,13 +12,16 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 
+
 public class CommentDAO {
     private ArrayList<Comment> comments = new ArrayList<>();
     private String contextPath;
+    private FactoryDAO factoryDAO;
 
     public CommentDAO(String contextPath) {
         this.contextPath = contextPath;
         loadComments();
+        factoryDAO = new FactoryDAO(contextPath);
     }
 
     public ArrayList<Comment> getAllComments() {
@@ -27,6 +32,7 @@ public class CommentDAO {
         // Generate new ID based on the last comment ID + 1
         int newId = comments.isEmpty() ? 0 : comments.get(comments.size() - 1).getId() + 1;
         comment.setId(newId);
+        comment.setStatus(CommentStatus.Processing);
         comments.add(comment);
         saveCommentsToFile();
     }
@@ -41,14 +47,36 @@ public class CommentDAO {
                     lastComment.getCustomerId() + ";" +
                     lastComment.getFactoryId() + ";" +
                     lastComment.getComment() + ";" +
-                    lastComment.getRating() + "\n");
+                    lastComment.getRating() + ";" +
+                    lastComment.getStatus() + "\n");
             bufferedWriter.flush();
             bufferedWriter.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-
+    
+    public ArrayList<Comment> findManagersFactoryComments(String username) {
+    	ArrayList<Comment> compatibileComments = new ArrayList<Comment>();
+    	System.out.println("USAO OVDJEEEJEJEJEJEJJEE");
+    	loadComments();
+		System.out.println(comments);
+        Factory factory = factoryDAO.findFactoryByManagerId(username);
+        System.out.println(factory);
+    	for(Comment comment : comments) {
+        	System.out.println("USAO OVDJEEEJEJEJEJEJJEE");
+    		System.out.println(comment);
+    		System.out.println(comment.getFactoryId());
+    		System.out.println(factory.getId());
+    		if(comment.getFactoryId() == factory.getId()) {
+    	    	System.out.println("USAO OVDJEEEJEJEJEJEJJEE");
+    	    	compatibileComments.add(comment);
+    		}
+    	}
+    	
+    	return compatibileComments;
+    }
+    
     private void loadComments() {
         this.comments = new ArrayList<>();
         BufferedReader in = null;
@@ -68,7 +96,9 @@ public class CommentDAO {
                 int factoryId = Integer.parseInt(st.nextToken().trim());
                 String commentText = st.nextToken().trim();
                 int rating = Integer.parseInt(st.nextToken().trim());
-                comments.add(new Comment(id, customerId, factoryId, commentText, rating));
+                CommentStatus status = CommentStatus.valueOf(st.nextToken().trim());
+                comments.add(new Comment(id, customerId, factoryId, commentText, rating, status));
+            	System.out.println("dodao jedan komentarcic " + comments);
             }
         } catch (Exception e) {
             e.printStackTrace();

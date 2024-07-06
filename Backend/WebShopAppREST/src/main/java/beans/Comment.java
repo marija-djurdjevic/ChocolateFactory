@@ -2,24 +2,28 @@ package beans;
 
 import java.util.Objects;
 
+import beans.enums.CommentStatus;
+
 public class Comment {
 	private int id;
 	private int customerId;
 	private int factoryId;
 	private String comment;
 	private int rating;
+	private CommentStatus status;
 	
 	public Comment() {
 		super();
 		// TODO Auto-generated constructor stub
 	}
-	public Comment(int id, int customerId, int factoryId, String comment, int rating) {
+	public Comment(int id, int customerId, int factoryId, String comment, int rating, CommentStatus status) {
 		super();
 		this.id = id;
 		this.customerId = customerId;
 		this.factoryId = factoryId;
 		this.comment = comment;
 		this.rating = rating;
+		this.status = status;
 		
 	}
 	public int getId() {
@@ -52,6 +56,14 @@ public class Comment {
 	public void setRating(int rating) {
 		this.rating = rating;
 	}
+	
+	public CommentStatus getStatus() {
+		return status;
+	}
+	public void setStatus(CommentStatus status) {
+		this.status = status;
+	}
+	
 	@Override
 	public int hashCode() {
 		return Objects.hash(comment, customerId, factoryId, id, rating);
