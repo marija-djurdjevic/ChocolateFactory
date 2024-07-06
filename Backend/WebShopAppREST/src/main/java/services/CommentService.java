@@ -47,6 +47,14 @@ public class CommentService {
     }
     
     @GET
+    @Path("/factory/{factoryId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public ArrayList<Comment> getCommentsByFactoryId(@PathParam("factoryId") int factoryId) {
+        CommentDAO dao = (CommentDAO) ctx.getAttribute("commentDAO");
+        return dao.findCommentsByFactoryId(factoryId);
+    }
+    
+    @GET
     @Path("/{managerUsername}")
     @Produces(MediaType.APPLICATION_JSON)
     public ArrayList<Comment> getPurchasesByManagerId(@PathParam("managerUsername") String username) {
