@@ -63,6 +63,7 @@
               <button v-if="isManager" @click="addWorker(factory.id)">Add Worker</button>
               <button v-if="isManager" @click="addChocolate(factory.id)">Add Chocolate</button>
               <button @click="showChocolates(factory.id)">Show Chocolates</button>
+              <button v-if="isAdmin" @click="deleteFactory(factory.id)">Delete</button>
             </div>
           </div>
         </div>
@@ -107,6 +108,17 @@ onMounted(() => {
   console.log(isAdmin.value);
   loadFactories();
 });
+
+async function deleteFactory(factoryId) {
+  try {
+    await axios.delete(`http://localhost:8080/WebShopAppREST/rest/factories/${factoryId}`);
+    console.log('Factory successfully deleted.');
+    loadFactories(); // Ovo učitava ponovo listu fabrika nakon brisanja
+  } catch (error) {
+    console.error('Error deleting factory:', error);
+  }
+}
+
 
 function goToShowUsers() {
   router.push('/users');

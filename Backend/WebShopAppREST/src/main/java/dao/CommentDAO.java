@@ -74,6 +74,17 @@ public class CommentDAO {
     	return compatibileComments;
     }
     
+
+    public ArrayList<Comment> findCommentsByFactoryId(int factoryId) {
+        ArrayList<Comment> factoryComments = new ArrayList<>();
+        for (Comment comment : comments) {
+            if (comment.getFactoryId() == factoryId) {
+                factoryComments.add(comment);
+            }
+        }
+        return factoryComments;
+    }
+
     public void saveAll() {
 		try {
 	        String filePath = contextPath + "comments.txt";
@@ -108,6 +119,7 @@ public class CommentDAO {
     }
    
     
+
     private void loadComments() {
         this.comments = new ArrayList<>();
         BufferedReader in = null;

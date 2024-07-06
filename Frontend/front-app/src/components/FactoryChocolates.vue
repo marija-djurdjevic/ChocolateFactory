@@ -48,6 +48,19 @@
         </div>
       </div>
     </div>
+    <div class="comments-list" v-if="comments.length > 0">
+      <h2>Comments</h2>
+      <div class="comment-items">
+        <div v-for="(comment, index) in filteredComments" :key="comment.id" class="comment-item" :style="{ backgroundColor: index % 2 === 0 ? '#ffe4b5' : '#FFC9AD' }">
+          <div class="comment-details">
+            <p><strong>User:</strong> {{ comment.customerId }}</p>
+            <p><strong>Rating:</strong> {{ comment.rating }}</p>
+            <p><strong>Comment:</strong> {{ comment.comment }}</p>
+            <p><strong>Status:</strong> {{ comment.status }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
     <div v-if="errorMessage" class="error-message">
       <p>{{ errorMessage }}</p>
     </div>
@@ -59,7 +72,7 @@
 
 <script setup>
 import axios from 'axios';
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import LocationMap from './LocationMap.vue';
 
@@ -68,12 +81,14 @@ const router = useRouter();
 const factoryId = route.params.factoryId;
 const factory = ref({});
 const chocolates = ref([]);
+const comments = ref([]);
 const existingchocolates = ref([]);
 const chocolateAmounts = ref({});
 const isManager = ref(false); 
 const isWorker = ref(false);
 const isCustomer = ref(false);
 const isthisfactory = ref(false);
+const isAdministrator = ref(false);
 const role = localStorage.getItem("role");
 const errorMessage = ref('');
 const amount = ref(1);
@@ -115,11 +130,14 @@ const cartChocolate = ref({
 onMounted(() => {
   loadFactory();
   loadChocolates();
+  loadComments();
   isManager.value = role === 'Manager';
   isWorker.value = role === 'Worker';
   isCustomer.value = role === 'Customer';
+  isAdministrator.value = role === 'Administrator';
   loadUser();
 });
+
 
 function loadUser() {
     axios.get(`http://localhost:8080/WebShopAppREST/rest/users/authenticateUser?username=${username.value}`)
@@ -183,6 +201,26 @@ async function loadChocolates() {
     console.error('Error loading chocolates:', error);
   }
 }
+
+
+async function loadComments() {
+  try {
+    const response = await axios.get(`http://localhost:8080/WebShopAppREST/rest/comments/factory/${factoryId}`);
+    comments.value = response.data;
+  } catch (error) {
+    console.error('Error loading comments:', error);
+  }
+}
+
+const filteredComments = computed(() => {
+  if (isManager.value || isAdministrator.value) {
+    return comments.value;
+  } else if (isCustomer.value) {
+    return comments.value.filter(comment => comment.status === 'Accepted');
+  } else {
+    return [];
+  }
+});
 
 function AddToCart(chocolateId, amountOfChocolate) {
   loadCart(chocolateId, amountOfChocolate);
@@ -441,6 +479,37 @@ async function updateChocolateAmount(chocolateId, newAmount) {
   font-size: 2rem;
 }
 
+.comment-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px; /* space between cards */
+}
+
+.comment-item {
+  flex: 1 1 calc(33.333% - 16px); /* 3 cards per row, subtract gap */
+  box-sizing: border-box;
+  padding: 16px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #ffe4b5;
+  transition: background-color 0.3s ease;
+}
+
+.comment-item:nth-child(odd) {
+  background-color: #FFC9AD;
+}
+
+@media (max-width: 1024px) {
+  .comment-item {
+    flex: 1 1 calc(50% - 16px); /* 2 cards per row on medium screens */
+  }
+}
+
+@media (max-width: 768px) {
+  .comment-item {
+    flex: 1 1 100%; /* 1 card per row on small screens */
+  }
+}
 .user-container {
   display: flex;
   align-items: center;
