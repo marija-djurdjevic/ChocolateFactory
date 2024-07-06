@@ -7,6 +7,7 @@ import javax.annotation.PostConstruct;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.OPTIONS;
 import javax.ws.rs.POST;
@@ -110,13 +111,21 @@ public class FactoryService {
         return Response.ok(savedFactory).build();
     }
 
-    @GET
+    /*@GET
     @Path("/delete")
     @Produces(MediaType.APPLICATION_JSON)
     public Factory deleteFactory(@QueryParam("factoryId") int factoryId) {
         FactoryDAO dao = (FactoryDAO) ctx.getAttribute("factoryDAO");
         return dao.deleteFactoryById(factoryId);
+    }*/
+    @DELETE
+    @Path("/{factoryId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Factory deleteFactory(@PathParam("factoryId") int factoryId) {
+        FactoryDAO dao = (FactoryDAO) ctx.getAttribute("factoryDAO");
+        return dao.deleteFactoryById(factoryId);
     }
+
 
     @GET
     @Path("/filter")

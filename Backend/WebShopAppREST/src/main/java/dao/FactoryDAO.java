@@ -172,7 +172,7 @@ public class FactoryDAO {
 			e.printStackTrace();
 		}
 	}
-	public Factory deleteFactoryById(int id) {
+	/*public Factory deleteFactoryById(int id) {
 		loadFactories(contextPath);
 		loadChocolatesForFactories();
         Factory factoryToRemove = null;
@@ -186,7 +186,43 @@ public class FactoryDAO {
             factories.remove(factoryToRemove);
         }
         return factoryToRemove;
-    }
+    }*/
+	public Factory deleteFactoryById(int id) {
+	    Factory factoryToRemove = null;
+	    for (Factory factory : factories) {
+	        if (factory.getId() == id) {
+	            factoryToRemove = factory;
+	            break;
+	        }
+	    }
+	    
+	    if (factoryToRemove != null) {
+	        factories.remove(factoryToRemove);
+	        saveFactoriesToFile(); // Poziv metode za čuvanje fabrika u fajl nakon brisanja
+	    }
+	    
+	    return factoryToRemove;
+	}
+
+	private void saveFactoriesToFile() {
+	    try {
+	        String filePath = contextPath + "/factories.txt";
+	        BufferedWriter writer = new BufferedWriter(new FileWriter(filePath));
+	        for (Factory factory : factories) {
+	            writer.write(factory.getId() + ";" +
+	                         factory.getName() + ";" +
+	                         factory.getWorktime() + ";" +
+	                         factory.isStatus() + ";" +
+	                         factory.getLocation() + ";" +
+	                         factory.getImagePath() + ";" +
+	                         factory.getGrade() + "\n");
+	        }
+	        writer.close();
+	    } catch (IOException e) {
+	        e.printStackTrace();
+	    }
+	}
+
 
     // Metoda za filtriranje tvornica prema statusu (radi ili ne radi)
     public ArrayList<Factory> filterFactoriesByStatus(boolean status) {
