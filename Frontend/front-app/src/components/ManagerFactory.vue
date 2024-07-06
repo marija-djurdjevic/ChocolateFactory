@@ -99,23 +99,32 @@
     </section>
 
     <section class="card comments">
-      <h2>Comments</h2>
-      <ul>
-        <li v-for="comment in comments">
-          <div class="comment-details">
-            <div>
-              <strong>Content:</strong> {{ comment.content }}
-            </div>
-            <div>
-              <strong>Grade:</strong> {{ comment.grade }}
-            </div>
-            <div>
-              <strong>Customer:</strong> {{ comment.customer }}
-            </div>
+    <h2>Comments</h2>
+    <ul>
+      <li v-for="comment in comments" :key="comment.id" class="comment-card">
+        <div class="comment-details">
+          <div>
+            <strong>Content:</strong> {{ comment.comment }}
           </div>
-        </li>
-      </ul>
-    </section>
+          <div>
+            <strong>Grade:</strong> {{ comment.rating }}
+          </div>
+          <div>
+            <strong>Customer:</strong> {{ getCustomerById(comment.customerId) }}
+          </div>
+          <div class="comment-status">
+            <template v-if="comment.status === 'Processing'">
+              <button @click="denyComment(comment.id)">Deny</button>
+              <button @click="approveComment(comment.id)">Approve</button>
+            </template>
+            <template v-else>
+              <span>{{ comment.status }}</span>
+            </template>
+          </div>
+        </div>
+      </li>
+    </ul>
+  </section>
 
     <section v-if="!factory" class="card no-factory">
       <p>No factory data available.</p>
@@ -144,6 +153,12 @@ export default {
       loadFactoryData();
     });
 
+    function getCustomerById(customerId)  {
+      const customer = customers.value.find(customer => customer.id === customerId);
+      return customer ? `${customer.name} ${customer.surname}` : 'Unknown';
+    }
+
+   
     const loadFactoryData = () => {
       if (!username.value) {
         console.error('Username is not defined in local storage');
@@ -268,6 +283,34 @@ export default {
         });
     };
 
+    const denyComment = commentId => {
+      axios
+        .put(`http://localhost:8080/WebShopAppREST/rest/comments/updateStatus?id=${commentId}&status=Declined`)
+        .then(response => {
+          const updatedComment = comments.value.find(comment => comment.id === commentId);
+          if (updatedComment) {
+            updatedComment.status = 'Declined';
+          }
+        })
+        .catch(error => {
+          console.error('Error denying comment', error);
+        });
+    };
+
+    const approveComment = commentId => {
+      axios
+        .put(`http://localhost:8080/WebShopAppREST/rest/comments/updateStatus?id=${commentId}&status=Accepted`)
+        .then(response => {
+          const updatedComment = comments.value.find(comment => comment.id === commentId);
+          if (updatedComment) {
+            updatedComment.status = 'Accepted';
+          }
+        })
+        .catch(error => {
+          console.error('Error denying comment', error);
+        });
+    };
+
     const loadComments = () => {
       console.log("DOBAVLJENI USERNAME MANAGERA "+ username.value);
       if (!username.value) {
@@ -286,11 +329,6 @@ export default {
         });
     };
 
-    const getCustomerById = (customerId) => {
-      const customer = customers.value.find(customer => customer.id === customerId);
-      return customer ? `${customer.name} ${customer.surname}` : 'Unknown';
-    };
-
 
     return {
       factory,
@@ -301,7 +339,11 @@ export default {
       loadFactoryData,
       updatePurchaseStatus, // Return updatePurchaseStatus method
       denyPurchase, // Return denyPurchase method
-      isLoading
+      isLoading,
+      comments,
+      getCustomerById,
+      denyComment,
+      approveComment
     };
   },
 };
@@ -441,6 +483,7 @@ export default {
   height: 40px;
   width:140px;
 }
+
 .deny-reason {
   margin-top: 10px;
 }
@@ -461,7 +504,6 @@ export default {
   color: #ffffff;
 }
 
-
 .deny-reason textarea {
   width: 100%;
   height: 60px;
@@ -469,6 +511,7 @@ export default {
   border: 1px solid #e0e0e0;
   border-radius: 5px;
 }
+
 .card.purchase-card button:last-of-type {
   background-color: #ff6347;
   color: white;
@@ -481,5 +524,43 @@ export default {
   margin-left: 10px;
   height: 40px;
   width:140px;
+}
+
+  .comment-card {
+  position: relative;
+  padding: 15px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+  margin-bottom: 10px;
+}
+
+.comment-card .comment-status {
+  display: flex; /* Postavite dugmad u red */
+  justify-content: flex-end; /* Poravnanje na desno */
+  margin-top: 10px;
+}
+
+.comment-card .comment-status button {
+  padding: 5px 10px;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  background-color: #ff6347;
+  color: white;
+  width: 100px;
+  transition: background-color 0.3s;
+  margin-left: 5px; /* Opciono: Dodajte razmak između dugmadi */
+}
+
+.comment-card .comment-status button:hover {
+  background-color: tomato;
+}
+
+.comment-card .comment-status span {
+  padding: 5px 10px;
+  border-radius: 3px;
+  background-color: #ccc;
+  color: white;
 }
 </style>
