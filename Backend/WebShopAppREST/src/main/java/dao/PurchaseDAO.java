@@ -93,9 +93,68 @@ public class PurchaseDAO {
         return purchase;
     }
     
+    public ArrayList<Purchase> findCustomersPurchases(int customerId) {   	
+        loadPurchases(contextPath);
+        ArrayList<Purchase> filteredPurchases = new ArrayList<Purchase>();
+        for(Purchase purchase : purchases) {
+        	if(purchase.getCustomerId() == customerId) {
+        		filteredPurchases.add(purchase);
+        	}
+        }
+        
+        return filteredPurchases;
+    }
+    
     private void updateCartChocolates(Purchase purchase, ShoppingCart shoppingCart) {
     	cartChocolateDAO.updateCartPurchase(purchase, shoppingCart);		
     }
+    
+    public Purchase cancel(Purchase p) {
+        loadPurchases(contextPath);
+        for (Purchase purchase : purchases) {
+            if (purchase.getId().equals(p.getId())) {
+                purchase.setStatus(PurchaseStatus.Canceled);
+                customerDAO.updatePointsMinus(p.getCustomerId(), p.getPrice());
+                updateCanceledChocolatesAmounts(p);
+                saveAll();
+                return purchase;
+            }
+        }
+        return null;
+    }
+    
+    private void updateCanceledChocolatesAmounts(Purchase purchase) {
+		for(CartChocolate cc : cartChocolateDAO.findAll()) {
+			if(purchase.getId().equals(cc.getPurchaseId())) {
+				System.out.println("USAO NASAO PROSAO");
+				Chocolate chocolate = chocolateDAO.findChocolate(cc.getChocolateId());
+				int newAmount = chocolate.getAmountOfChocolate() + cc.getAmount();
+				chocolate.setAmountOfChocolate(newAmount);
+			}
+		}
+		
+		chocolateDAO.saveAllChocolates();
+    }
+    
+    public void saveAll() {
+		try {
+	        String filePath = contextPath + "purchases.txt";
+	        FileWriter writer = new FileWriter(filePath, false); 
+	        BufferedWriter bufferedWriter = new BufferedWriter(writer);
+	        for (Purchase purchase : purchases) {
+	        	bufferedWriter.write(purchase.getId() + ";" +
+	                    purchase.getFactoryId() + ";" +
+	                    purchase.getDateAndTime().format(formatter) + ";" +
+	                    purchase.getPrice() + ";" +
+	                    purchase.getCustomerId() + ";" +
+	                    purchase.getStatus() + "\n");
+	        }
+	        bufferedWriter.flush();
+	        bufferedWriter.close();
+	    } catch (IOException e) {
+	        e.printStackTrace();
+	    }
+	}
     
     public void loadChocolatesAndPriceToPurchase(Purchase pc) {
 		chocolateDAO = new ChocolateDAO(contextPath);
@@ -109,7 +168,7 @@ public class PurchaseDAO {
 				purchase.chocolates = new ArrayList<>();
 				for(CartChocolate cc : cartChocolateDAO.findAll()) {
 					System.out.println(cc);
-					if(purchase.getId() == cc.getPurchaseId()) {
+					if(purchase.getId().equals(cc.getPurchaseId())) {
 						System.out.println("NASAO CARTCHOCOLATE");
 						Chocolate chocolate = chocolateDAO.findChocolate(cc.getChocolateId());
 						if(chocolate == null) {

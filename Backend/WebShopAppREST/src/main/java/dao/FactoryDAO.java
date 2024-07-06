@@ -29,6 +29,7 @@ public class FactoryDAO {
     private ManagerDAO managerDAO;
     private UserDAO userDAO;
 	private String contextPath;
+	
 
 	
 	public FactoryDAO(String contextPath) {
@@ -96,6 +97,18 @@ public class FactoryDAO {
 		f.addChocolateToFactory(chocolate);
 		return chocolate;
 	}
+	
+	public Factory findFactoryByManagerId(String username) {
+	    loadFactories(contextPath);
+	    for (Factory factory : factories) {
+	        if (managerDAO.isManagerOfFactory(username, factory.getId())) {
+	            factory.loadImageString();
+	            return factory;
+	        }
+	    }
+	    return null;
+	}
+	
 	
 	//public Factory updateFactory(int id, Factory factory) {
 		//loadFactories(contextPath);

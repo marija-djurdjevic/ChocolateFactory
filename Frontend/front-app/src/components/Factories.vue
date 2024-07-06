@@ -13,6 +13,7 @@
       <button v-if="!isLoggedIn" class="login-button" @click="goToLogin">Login</button>
       <button v-if="isLoggedIn && isAdmin" class="admin-button" @click="goToAddFactory">Add Factory</button>
       <button v-if="isLoggedIn" class="login-button" @click="logout">Logout</button>
+      <button v-if="isLoggedIn && isManager" class="login-button" @click="goToFactoryManager(username)">Factory</button>
     </header>
     <div class="search-bar">
       <input v-model="searchFactoryName" placeholder="Factory Name">
@@ -119,6 +120,15 @@ function checkLoggedIn() {
   const token = localStorage.getItem('token');
   return !!token;
 }
+
+function goToFactoryManager(username) {
+  if (username) {
+    router.push({ name: 'managerFactory', params: { username } });
+  } else {
+    console.error('Username is undefined or null');
+    // Handle the case where username is not defined
+  }
+};
 
 function checkAdmin() {
   console.log(role);

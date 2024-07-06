@@ -84,7 +84,27 @@ public class CustomerDAO {
 		loadCustomers(contextPath);
 		for(Customer customer : customers) {
 			if(customer.getId() == customerId) {
-				double newPoints = customer.getPoints() + ((price / 1000) * 133);
+				double newPoints = customer.getPoints() + price / 1000 * 133;
+				customer.setPoints(newPoints);
+				saveAll();
+				return customer;
+			}
+		}
+		
+		return null;
+	}
+	
+	public Customer updatePointsMinus(int customerId, double price) {
+		loadCustomers(contextPath);
+		for(Customer customer : customers) {
+			if(customer.getId() == customerId) {
+				double newPoints = customer.getPoints() - price / 1000 * 133 * 4;
+			    System.out.println(newPoints);
+				if(newPoints < 0) {
+					newPoints = 0;
+				}
+				
+			    System.out.println(newPoints);
 				customer.setPoints(newPoints);
 				saveAll();
 				return customer;
@@ -109,6 +129,7 @@ public class CustomerDAO {
 	            		customer.getGender() + ";" +
 	            		customer.getBirthDate().format(formatter) + ";" +
 	            		roleString + ";" +
+	            		customer.isBlocked() + ";" +
 	                    customer.getPoints() + "\n");
 	        }
 	        bufferedWriter.flush();
@@ -140,6 +161,7 @@ public class CustomerDAO {
             		customer.getGender() + ";" +
             		customer.getBirthDate().format(formatter) + ";" +
             		roleString + ";" +
+            		customer.isBlocked() + ";" +
                     customer.getPoints() + "\n");
             bufferedWriter.flush(); // Ensure all data is written to the file
             bufferedWriter.close();

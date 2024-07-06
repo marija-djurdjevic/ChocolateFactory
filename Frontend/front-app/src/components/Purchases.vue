@@ -10,16 +10,15 @@
         <div class="purchase-items">
           <div v-for="purchase in purchases" :key="purchase.id" class="purchase-item">
             <div class="purchase-details">
-              <h2>{{ getFactoryName(purchase.factoryId) }}</h2>
+              <p><strong>Factory:</strong> {{ getFactoryName(purchase.factoryId) }}</p>
               <p><strong>Status:</strong> {{ purchase.status }}</p>
               <p><strong>Price:</strong> {{ purchase.price }}</p>
-              <p><strong>Date and Time:</strong> {{ purchase.dateAndTime }}</p>
+              <p><strong>Order created on:</strong> {{ formatDate(purchase.dateAndTime) }}</p>
             </div>
             <button 
               v-if="purchase.status === 'Processing'" 
               @click="cancelPurchase(purchase.id)" 
-              class="cancel-button"
-            >
+              class="cancel-button">
               Cancel
             </button>
           </div>
@@ -33,16 +32,44 @@
   import { ref, onMounted } from 'vue';
   
   const purchases = ref([]);
-  const factories = ref([]);
+  const factories = ref([]); 
+  const username = ref(localStorage.getItem("username") || '');
   
-  onMounted(() => {
-    loadPurchases();
-    loadFactories();
+  const user = ref({
+    username: '',
+    password: '',
+    name: '',
+    surname: '',
+    gender: '',
+    birthDate: ''
   });
   
+  onMounted(() => {
+    loadUser();
+  });
+  
+  function loadUser() {
+    axios.get(`http://localhost:8080/WebShopAppREST/rest/users/authenticateUser?username=${username.value}`)
+      .then(response => {
+        user.value = response.data;
+        console.log(user.value);
+        loadFactories();
+      })
+      .catch(error => {
+        console.error('Login failed:', error);
+      });
+  }
+  
+  function formatDate(dateString) {
+    const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+    return new Date(dateString).toLocaleDateString(undefined, options);
+  }
+  
   async function loadPurchases() {
+    console.log(user.value.id);
+    console.log(user.id);
     try {
-      const response = await axios.get('http://localhost:8080/WebShopAppREST/rest/purchases/userPurchases');
+      const response = await axios.get(`http://localhost:8080/WebShopAppREST/rest/purchases/${user.value.id}`);
       purchases.value = response.data;
     } catch (error) {
       console.error('Error loading purchases:', error);
@@ -51,8 +78,9 @@
   
   async function loadFactories() {
     try {
-      const response = await axios.get('http://localhost:8080/WebShopAppREST/rest/factories/all');
+      const response = await axios.get('http://localhost:8080/WebShopAppREST/rest/factories/');
       factories.value = response.data;
+      loadPurchases();
     } catch (error) {
       console.error('Error loading factories:', error);
     }
@@ -64,19 +92,16 @@
   }
   
   function cancelPurchase(purchaseId) {
-    axios.post(`http://localhost:8080/WebShopAppREST/rest/purchases/cancel`, { id: purchaseId })
+    const purchase = purchases.value.find(p => p.id === purchaseId);
+    console.log(purchase);
+    axios.post(`http://localhost:8080/WebShopAppREST/rest/purchases/cancel`, purchase)
       .then(response => {
-        if (response.status === 200) {
-          const purchase = purchases.value.find(purchase => purchase.id === purchaseId);
-          if (purchase) {
-            purchase.status = 'Canceled';
-          }
-        } else {
-          console.error('Error canceling purchase:', response.data);
-        }
+        if (purchase) {
+        purchase.status = 'Canceled';
+      }
       })
       .catch(error => {
-        console.error('Error canceling purchase:', error);
+        console.error('Error updating chocolate:', error);
       });
   }
   </script>
@@ -114,7 +139,7 @@
   
   .purchase-item {
     background-color: blanchedalmond; 
-    width: 250px;
+    width: 330px;
     margin: 20px;
     padding: 15px;
     border-radius: 10px;
@@ -125,7 +150,7 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    height: 300px;
+    height: 250px;
   }
   
   .purchase-item:hover {
@@ -169,3 +194,4 @@
     font-size: 1.5em;
   }
   </style>
+  

@@ -12,7 +12,7 @@ import EditUserView from '@/views/EditUserView.vue';
 import ShoppingCartView from '@/views/ShoppingCartView.vue';
 import UsersView from '@/views/UsersView.vue';
 import PurchasesView from '@/views/PurchasesView.vue';
-
+import ManagerFactoryView from '@/views/ManagerFactoryView.vue';
 const routes = [
   {
     path: '/',
@@ -78,6 +78,11 @@ const routes = [
     path: '/purchases', 
     name: 'Purchases',
     component: PurchasesView
+  },
+  {
+    path: '/managerFactory/:username', 
+    name: 'managerFactory',
+    component: ManagerFactoryView
   }
 ]
 

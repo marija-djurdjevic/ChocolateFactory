@@ -185,7 +185,20 @@ public class FactoryService {
         }
     }
 
-
+    /*@GET
+    @Path("/find")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Factory findFactoryByManagerId(@QueryParam("managerId") int managerId) {
+        FactoryDAO factoryDAO = (FactoryDAO) ctx.getAttribute("factoryDAO");
+        return factoryDAO.findFactoryByManagerId(managerId);
+    }*/
+    @GET
+    @Path("/find")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Factory findFactoryByUsername(@QueryParam("username") String username) {
+        FactoryDAO factoryDAO = (FactoryDAO) ctx.getAttribute("factoryDAO");
+        return factoryDAO.findFactoryByManagerId(username);
+    }
 
     @POST
     @Path("/{factoryId}/addWorker")

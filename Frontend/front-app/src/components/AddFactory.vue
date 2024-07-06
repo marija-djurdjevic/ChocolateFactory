@@ -69,6 +69,7 @@
     image: '',
     grade: 0
   });
+  
   const selectedLocation = ref({
     longitude: '',
     latitude: '',
