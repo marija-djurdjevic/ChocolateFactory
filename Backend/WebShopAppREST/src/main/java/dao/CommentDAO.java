@@ -1,6 +1,7 @@
 package dao;
 import beans.Comment;
 import beans.Factory;
+import beans.ShoppingCart;
 import beans.enums.CommentStatus;
 import beans.enums.PurchaseStatus;
 import java.io.BufferedReader;
@@ -77,6 +78,7 @@ public class CommentDAO {
     	return compatibileComments;
     }
     
+
     public ArrayList<Comment> findCommentsByFactoryId(int factoryId) {
         ArrayList<Comment> factoryComments = new ArrayList<>();
         for (Comment comment : comments) {
@@ -86,6 +88,42 @@ public class CommentDAO {
         }
         return factoryComments;
     }
+
+    public void saveAll() {
+		try {
+	        String filePath = contextPath + "comments.txt";
+	        FileWriter writer = new FileWriter(filePath, false); 
+	        BufferedWriter bufferedWriter = new BufferedWriter(writer);
+	        for (Comment comment : comments) {
+	        	bufferedWriter.write(comment.getId() + ";" +
+	        			comment.getCustomerId() + ";" +
+	        			comment.getFactoryId() + ";" +
+	        			comment.getComment() + ";" +
+	        			comment.getRating() + ";" +
+	        			comment.getStatus() + "\n");
+	        }
+	        bufferedWriter.flush();
+	        bufferedWriter.close();
+	    } catch (IOException e) {
+	        e.printStackTrace();
+	    }
+	}
+    
+    public Comment updateCommentStatus(int id, String status) {
+    	loadComments();
+    	for(Comment comment : comments) {
+    		if(comment.getId() == id) {
+    			comment.setStatus(CommentStatus.valueOf(status));
+    			saveAll();
+    			return comment;
+    		}
+    	}
+    	
+    	return null;
+    }
+   
+    
+
     private void loadComments() {
         this.comments = new ArrayList<>();
         BufferedReader in = null;
