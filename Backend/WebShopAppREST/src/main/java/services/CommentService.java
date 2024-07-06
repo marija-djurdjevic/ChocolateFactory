@@ -6,13 +6,18 @@ import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
 import beans.Comment;
 import beans.Purchase;
+import beans.enums.PurchaseStatus;
 import dao.CommentDAO;
 import dao.PurchaseDAO;
 
@@ -45,6 +50,19 @@ public class CommentService {
         CommentDAO dao = (CommentDAO) ctx.getAttribute("commentDAO");
         dao.saveComment(comment);
     }
+    
+    @PUT
+    @Path("/updateStatus")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response updateCommentStatus(@QueryParam("id") int id, @QueryParam("status") String status) {
+    	System.out.println("STATUS KOMENTARA" + status);
+    	CommentDAO dao = (CommentDAO) ctx.getAttribute("commentDAO");
+        Comment comment = dao.updateCommentStatus(id, status);
+    	System.out.println("STATUS KOMENTARA" + comment.getStatus());
+        return Response.ok(comment).build();
+    }
+    
     
     @GET
     @Path("/{managerUsername}")

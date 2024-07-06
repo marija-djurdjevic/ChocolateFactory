@@ -218,6 +218,7 @@ public class PurchaseDAO {
 
 	    savePurchases(contextPath);
 	}
+   
    private void savePurchases(String contextPath) {
 	    BufferedWriter writer = null;
 	    try {
