@@ -28,6 +28,7 @@ public class CommentDAO {
     }
 
     public ArrayList<Comment> getAllComments() {
+		loadComments();
         return comments;
     }
 
@@ -111,6 +112,7 @@ public class CommentDAO {
     		if(comment.getId() == id) {
     			comment.setStatus(CommentStatus.valueOf(status));
     			saveAll();
+    			loadComments();
     			return comment;
     		}
     	}
