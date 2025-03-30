@@ -34,5 +34,14 @@ npm install
 npm run serve
 ```
 
-### Project Creators
+## Project Creators
 This project was developed by Jana Janković and Marija Đurđević.
+Below are some screenshots showcasing the main features of the application.
+
+![home](https://github.com/user-attachments/assets/8d618941-8576-41ce-99b0-ec9411f54ba1)
+![registration](https://github.com/user-attachments/assets/59c71a20-eb7e-4613-88e0-6415a647c6bd)
+![newFactory](https://github.com/user-attachments/assets/c25b5c99-d8dd-47fc-a272-c0f5851beaaf)
+![discount](https://github.com/user-attachments/assets/431b1a96-bd16-487c-a911-815b03417968)
+
+
+
